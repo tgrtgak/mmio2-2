@@ -1,0 +1,43 @@
+.top
+  div#term_wrap
+    div#term_container
+    div
+      textarea#term_paste cols=10 rows=1 autocorrect="off"
+        | Paste Here
+      label
+      progress#net_progress
+  .register-file
+    ol.tabs
+      li.tab.active
+        button
+          = I18n.t(:"run.registers.tab")
+    table.registers
+      tbody
+        - ["pc", "ra", "sp", "gp", "tp", "t0",
+           "t1", "t2", "t3", "t4", "t5", "t6",
+           "s0", "s1", "s2", "s3", "s4", "s5",
+           "s6", "s7", "s8", "s9", "s10", "s11",
+           "a0", "a1", "a2", "a3", "a4", "a5",
+           "a6", "a7"].each do |register_name|
+          tr.register class=register_name
+            td.name
+              = register_name
+            td.value
+              = "0x0000000000000000"
+.bottom
+  ol.tabs
+    li.tab.active
+      button aria-controls=:"machine-code-panel"
+        = I18n.t(:"run.machine-code.tab")
+    li.tab
+      button aria-controls=:"memory-panel"
+        = I18n.t(:"run.memory.tab")
+  ol.tab-panels
+    li.tab-panel.active#machine-code-panel
+      table.instructions.empty
+        tbody
+
+      img.waiting src="images/dynamic/hex/dbccda/dinosaurs/velociraptor.svg"
+    li.tab-panel#memory-panel
+      .memory.empty
+      img.waiting src="images/dynamic/hex/dbccda/dinosaurs/tyrannosaurus.svg"

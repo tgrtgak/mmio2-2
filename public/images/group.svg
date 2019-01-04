@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="22"
+   height="22"
+   viewBox="0 0 22 22"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.92.2 2405546, 2018-03-11"
+   sodipodi:docname="group.svg">
+  <metadata
+     id="metadata14">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>album_collection</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1152"
+     id="namedview12"
+     showgrid="false"
+     inkscape:zoom="8"
+     inkscape:cx="36.103707"
+     inkscape:cy="0.99455699"
+     inkscape:window-x="0"
+     inkscape:window-y="20"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <title
+     id="title4">album_collection</title>
+  <description
+     id="description6">Created with Sketch (http://www.bohemiancoding.com/sketch)</description>
+  <defs
+     id="defs8" />
+  <path
+     inkscape:connector-curvature="0"
+     style="fill:#2da0b7;fill-opacity:1;fill-rule:evenodd;stroke:none"
+     sketch:type="MSShapeGroup"
+     id="album_collection"
+     d="M 0.14048767,6 C 0.06289847,6 0,6.0579357 0,6.1287911 V 21.871209 C 0,21.942338 0.06311035,22 0.14048767,22 H 21.859512 C 21.937101,22 22,21.942064 22,21.871209 V 6.1287911 C 22,6.0576617 21.93689,6 21.859512,6 Z M 1,4 V 5 H 21 V 4 Z"
+     sodipodi:nodetypes="sssssssssccccc" />
+</svg>

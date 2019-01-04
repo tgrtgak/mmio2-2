@@ -1,0 +1,2 @@
+require './rars'
+run RARS

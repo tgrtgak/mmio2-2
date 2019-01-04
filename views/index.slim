@@ -1,0 +1,28 @@
+doctype html
+html lang="en-US"
+  head
+    == partial(:head)
+    title
+      | RARS
+  body
+    ol.tabs
+      li.tab.active
+        button aria-controls=:"assemble-panel"
+          = I18n.t(:"edit.tab")
+      li.tab
+        button aria-controls=:"run-panel"
+          = I18n.t(:"run.tab")
+      li.tab
+        button aria-controls=:"guidance-panel"
+          = I18n.t(:"guidance.tab")
+    ol.tab-panels
+      li.tab-panel.active id=:"assemble-panel"
+        == partial(:"assemble-panel")
+      li.tab-panel        id=:"run-panel"
+        == partial(:"run-panel")
+      li.tab-panel        id=:"guidance-panel"
+        == partial(:"guidance-panel")
+    ol.toolbar
+      li
+        button#assemble
+    == partial(:scripts)

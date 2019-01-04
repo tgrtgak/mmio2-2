@@ -1,0 +1,24 @@
+ol
+  template.directory
+    li.directory
+      img        src="images/group.svg"
+      img.active src="images/group.svg"
+      img.hover  src="images/group.svg"
+      span.name
+      ol
+  template.file
+    li.file
+      img        src="images/text.svg"
+      img.active src="images/text.svg"
+      img.hover  src="images/text.svg"
+      span.name
+  -# Render all files in public/files
+  == partial(:"project-pane-directory", :locals => { :path => "public/files", :root => "files" })
+  li.directory
+    img        src="images/dynamic/hex/46b1e4/group.svg"
+    img.active src="images/dynamic/hex/ffffff/group.svg"
+    img.hover  src="images/dynamic/hex/46b1e4/group.svg"
+    span.name
+      | kernel
+    ol
+      == partial(:"project-pane-directory", :locals => { :path => "kernel", :filter => "*.s", :root => "kernel" })

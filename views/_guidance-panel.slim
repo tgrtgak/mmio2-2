@@ -1,0 +1,16 @@
+- topics = ["about", "usage", "ecalls", "tutorials"]
+
+ol.tabs
+  - tabCount = 0
+  - topics.each_with_index do |topic, i|
+    li.tab class=(i == 0 ? "active" : "")
+      button aria-controls="guidance-panel-#{i}"
+        = I18n.t(:"guidance.#{topic}.tab")
+    - tabCount += 1
+
+ol.tab-panels
+  - tabCount = 0
+  - topics.each_with_index do |topic, i|
+    li.tab-panel class=(i == 0 ? "active" : "") id="guidance-panel-#{i}"
+      iframe src="guidance/#{topic}"
+    - tabCount += 1

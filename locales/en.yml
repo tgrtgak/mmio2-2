@@ -1,0 +1,37 @@
+en:
+  title:                "RISC-V Assembler and Runtime Simulator"
+
+  edit:
+    tab:                "Edit"
+
+
+  run:
+    tab:                "Run"
+
+    memory:
+      tab:              "Memory"
+
+    machine-code:
+      tab:              "Machine Code"
+
+    registers:
+      tab:              "Registers"
+
+  guidance:
+    tab:                "Guidance"
+
+    about:
+      tab:              "About"
+
+    usage:
+      tab:              "Usage"
+
+    ecalls:
+      tab:              "Ecalls"
+
+    tutorials:
+      tab:              "Tutorials"
+
+  console:
+    initial: |
+      Console output. When you assemble something and stub your toe slightly, those errors will appear here.

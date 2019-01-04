@@ -1,0 +1,105 @@
+/* Font table for the site */
+
+@charset "UTF-8";
+
+/* Local fonts below */
+
+@font-face {
+  font-family: 'Alegreya Sans SC';
+   font-style: normal;
+  font-weight: 400;
+          src: local('Alegreya Sans SC'),
+               local('AlegreyaSansSC-Regular'),
+               url(/fonts/alegreya/alegreya.woff2) format('woff2'),
+               url(/fonts/alegreya/alegreya.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Cinzel Decorative';
+   font-style: normal;
+  font-weight: 700;
+          src: local('Cinzel Decorative Bold'),
+               local('CinzelDecorative-Bold'),
+               url(/fonts/cinzel/cinzel.woff2) format('woff2'),
+               url(/fonts/cinzel/cinzel.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Lato';
+   font-style: normal;
+  font-weight: 300;
+          src: local('Lato Light'),
+               local('Lato-Light'),
+               url(/fonts/lato/Lato-Light.woff2) format('woff2'),
+               url(/fonts/lato/Lato-Light.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Lato';
+   font-style: normal;
+  font-weight: normal;
+          src: local('Lato Regular'),
+               local('Lato-Regular'),
+               url(/fonts/lato/Lato-Regular.woff2) format('woff2'),
+               url(/fonts/lato/Lato-Regular.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Lato';
+   font-style: bold;
+  font-weight: bold;
+          src: local('Lato Heavy'),
+               local('Lato-Heavy'),
+               url(/fonts/lato/Lato-Heavy.woff2) format('woff2'),
+               url(/fonts/lato/Lato-Heavy.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Marcellus SC';
+   font-style: normal;
+  font-weight: 400;
+          src: local('Marcellus SC'),
+               local('MarcellusSC-Regular'),
+               url(/fonts/marcellus/marcellus.woff2) format('woff2'),
+               url(/fonts/marcellus/marcellus.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+   font-style: normal;
+  font-weight: 300;
+          src: local('Open Sans Light'),
+               local('OpenSans-Light'),
+               url(/fonts/opensans/open_sans_300.woff2) format('woff2'),
+               url(/fonts/opensans/open_sans_300.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+   font-style: normal;
+  font-weight: 400;
+          src: local('Open Sans'),
+               local('OpenSans'),
+               url(/fonts/opensans/open_sans_400.woff2) format('woff2'),
+               url(/fonts/opensans/open_sans_400.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+   font-style: normal;
+  font-weight: 600;
+          src: local('Open Sans Semibold'),
+               local('OpenSans-Semibold'),
+               url(/fonts/opensans/open_sans_600.woff2) format('woff2'),
+               url(/fonts/opensans/open_sans_600.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Oxygen';
+   font-style: normal;
+  font-weight: 400;
+          src: local('Oxygen'),
+               local('Oxygen-Regular'),
+               url(/fonts/oxygen/oxygen.woff2) format('woff2'),
+               url(/fonts/oxygen/oxygen.woff) format('woff');
+}

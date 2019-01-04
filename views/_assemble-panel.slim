@@ -1,0 +1,7 @@
+.editor-pane
+  .project-pane
+    == partial(:"project-pane")
+  textarea#editor
+    | add s1, s1, 1
+pre#output.initial
+  = I18n.t(:"console.initial")

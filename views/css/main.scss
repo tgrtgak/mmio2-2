@@ -1,0 +1,565 @@
+/* Basic page details */
+body, html {
+    display: flex;
+    flex-direction: column;
+
+    font-size: 16px;
+
+    overflow: hidden;
+
+    margin: 0;
+    padding: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+}
+
+/* 4k support */
+@media (min-width: 2561px) {
+    /* If we did our job, this is all we need to scale everything! */
+    body, html {
+        font-size: 24px;
+    }
+}
+
+/* Making sure hidden things are hidden */
+template, *[hidden] {
+  display: none !important;
+}
+
+.editor-pane {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+
+    flex: 1 1 100%;
+
+    overflow: auto;
+
+    margin: 0;
+
+    width: 100%;
+}
+
+.editor-pane {
+  textarea, pre {
+      background: #272822;
+      box-sizing: border-box;
+      color: white;
+
+      flex: 1 1 100%;
+
+      overflow: auto;
+
+      margin: 0;
+  }
+}
+
+pre#output {
+    background: #0e0e0e;
+    color: #d4d4d4;
+
+    flex: 0 1 25%;
+    box-sizing: border-box;
+    overflow: auto;
+    overflow-y: scroll;
+
+    max-height: 25%;
+
+    margin: 0;
+    margin-top: 0.2rem;
+    padding: 0.2rem;
+}
+
+pre#output.initial {
+    font: 300 1rem Lato;
+    font-style: italic;
+}
+
+ol.toolbar {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.4rem;
+
+  padding: 0;
+  margin:  0;
+
+  list-style: none;
+
+  li {
+    display: block;
+    line-height: 0;
+    button {
+      height: 1.40rem;
+      width:  1.40rem;
+
+      position: relative;
+
+      background: white;
+      border: 1px solid #46b1e4;
+      //border-radius: 50%;
+      box-shadow: 0px 0px 0px 2px white;
+      outline: none;
+
+      background-image: url('../images/dynamic/hex/46b1e4/toolbar/play.svg');
+      background-position: 55% 50%;
+      background-size: 0.45rem;
+      background-repeat: no-repeat;
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+}
+
+ol.tabs {
+  background: #464646;
+
+  display: block;
+  flex: 0 1 auto;
+
+  height:      2rem;
+  min-height:  2rem;
+  line-height: 2rem;
+
+  overflow:    hidden;
+
+  padding: 0;
+  margin: 0;
+
+  position: relative;
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    box-shadow: 0px 0px 2px 0px black inset;
+    pointer-events: none;
+  }
+}
+
+ol.tab-panels ol.tabs {
+  background: #927a90;
+  box-shadow: 0px 0px 4px 0px black inset;
+}
+
+ol.tabs li.tab {
+  position: relative;
+  background: #666;
+
+  display: inline-block;
+
+  height:  1.80rem;
+  line-height: 1.5rem;
+
+  margin-left: -0.05rem;
+  margin-top: 0.05rem;
+}
+
+ol.tabs li.tab:first-child {
+  margin-left: 0.5rem;
+}
+
+ol.tabs li.tab.active {
+  height:  1.80rem;
+
+  margin-top: 0.25rem;
+
+  background: #333;
+
+  box-shadow: 0px 0px 7px 0px #464646;
+
+  z-index:    999;
+}
+
+ol.tabs li.tab.active:after {
+  content: '';
+  position: absolute;
+  top: 0.1rem;
+  left: 0.1rem;
+  height: 0.2rem;
+  width: calc(100% - 0.2rem);
+  background: #46b1e4;
+}
+
+ol.tabs li.tab button ,
+ol.tabs li.tab a {
+  background: white;
+
+  border: 0.05rem solid #ddd;
+  outline: none;
+
+  color: #666;
+
+  display: inline-block;
+
+  padding: 0 0.5rem;
+
+  font: 400 1rem Lato;
+
+  height: 1.70rem;
+  line-height: 1.60rem;
+
+  min-width: 5rem;
+  text-align: center;
+
+  text-decoration: none;
+}
+
+ol.tabs li.tab.active button, 
+ol.tabs li.tab.active a {
+  color: #46b1e4;
+
+  height: 1.80rem;
+  line-height: 1.90rem;
+}
+
+ol.tab-panels {
+  display: block;
+  flex: 1 1 100%;
+  overflow: hidden;
+
+  margin: 0;
+  padding: 0;
+}
+
+ol.tab-panels li.tab-panel {
+  display: none;
+  position: relative;
+  flex-direction: column;
+
+  max-height: 100%;
+  height: 100%;
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  padding-top: 0.2rem;
+}
+
+ol.tab-panels li.tab-panel.active {
+  display: flex;
+}
+
+.project-pane {
+    background: #fff;
+    box-shadow: 0px 0px 4px -1px black inset;
+
+    cursor: default;
+
+    flex: 1 0 auto;
+
+    margin-right: 0.2rem;
+
+    width: 15rem;
+
+    overflow: auto;
+
+    ol {
+      padding: 0.5rem;
+
+      // Nested list
+      ol {
+        padding: 0.2rem 0.5rem;
+      }
+
+      // Directory/File
+      li {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        padding-bottom: 0.2rem;
+
+        > img {
+          width: 1rem;
+          height: 1rem;
+          line-height: 1rem;
+          margin-right: 0.2rem;
+          vertical-align: middle;
+          
+          &.active ,
+          &.hover {
+            display: none;
+          }
+        }
+
+        span {
+          width: 1rem;
+          height: 1rem;
+          line-height: 1rem;
+          margin-right: 0.2rem;
+          vertical-align: middle;
+        }
+
+        &:hover {
+          > img {
+            display: none;
+          }
+
+          > img.hover {
+            display: inline-block;
+          }
+        }
+
+        &.active {
+          background: #46b1e4;
+          color: white;
+          padding-left: 0.5rem;
+          border-radius: 1rem;
+
+          > img {
+            display: none;
+
+            &.hover {
+                display: none;
+            }
+
+            &.active {
+              display: inline-block;
+            }
+          }
+        }
+      }
+    }
+}
+
+#term_wrap {
+  margin: 0;
+  text-align: center;
+  background: #211a21;
+  background-image: url('../images/dynamic/hex/1d141d/tracks.svg');
+  background-size: 10rem;
+
+  #term_container {
+    text-align: left;
+    margin: 0 auto;
+    display: inline-block;
+
+    border-left:  5px solid #2d242d;
+    border-right: 5px solid #2d242d;
+    outline:      1px solid #1d141d
+  }
+}
+
+#run-panel {
+
+  .top {
+    display: flex;
+    flex-direction: row;
+
+    font-family: monospace,courier,fixed,swiss,sans-serif;
+    font-size: 15px;
+    font-weight: normal;
+    font-variant-ligatures: none;
+    overflow: hidden;
+
+    flex: 1 0 auto;
+
+    line-height: 1.2;
+    height: 36em;
+
+    flex-basis: 36em;
+
+    #term_wrap {
+      flex: 1 0 auto;
+    }
+
+    .register-file {
+      flex: 0 1 15rem;
+      width: 15rem;
+      margin-left: 0.2rem;
+      background: #fff;
+      position: relative;
+
+      display: flex;
+      flex-direction: column;
+
+      .registers {
+        box-shadow: 0px 0px 4px -1px black inset;
+        padding: 0;
+        margin: 0;
+        margin-top: 0.2rem;
+        height: 100%;
+        width:  100%;
+        overflow: auto;
+        border-collapse: collapse;
+        display: block;
+
+        .register {
+          padding: 0.2rem;
+
+          > * {
+            border-bottom: 1px solid #ddd;
+            padding: 0.2rem 0.4rem;
+
+            &:last-child {
+              border-left: 1px solid #ddd;
+            }
+
+            text-align: center;
+          }
+
+          &:last-child {
+            border: none;
+          }
+
+          .value {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+  .bottom {
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 0.2rem;
+
+    flex: 1 1 100%;
+
+    li.tab-panel {
+      background: white;
+    }
+  }
+}
+
+table.instructions {
+  position: absolute;
+  top: 0.15rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-sizing: content-box;
+  overflow: auto;
+  height:   100%;
+  display:  block;
+  box-shadow: 0px 0px 4px -1px black inset;
+  border-collapse: collapse;
+  tr {
+    &:hover td {
+      background: #c3e2f2;
+    }
+
+    td {
+      font-family: monospace,courier,fixed,swiss,sans-serif;
+      font-size: 15px;
+      font-weight: normal;
+      font-variant-ligatures: none;
+      border-top: 1px solid #ddd;
+      border-left: 1px solid #ddd;
+      padding: 0.2rem;
+
+      &:empty {
+        border-top: none;
+      }
+
+      &:last-child {
+        border-right: 1px solid #ddd;
+      }
+
+      &:first-child {
+        border-left: none;
+      }
+
+      &.breakpoint.checked {
+        &,
+        & ~ td {
+          background: #ddd0db;
+        }
+      }
+    }
+
+    td.machine-code,
+    td.address,
+    td.row {
+      text-align: right;
+    }
+
+    td.code {
+      width: 50%;
+    }
+
+    td.original {
+      width: 50%;
+    }
+
+    &:first-child {
+      td {
+        border-top: none;
+      }
+    }
+
+    &:last-child {
+      td {
+        border-bottom: 1px solid #ddd;
+      }
+    }
+  }
+
+  & + img {
+    display: none;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-sizing: content-box;
+    height: 100%;
+    margin: 0 auto;
+  }
+
+  &.empty {
+    display: none;
+
+    & + img {
+      display: block;
+    }
+  }
+}
+
+#memory-panel {
+  .memory {
+    & + img {
+      display: block;
+
+      position: absolute;
+      top: 0.15rem;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      box-sizing: content-box;
+      height: 100%;
+      margin: 0 auto;
+    }
+
+    &.empty {
+      display: none;
+
+      & + img {
+        display: block;
+      }
+    }
+  }
+}
+
+iframe {
+  height: 100%;
+  width:  100%;
+  border: 0;
+  box-shadow: 0px 0px 4px -1px black inset;
+}
+
+.ace_scroller {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 80%;
+  background-image: url("../images/dynamic/hex/252620/dinosaurs/stegosaurus.svg");
+}
