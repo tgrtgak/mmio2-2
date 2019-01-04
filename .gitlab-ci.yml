@@ -3,6 +3,10 @@ image: ruby:2.4
 pages:
   stage: deploy
   script:
+    - sh install.sh
+    - sh build.sh
+    - npm install
+    - npx webpack
     - gem install bundler
     - bundle install
     - rackula generate -o public -p assets
@@ -10,4 +14,4 @@ pages:
     paths:
       - public
   only:
-    - master
+    - deployed
