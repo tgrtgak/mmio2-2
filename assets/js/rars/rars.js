@@ -59,7 +59,7 @@ class RARS {
             window.editor.getSession().setAnnotations(annotations);
         });
 
-        window.term.write("\x1b[2J\x1b[0;0H");
+        window.term.write("\x1b[0;40;37m\x1b[2J\x1b[0;0H");
         assembler.assemble("foo.s", text, terminal, (object) => {
             Linker.link(linkerScript, object, terminal, (binary) => {
                 // On success, go to the run tab

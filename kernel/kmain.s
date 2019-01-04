@@ -61,6 +61,13 @@ kmain:
   jal   paging_install
   jal   fdt_get_memory_base_addr
 
+  # Initialize the Real-Time Clock (via the CLINT)
+  # Get the CLINT MMIO Address
+  jal   fdt_get_clint_base_addr
+  li    t0, MEM_BASE
+  add   a0, a0, t0
+  jal   rtc_init
+
   # Create a userspace page table
   # (Optional)
 

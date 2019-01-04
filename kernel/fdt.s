@@ -9,6 +9,8 @@
 
 .global fdt_read
 .global fdt_get_virtio_base_addr
+.global fdt_get_clint_base_addr
+.global fdt_get_cpu_timebase_frequency
 .global fdt_get_memory_base_addr
 .global fdt_get_memory_length
 .global fdt_get_application_base_addr
@@ -154,6 +156,17 @@ _fdt_read_exit:
   pop   ra
   jr    ra
 
+# fdt_get_cpu_timebase_frequency(): Returns the timer resolution in cycles per second.
+#
+# Does not clobber any registers except a0.
+#
+# Returns
+#   a0: The cycles per second of the CPU.
+fdt_get_cpu_timebase_frequency:
+  la    a0, fdt_cpu_timebase_frequency
+  ld    a0, 0(a0)
+  jr    ra
+
 # fdt_get_virtio_base_addr(): Returns the address of the virtio MMIO region. 
 #
 # Does not clobber any registers except a0.
@@ -162,6 +175,17 @@ _fdt_read_exit:
 #   a0: The address of the virtio MMIO region.
 fdt_get_virtio_base_addr:
   la    a0, fdt_virtio_base_addr
+  ld    a0, 0(a0)
+  jr    ra
+
+# fdt_get_clint_base_addr(): Returns the address of the clint MMIO region. 
+#
+# Does not clobber any registers except a0.
+#
+# Returns
+#   a0: The address of the clint MMIO region.
+fdt_get_clint_base_addr:
+  la    a0, fdt_clint_base_addr
   ld    a0, 0(a0)
   jr    ra
 
@@ -534,6 +558,20 @@ fdt_parse_property:
   jal   strncmp
   beqz  a0, _fdt_parse_property_virtio
 
+  # Check for "clint" nodes
+  move  a0, s0
+  la    a1, str_fdt_check_node_clint
+  li    a2, 6
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_clint
+
+  # Check for "cpus" nodes
+  move  a0, s0
+  la    a1, str_fdt_check_node_cpus
+  li    a2, 5
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_cpus
+
   # Check for "memory" nodes
   move  a0, s0
   la    a1, str_fdt_check_node_memory
@@ -631,6 +669,38 @@ _fdt_parse_property_virtio:
 
   j _fdt_parse_property_exit
 
+_fdt_parse_property_clint:
+  # Skip if we already know the base address
+  la    t0, fdt_clint_base_addr
+  ld    t0, 0(t0)
+  bnez  t0, _fdt_parse_property_exit
+  
+  # Get the address by parsing the string
+  move  a0, s0
+  add   a0, a0, 6
+  li    a1, 16
+  jal   parse_int
+  la    t0, fdt_clint_base_addr
+  sd    a0, 0(t0)
+
+  j _fdt_parse_property_exit
+
+_fdt_parse_property_cpus:
+  # Check for the cpus "timebase-frequency" property
+  move  a0, s1
+  la    a1, str_fdt_check_prop_timebase_freq
+  li    a2, 19
+  jal   strncmp
+  bnez  a0, _fdt_parse_property_exit
+
+  # Parse the field, a LE32 word
+  lwu   a0, 0(s2)
+  jal   toBE32
+  la    t0, fdt_cpu_timebase_frequency
+  sw    a0, 0(t0)
+
+  j     _fdt_parse_property_exit
+
 _fdt_parse_property_memory:
   # Check for the memory size "reg"
   move  a0, s1
@@ -717,9 +787,11 @@ fdt_strings_length:               .dword  0
 # FDT base properties
 fdt_address_cells:                .dword  2
 fdt_size_cells:                   .dword  1
+fdt_cpu_timebase_frequency:       .dword  0
 
 # FDT regions of interest:
 fdt_virtio_base_addr:             .dword  0
+fdt_clint_base_addr:              .dword  0
 fdt_memory_base_addr:             .dword  0
 fdt_memory_length:                .dword  0
 fdt_application_start:            .dword  0
@@ -728,11 +800,14 @@ fdt_application_end:              .dword  0
 # FDT node names to check for
 str_fdt_check_node_root:          .string ""
 str_fdt_check_node_memory:        .string "memory@"
+str_fdt_check_node_cpus:          .string "cpus"
 str_fdt_check_node_virtio:        .string "virtio@"
+str_fdt_check_node_clint:         .string "clint@"
 str_fdt_check_node_chosen:        .string "chosen"
 
 # FDT property names to check for
 str_fdt_check_prop_reg:           .string "reg"
+str_fdt_check_prop_timebase_freq: .string "timebase-frequency"
 str_fdt_check_prop_address_cells: .string "#address-cells"
 str_fdt_check_prop_size_cells:    .string "#size-cells"
 str_fdt_check_prop_kernel_start:  .string "riscv,kernel-start"

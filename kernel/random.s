@@ -70,6 +70,7 @@ random_get_word:
   move  a0, t0
 
   pop   ra
+  jr    ra
 
 # random_lookup_rng_id(rng_id): Finds the address of the current rng seed.
 #
@@ -79,6 +80,9 @@ random_get_word:
 # Returns
 #   a0: The address of the seed, or the next available.
 random_lookup_rng_id:
+  push  s0
+  move  s0, a0
+
   # Look up the RNG by id
   la    t0, random_current_rng_ids
   la    t1, random_total_used
@@ -87,33 +91,46 @@ random_lookup_rng_id:
 _random_lookup_rng_id_loop:
   beqz  t1, _random_lookup_rng_id_break
   lwu   t2, 0(t0)
-  beq   t2, a0, _random_lookup_rng_id_break
+  beq   t2, s0, _random_lookup_rng_id_break
 
-  add   t0, t0, -4
+  add   t0, t0, 4
   add   t1, t1, -1
   j     _random_lookup_rng_id_loop
+
 _random_lookup_rng_id_break:
+  # t0: The address of the ID (or the next available)
+  # t1: When 0, it means we looked at every known id
+
   # Get the offset into the array
   la    t2, random_current_rng_ids
-  sub   t0, t0, t2
+  sub   t3, t0, t2
   # And add that to the seeds pointer
   la    t2, random_current_seeds
-  add   a0, t2, t0
-  # If this is a newly allocated one, acquire a seed first
+  # Get the pointer of the random number generator state
+  add   a0, t2, t3
+
+  # Are we creating a new one?
   bnez  t1, _random_lookup_rng_id_exit
+
+  # Set the initial seed (MARS says it doesn't do this, but it does)
   # TODO: get the system time, here
   sw    zero, 0(a0)
+
+  # Set the id
+  sw    s0,   0(t0)
+
   # Increment counter (unless we have consumed the maximum total)
   la    t1, random_total_used
   ld    t2, 0(t1)
-  li    t0, MAX_RNG
-  beq   t0, t2, _random_lookup_rng_id_exit
+  li    t3, MAX_RNG
+  beq   t3, t2, _random_lookup_rng_id_exit
   add   t2, t2, 1
   sw    t2, 0(t1)
 
 _random_lookup_rng_id_exit:
   # Return a0, the address to the seed pointer requested
   # (or the next available one)
+  pop   s0
   jr    ra
 
 .data

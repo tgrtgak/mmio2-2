@@ -43,41 +43,41 @@ _syscall_table:
   j syscall_print_float     # a0: 2
   j syscall_print_double    # a0: 3
   j syscall_print_string    # a0: 4
-  nop                       # a0: 5
-  nop                       # a0: 6
-  nop                       # a0: 7
-  nop                       # a0: 8
-  nop                       # a0: 9
+  jr ra                     # a0: 5
+  jr ra                     # a0: 6
+  jr ra                     # a0: 7
+  jr ra                     # a0: 8
+  jr ra                     # a0: 9
   j syscall_exit            # a0: 10
-  nop                       # a0: 11
-  nop                       # a0: 12
-  nop                       # a0: 13
-  nop                       # a0: 14
-  nop                       # a0: 15
-  nop                       # a0: 16
-  nop                       # a0: 17
-  nop                       # a0: 18
-  nop                       # a0: 19
-  nop                       # a0: 20
-  nop                       # a0: 21
-  nop                       # a0: 22
-  nop                       # a0: 23
-  nop                       # a0: 24
-  nop                       # a0: 25
-  nop                       # a0: 26
-  nop                       # a0: 27
-  nop                       # a0: 28
-  nop                       # a0: 29
-  nop                       # a0: 30
-  nop                       # a0: 31
-  nop                       # a0: 32
-  nop                       # a0: 33
-  nop                       # a0: 34
-  nop                       # a0: 35
-  nop                       # a0: 36
-  nop                       # a0: 37
-  nop                       # a0: 38
-  nop                       # a0: 39
+  jr ra                     # a0: 11
+  jr ra                     # a0: 12
+  jr ra                     # a0: 13
+  jr ra                     # a0: 14
+  jr ra                     # a0: 15
+  jr ra                     # a0: 16
+  jr ra                     # a0: 17
+  jr ra                     # a0: 18
+  jr ra                     # a0: 19
+  jr ra                     # a0: 20
+  jr ra                     # a0: 21
+  jr ra                     # a0: 22
+  jr ra                     # a0: 23
+  jr ra                     # a0: 24
+  jr ra                     # a0: 25
+  jr ra                     # a0: 26
+  jr ra                     # a0: 27
+  jr ra                     # a0: 28
+  jr ra                     # a0: 29
+  j syscall_get_system_time # a0: 30
+  jr ra                     # a0: 31
+  jr ra                     # a0: 32
+  jr ra                     # a0: 33
+  jr ra                     # a0: 34
+  jr ra                     # a0: 35
+  jr ra                     # a0: 36
+  jr ra                     # a0: 37
+  jr ra                     # a0: 38
+  jr ra                     # a0: 39
   j syscall_srand           # a0: 40
   j syscall_rand            # a0: 41
 
@@ -112,6 +112,29 @@ syscall_print_string:
 
 syscall_exit:
   jal   exit
+
+syscall_get_system_time:
+  push  ra
+  push  s0
+
+  jal   rtc_get_mtime
+  move  s0, a0
+  # The resolution of the TinyEmu simulator is
+  # 10Mhz, therefore if we divide by ten we get
+  # microseconds, and milliseconds dividing by
+  # 10000.
+
+  # We can query that from the "cpus/timebase-frequency" in the FDT
+  jal   fdt_get_cpu_timebase_frequency
+  # a0: The cycles per second of the CPU
+  # s0: The total cycles executed so far
+  li    t0, 1000
+  divu  a0, a0, t0  # give me the cycles per millisecond of the CPU
+  div   a0, s0, a0  # give me the total milliseconds of boot time
+
+  pop   s0
+  pop   ra
+  jr    ra
 
 syscall_srand:
   push  ra
