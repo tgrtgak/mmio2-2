@@ -1,0 +1,13 @@
+image: ruby:2.4
+
+pages:
+  stage: deploy
+  script:
+    - gem install bundler
+    - bundle install
+    - rackula generate -o public -p assets
+  artifacts:
+    paths:
+      - public
+  only:
+    - master

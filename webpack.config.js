@@ -6,13 +6,13 @@ module.exports = {
   /* The main javascript file for the application
    */
   entry: [
-    "./public/js/app.js"
+    "./assets/js/app.js"
   ],
 
   /* The eventual transpiled output file.
    */
   output: {
-    path: __dirname + "/public/js",
+    path: __dirname + "/assets/js",
     filename: "rars.js",
     sourceMapFilename: "rars.js.map"
   },

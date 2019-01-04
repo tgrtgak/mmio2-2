@@ -54,7 +54,7 @@ module.exports = function(config) {
 
         coverageIstanbulReporter: {
             reports: ['html'],
-            dir: path.join(__dirname, "public", "coverage", "js"),
+            dir: path.join(__dirname, "coverage", "js"),
         },
 
         coverageReporter: {

@@ -33,6 +33,7 @@ class RARS < Sinatra::Base
   set :app_file => '.'
 
   # Static Asset Management
+  set :public_folder, "assets"
   set :static_cache_control, [:public, max_age: 60 * 60 * 24 * 365]
 
   # Markdown
@@ -135,7 +136,7 @@ class RARS < Sinatra::Base
 
     params["name"] = params["splat"].join
 
-    if not File.exist?("public/images/#{params[:name]}.svg")
+    if not File.exist?("assets/images/#{params[:name]}.svg")
       status 404
       return
     end
@@ -156,7 +157,7 @@ class RARS < Sinatra::Base
       stream do |out|
         # We need to write out the <svg> tab and then the stylesheet
         begin
-          File.open("public/images/#{params[:name]}.svg") do |f|
+          File.open("assets/images/#{params[:name]}.svg") do |f|
             stylesheet_line = "<?xml-stylesheet type=\"text/css\" href=\"data:text/css;charset=utf-8;base64,#{embed.strip}\" ?>"
             line = f.readline
             if line.include?("<?xml")
@@ -175,7 +176,7 @@ class RARS < Sinatra::Base
         end
       end
     else
-      send_file "public/images/#{params[:name]}.svg"
+      send_file "assets/images/#{params[:name]}.svg"
     end
   rescue
     status 404
