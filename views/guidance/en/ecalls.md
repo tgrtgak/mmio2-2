@@ -42,7 +42,7 @@ Refer to the table below for more information.
 | 10 | exit            |               | a1: exit code | Terminates the program and powers down the machine.          |
 | 11 | print character |               | a1: character to print | Prints the character given in a1.                            |
 | 30 | system time     | a0: milliseconds since boot | | Gets the number of milliseconds since booting the machine. Will not be incredibly accurate. |
-| 40 | set seed        | | a0: id of generator | Sets the given random number generator to the given seed. |
+| 40 | set seed        | | a1: id of generator | Sets the given random number generator to the given seed. |
 | 41 | random word     | a0: random word | a1: The id of the generator to use. |
 
 ## Descriptions and Usage

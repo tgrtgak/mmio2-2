@@ -10,7 +10,7 @@ class Assembler extends EventComponent {
     assemble(filename, source, terminal, callback) {
         var worker = new Worker("js/riscv64-unknown-elf-as.js");
         terminal.clear();
-        terminal.writeln("Assembling ---------------------------------------------------------------------");
+        terminal.writeHeader("Assembling");
 
         source = source + "\n";
         var fileData = new Blob([source], {'type': 'text/plain'});

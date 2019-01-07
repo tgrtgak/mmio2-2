@@ -112,7 +112,6 @@ class Simulator extends EventComponent {
      */
     _initializeFS(mounts) {
         var FS = this._module.FS;
-        console.log(this._module);
 
         // Borrowed a lot from Kagami, here. They are a veritable superhero.
         mounts.forEach( (mount) => {
@@ -162,7 +161,6 @@ class Simulator extends EventComponent {
      * Called internally when the simulator starts.
      */
     _start() {
-        window.console.log("_start");
         var Module = this._module;
 
         this._console_write1      = Module.cwrap('console_queue_char', null, ['number']);
@@ -182,7 +180,6 @@ class Simulator extends EventComponent {
         }
 
         this._started = true;
-        window.console.log("_runtimeInitialized", this.configurationURL);
         this._vm_start(this.configurationURL,
                        this.memorySize,
                        "",   // cmdline

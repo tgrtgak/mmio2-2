@@ -1,9 +1,18 @@
 "use strict";
 
-class Linker {
-    static link(linkerScript, object, terminal, callback) {
+import EventComponent from './event_component';
+
+class Linker extends EventComponent {
+    constructor() {
+        super();
+    }
+
+    link(linkerScript, object, terminal, callback) {
         terminal.writeln("");
-        terminal.writeln("Linking ------------------------------------------------------------------------");
+        terminal.writeHeader("Linking");
+
+        // Initially, there are no errors
+        this._errors = [];
 
         var worker = new Worker("js/riscv64-unknown-elf-ld.js");
 
@@ -17,7 +26,7 @@ class Linker {
 
         var files = [object];
 
-        worker.onmessage = function(e) {
+        worker.onmessage = (e) => {
             var msg = e.data;
 
             switch(msg.type) {
@@ -39,12 +48,27 @@ class Linker {
                     terminal.writeln(msg.data);
                     break;
                 case "stderr":
+                    // Check for error statements
+                    var matches = Linker.ERROR_REGEX.exec(msg.data);
+                    if (matches) {
+                        var error = {
+                            row: parseInt(matches[1]) - 1,
+                            column: 0,
+                            text: matches[2]
+                        };
+                        this._errors.push(error);
+                        this.trigger('error', error);
+                    }
+
                     terminal.writeln(msg.data);
                     break;
                 case "exit":
                     break;
                 case "done":
-                    callback(msg.data.MEMFS[0]);
+                    this.trigger('done');
+                    if (msg.data.MEMFS[0] && this._errors.length == 0) {
+                        callback(msg.data.MEMFS[0]);
+                    }
                     worker.terminate();
                     break;
                 default:
@@ -52,6 +76,15 @@ class Linker {
             }
         };
     }
+
+    /**
+     * Retrieves the errors gathered in the last link.
+     */
+    get errors() {
+        return this._errors.slice();
+    }
 }
+
+Linker.ERROR_REGEX = /^\S+:(\d+):\s+(.+)$/;
 
 export default Linker;

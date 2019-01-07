@@ -44,8 +44,14 @@ class RARS {
         var linkerScript = "SECTIONS { . = 0x10000000; .text : { *(.text) } . = 0x40000000; .data : { *(.data) } }";
 
         var assembler = new Assembler();
+        var linker    = new Linker();
         var annotations = [];
         assembler.on('error', (error) => {
+            error.type = 'error';
+            annotations.push(error);
+        });
+
+        linker.on('error', (error) => {
             error.type = 'error';
             annotations.push(error);
         });
@@ -59,9 +65,13 @@ class RARS {
             window.editor.getSession().setAnnotations(annotations);
         });
 
+        linker.on('done', () => {
+            window.editor.getSession().setAnnotations(annotations);
+        });
+
         window.term.write("\x1b[0;40;37m\x1b[2J\x1b[0;0H");
         assembler.assemble("foo.s", text, terminal, (object) => {
-            Linker.link(linkerScript, object, terminal, (binary) => {
+            linker.link(linkerScript, object, terminal, (binary) => {
                 // On success, go to the run tab
                 var runTab = document.body.querySelector("button[aria-controls=\"run-panel\"]");
                 if (runTab) {

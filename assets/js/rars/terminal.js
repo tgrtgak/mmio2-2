@@ -36,6 +36,20 @@ class Terminal extends EventComponent {
     }
 
     /**
+     * Creates a new header.
+     */
+    writeHeader(string) {
+        var header = document.createElement("h1");
+        header.innerHTML = string;
+        var maxScroll = this._element.scrollHeight - this._element.clientHeight;
+        var autoScroll = (this._element.scrollTop >= maxScroll - 0.5);
+        this._element.appendChild(header);
+        if (autoScroll) {
+            this._element.scrollTop = this._element.scrollHeight - this._element.clientHeight;
+        }
+    }
+
+    /**
      * Writes the given string to the terminal.
      *
      * @param {string} data The string to write.
