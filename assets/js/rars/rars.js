@@ -44,6 +44,8 @@ class RARS {
         RARS.codeListing.clear();
         RARS.codeListing.source = text;
 
+        RARS.registerListing.clear();
+
         RARS.memoryListing.clear();
 
         var linkerScript = "SECTIONS { . = 0x00400000; .text : { *(.text) } . = 0x10010000; .data : { *(.data) } }";

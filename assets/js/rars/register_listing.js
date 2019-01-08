@@ -26,6 +26,16 @@ class RegisterListing extends EventComponent {
     }
 
     /**
+     * Resets the register listing to all zeros.
+     */
+    clear() {
+        Simulator.REGISTER_NAMES.forEach( (regName) => {
+            var str = "0000000000000000";
+            this._element.querySelector("tr." + regName + " td.value").textContent = "0x" + str;
+        });
+    }
+
+    /**
      * Updates the register listing for the provided register values.
      *
      * @param {BigUint64Array} regs The register values.

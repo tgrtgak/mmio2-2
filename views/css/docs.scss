@@ -1,4 +1,5 @@
-body.documentation {
+.content.documentation ,
+body.documentation     {
   overflow: auto;
 
   > *:not(h1):not(h2):not(h3):last-child {

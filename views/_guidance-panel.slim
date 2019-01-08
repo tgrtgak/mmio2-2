@@ -11,6 +11,5 @@ ol.tabs
 ol.tab-panels
   - tabCount = 0
   - topics.each_with_index do |topic, i|
-    li.tab-panel class=(i == 0 ? "active" : "") id="guidance-panel-#{i}"
-      iframe src="guidance/#{topic}"
+    li.tab-panel class=(i == 0 ? "active" : "") id="guidance-panel-#{i}" data-pjax="guidance/#{topic}"
     - tabCount += 1
