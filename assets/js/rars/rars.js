@@ -7,9 +7,11 @@ import Simulator       from './simulator';
 import Assembler       from './assembler';
 import Linker          from './linker';
 import Disassembler    from './disassembler';
+import Dumper          from './dumper';
 import Terminal        from './terminal';
 import FileList        from './file_list';
 import CodeListing     from './code_listing';
+import MemoryListing   from './memory_listing';
 import RegisterListing from './register_listing';
 
 class RARS {
@@ -21,6 +23,7 @@ class RARS {
         RARS.fileList.loadItem(RARS.fileList.startupItem);
         RARS.codeListing = new CodeListing(document.body);
         RARS.registerListing = new RegisterListing(document.body);
+        RARS.memoryListing = new MemoryListing(document.body);
 
         RARS.toolbar.on('click', (button) => {
             switch (button.getAttribute("id")) {
@@ -41,7 +44,9 @@ class RARS {
         RARS.codeListing.clear();
         RARS.codeListing.source = text;
 
-        var linkerScript = "SECTIONS { . = 0x10000000; .text : { *(.text) } . = 0x40000000; .data : { *(.data) } }";
+        RARS.memoryListing.clear();
+
+        var linkerScript = "SECTIONS { . = 0x00400000; .text : { *(.text) } . = 0x10010000; .data : { *(.data) } }";
 
         var assembler = new Assembler();
         var linker    = new Linker();
@@ -59,6 +64,11 @@ class RARS {
         var disassembler = new Disassembler();
         disassembler.on('instruction', (instruction) => {
             RARS.codeListing.add(instruction);
+        });
+
+        var dumper = new Dumper();
+        dumper.on('update', (row) => {
+            RARS.memoryListing.update(row.address, row.data);
         });
 
         assembler.on('done', () => {
@@ -100,8 +110,14 @@ class RARS {
 
                 sim.run();
 
+                //let b2 = new Blob([binary], {type: binary.type});
+
                 // Also, disassemble the binary
                 disassembler.disassemble(binary, terminal, () => {
+                });
+
+                // And dump its memory (data segment)
+                dumper.dump(binary, ".data", terminal, () => {
                 });
             });
         });

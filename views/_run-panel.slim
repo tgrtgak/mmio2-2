@@ -35,9 +35,45 @@
   ol.tab-panels
     li.tab-panel.active#machine-code-panel
       table.instructions.empty
+        thead
+          th
+            -#= I18n.t(:"run.machine-code.headers.breakpoint")
+          th
+            = I18n.t(:"run.machine-code.headers.address")
+          th
+            = I18n.t(:"run.machine-code.headers.code")
+          th
+            = I18n.t(:"run.machine-code.headers.disassembly")
+          th
+            = I18n.t(:"run.machine-code.headers.line")
+          th
+            = I18n.t(:"run.machine-code.headers.source")
         tbody
 
       img.waiting src="images/dynamic/hex/dbccda/dinosaurs/velociraptor.svg"
     li.tab-panel#memory-panel
-      .memory.empty
+      table.memory.empty
+        thead
+          th
+            = I18n.t(:"run.memory.headers.address")
+          th
+            = I18n.t(:"run.memory.headers.value") + " (+0)"
+          th
+            = I18n.t(:"run.memory.headers.value") + " (+4)"
+          th
+            = I18n.t(:"run.memory.headers.value") + " (+8)"
+          th
+            = I18n.t(:"run.memory.headers.value") + " (+12)"
+          th
+            = I18n.t(:"run.memory.headers.value") + " (+16)"
+          th
+            = I18n.t(:"run.memory.headers.value") + " (+20)"
+          th
+            = I18n.t(:"run.memory.headers.value") + " (+24)"
+          th
+            = I18n.t(:"run.memory.headers.value") + " (+28)"
+          th
+            = I18n.t(:"run.memory.headers.printed")
+        tbody
+
       img.waiting src="images/dynamic/hex/dbccda/dinosaurs/tyrannosaurus.svg"

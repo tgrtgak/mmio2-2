@@ -10,9 +10,20 @@ en:
 
     memory:
       tab:              "Memory"
+      headers:
+        address:        "Address"
+        value:          "Value"
+        printed:        "Printed"
 
     machine-code:
       tab:              "Machine Code"
+      headers:
+        breakpoint:     "Set Breakpoint"
+        address:        "Address"
+        code:           "Code"
+        disassembly:    "Disassembly"
+        line:           "Line"
+        source:         "Source"
 
     registers:
       tab:              "Registers"

@@ -445,6 +445,7 @@ ol.tab-panels li.tab-panel.active {
   }
 }
 
+table.memory ,
 table.instructions {
   position: absolute;
   top: 0.15rem;
@@ -462,6 +463,7 @@ table.instructions {
       background: #c3e2f2;
     }
 
+    th ,
     td {
       font-family: monospace,courier,fixed,swiss,sans-serif;
       font-size: 15px;
@@ -476,7 +478,6 @@ table.instructions {
       }
 
       &:last-child {
-        border-right: 1px solid #ddd;
       }
 
       &:first-child {
@@ -501,8 +502,24 @@ table.instructions {
       width: 50%;
     }
 
+    td.address ,
+    td.ascii {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    td.word {
+        text-align: center;
+    }
+
     td.original {
       width: 50%;
+    }
+
+    th {
+      font: bold 0.9rem Lato, sans-serif;
+      border-bottom: 1px solid #333;
+      text-align: center;
     }
 
     &:first-child {
@@ -543,7 +560,7 @@ table.instructions {
 #memory-panel {
   .memory {
     & + img {
-      display: block;
+      display: none;
 
       position: absolute;
       top: 0.15rem;
