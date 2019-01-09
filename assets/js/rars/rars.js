@@ -24,17 +24,49 @@ class RARS {
         RARS.codeListing = new CodeListing(document.body);
         RARS.registerListing = new RegisterListing(document.body);
         RARS.memoryListing = new MemoryListing(document.body);
+        RARS.simulator = null;
+
+        RARS.codeListing.on("breakpoint-set", (info) => {
+            if (RARS.simulator) {
+                RARS.simulator.breakpointSet(info.address);
+            }
+        });
+
+        RARS.codeListing.on("breakpoint-clear", (info) => {
+            if (RARS.simulator) {
+                RARS.simulator.breakpointClear(info.address);
+            }
+        });
 
         RARS.toolbar.on('click', (button) => {
             switch (button.getAttribute("id")) {
                 case "assemble":
                     this.assemble();
                     break;
+                case "run":
+                    this.run();
+                    break;
                 default:
                     // Unknown button
                     break;
             }
         });
+    }
+
+    static run() {
+        if (RARS.simulator) {
+            RARS.codeListing.unhighlight();
+            RARS.simulator.resume();
+        }
+    }
+
+    static pause() {
+        if (RARS.simulator) {
+            RARS.simulator.pause();
+        }
+    }
+
+    static step() {
     }
 
     static assemble() {
@@ -109,8 +141,20 @@ class RARS {
                 sim.on("quit", () => {
                     RARS.registerListing.update(sim.registers);
                 });
+                sim.on("breakpoint", () => {
+                    // Get register dump
+                    RARS.registerListing.unhighlight();
+                    RARS.registerListing.update(sim.registers);
+
+                    // Get updated memory
+                    // TODO
+
+                    // Highlight code line and scroll to it
+                    RARS.codeListing.highlight(sim.pc.toString(16));
+                });
 
                 sim.run();
+                this.simulator = sim;
 
                 //let b2 = new Blob([binary], {type: binary.type});
 

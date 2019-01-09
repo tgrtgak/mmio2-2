@@ -53,6 +53,33 @@ class CodeListing extends EventComponent {
         this._element.querySelectorAll("tbody tr").forEach( (x) => x.remove() );
     }
 
+    unhighlight() {
+        this._highlighted = null;
+        this._element.querySelectorAll(".highlighted").forEach( (element) => {
+            element.classList.remove("highlighted");
+        });
+    }
+
+    /**
+     * Highlights the instruction at the given address.
+     *
+     * Only one line can be highlighted at a time.
+     *
+     * @param {string} address The address as a hex string, i.e. "400004".
+     */
+    highlight(address) {
+        this._highlighted = address;
+
+        this._element.querySelectorAll(".highlighted").forEach( (element) => {
+            element.classList.remove("highlighted");
+        });
+
+        var element = this._element.querySelector(".address-" + address);
+        if (element) {
+            element.parentNode.classList.add("highlighted");
+        }
+    }
+
     /**
      * Adds an instruction.
      */
@@ -89,11 +116,17 @@ class CodeListing extends EventComponent {
         breakpointCell.appendChild(checkbox);
         row.appendChild(breakpointCell);
 
-        row.appendChild(createCell("address", info.address));
+        var addressCell = createCell("address", info.address);
+        addressCell.classList.add("address-" + info.address);
+        row.appendChild(addressCell);
         row.appendChild(createCell("machine-code", info.machineCode));
         row.appendChild(createCell("code", info.code));
         row.appendChild(createCell("row", rowText));
         row.appendChild(createCell("original", (rowText ? this._sourceLines[info.row - 1] : "")));
+
+        if (info.address == this._highlighted) {
+            row.classList.add('highlighted');
+        }
 
         this._element.querySelector("tbody").appendChild(row);
         this._last = info;

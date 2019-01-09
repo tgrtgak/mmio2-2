@@ -76,6 +76,39 @@ class RARS < Sinatra::Base
               "Expires" => (now + 31536000).httpdate,
               "Cache-Control" => "public, max-age=31536000"
     end
+
+    # Renders the given markdown guidance page with or without the layout.
+    def render_guidance(page, layout = true)
+      # Get interpolated strings
+      if !defined?(@@binutils_authors)
+        begin
+          @@binutils_authors = JSON.parse(`ruby scripts/parse_binutils_authors.rb`).join(", ")
+        rescue
+          @@binutils_authors = "various"
+        end
+      end
+
+      lang = :en
+
+      page = page.to_s
+
+      if page.start_with?("/")
+        page = page[1..-1]
+      end
+
+      filename = :"guidance/#{lang.to_s}/#{page}"
+      if not File.exists?("views/#{filename}.md")
+        # default to the english docs if we cannot find the requested language
+        filename = :"guidance/en/#{page}"
+      end
+
+      data = File.read("views/#{filename}.md")
+      data.gsub!("{% binutils_authors %}", @@binutils_authors)
+      ret = render(:markdown, data, :layout => layout)
+      ret.gsub!(" href=\"http", " target=\"_blank\" href=\"http")
+      ret.gsub!("<p><img", "<p class=\"image\"><img")
+      ret
+    end
   end
 
   # Routes
@@ -87,29 +120,8 @@ class RARS < Sinatra::Base
 
   # guidance page index
   get '/guidance/*' do |splat|
-    # Get interpolated strings
-    if !defined?(@@binutils_authors)
-      begin
-        @@binutils_authors = JSON.parse(`ruby scripts/parse_binutils_authors.rb`).join(", ")
-      rescue
-        @@binutils_authors = "various"
-      end
-    end
-
-    lang = :en
-
-    filename = :"guidance/#{lang.to_s}#{File.expand_path(splat, "/")}"
-    if not File.exists?("views/#{filename}.md")
-      # default to the english docs if we cannot find the requested language
-      filename = :"guidance/en#{File.expand_path(splat, "/")}"
-    end
-
-    data = File.read("views/#{filename}.md")
-    data.gsub!("{% binutils_authors %}", @@binutils_authors)
-    ret = render(:markdown, data)
-    ret.gsub!(" href=\"http", " target=\"_blank\" href=\"http")
-    ret.gsub!("<p><img", "<p class=\"image\"><img")
-    ret
+    page = "#{File.expand_path(splat, "/")}"
+    render_guidance(page)
   end
 
   # stylesheets

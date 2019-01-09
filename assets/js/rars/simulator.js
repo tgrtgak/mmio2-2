@@ -18,6 +18,7 @@ class Simulator extends EventComponent {
         this._module = {};
         this._startRequested = false;
         this._canStart = false;
+        this._ready = false;
 
         window.update_downloading = () => {
         };
@@ -79,6 +80,15 @@ class Simulator extends EventComponent {
         Module.quit = (status, ex) => {
             this._quit();
             throw ex;
+        };
+
+        Module.onBreakpoint = () => {
+            this._breakpoint();
+        };
+
+        Module.onVMReady = () => {
+            this._ready = true;
+            this.trigger("ready");
         };
 
         Module.preRun = () => {
@@ -163,15 +173,19 @@ class Simulator extends EventComponent {
     _start() {
         var Module = this._module;
 
-        this._console_write1      = Module.cwrap('console_queue_char', null, ['number']);
-        this._fs_import_file      = Module.cwrap('fs_import_file', null, ['string', 'number', 'number']);
-        this._display_key_event   = Module.cwrap('display_key_event', null, ['number', 'number']);
-        this._display_mouse_event = Module.cwrap('display_mouse_event', null, ['number', 'number', 'number']);
-        this._display_wheel_event = Module.cwrap('display_wheel_event', null, ['number']);
-        this._net_write_packet    = Module.cwrap('net_write_packet', null, ['number', 'number']);
-        this._net_set_carrier     = Module.cwrap('net_set_carrier', null, ['number']);
-        this._vm_start            = Module.cwrap('vm_start', null, ["string", "number", "string", "string", "number", "number", "number", "string"]);
-        this._cpu_get_regs        = Module.cwrap('cpu_get_regs', null, ["number"]);
+        this._console_write1       = Module.cwrap('console_queue_char', null, ['number']);
+        this._fs_import_file       = Module.cwrap('fs_import_file', null, ['string', 'number', 'number']);
+        this._display_key_event    = Module.cwrap('display_key_event', null, ['number', 'number']);
+        this._display_mouse_event  = Module.cwrap('display_mouse_event', null, ['number', 'number', 'number']);
+        this._display_wheel_event  = Module.cwrap('display_wheel_event', null, ['number']);
+        this._net_write_packet     = Module.cwrap('net_write_packet', null, ['number', 'number']);
+        this._net_set_carrier      = Module.cwrap('net_set_carrier', null, ['number']);
+        this._vm_start             = Module.cwrap('vm_start', null, ["string", "number", "string", "string", "number", "number", "number", "string"]);
+        this._vm_pause             = Module.cwrap('vm_pause', null, []);
+        this._vm_resume            = Module.cwrap('vm_resume', null, []);
+        this._cpu_get_regs         = Module.cwrap('cpu_get_regs', null, ["number"]);
+        this._cpu_set_breakpoint   = Module.cwrap('cpu_set_breakpoint', null, ["number"]);
+        this._cpu_clear_breakpoint = Module.cwrap('cpu_clear_breakpoint', null, ["number"]);
     }
 
     _runtimeInitialized() {
@@ -305,17 +319,29 @@ class Simulator extends EventComponent {
     /**
      * Add a breakpoint.
      *
-     * @param {number} address The address is break upon reaching.
+     * @param {string} address The address is break upon reaching.
      */
-    addBreakpoint(address) {
+    breakpointSet(address) {
+        // Convert 'address' to a pair of uint32s.
+        address = address.padStart(16, "0");
+        let high = parseInt(address.slice(0, 8), 16);
+        let low  = parseInt(address.slice(8), 16);
+        // Call into emulator
+        this._cpu_set_breakpoint(high, low);
     }
 
     /**
      * Removes a previously attached breakpoint via its address.
      *
-     * @param {number} address The address of the breakpoint to remove.
+     * @param {string} address The address of the breakpoint to remove.
      */
-    removeBreakpoint(address) {
+    breakpointClear(address) {
+        // Convert 'address' to a pair of uint32s.
+        address = address.padStart(16, "0");
+        let high = parseInt(address.slice(0, 8), 16);
+        let low  = parseInt(address.slice(8), 16);
+        // Call into emulator
+        this._cpu_clear_breakpoint(high, low);
     }
 
     /**
@@ -352,10 +378,32 @@ class Simulator extends EventComponent {
         });
     }
 
+    /*
+     * Internal function that is the breakpoint callback.
+     */
+    _breakpoint() {
+        this.trigger("breakpoint");
+    }
+
     /**
      * Pause the simulation.
      */
     pause() {
+        if (this._ready) {
+            this._vm_pause();
+            this.trigger('paused');
+        }
+    }
+
+    /**
+     * Resumes the simulation, if it is paused.
+     */
+    resume() {
+        if (this._ready) {
+            this._vm_resume();
+            // TODO: move pause/running events to come from the emulator itself
+            this.trigger('running');
+        }
     }
 }
 

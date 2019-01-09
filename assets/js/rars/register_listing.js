@@ -36,6 +36,16 @@ class RegisterListing extends EventComponent {
     }
 
     /**
+     * Removes highlights on updated entries.
+     */
+    unhighlight() {
+        Simulator.REGISTER_NAMES.forEach( (regName) => {
+            var str = "0000000000000000";
+            this._element.querySelector("tr." + regName + " td.value").parentNode.classList.remove("updated");
+        });
+    }
+
+    /**
      * Updates the register listing for the provided register values.
      *
      * @param {BigUint64Array} regs The register values.
@@ -45,7 +55,15 @@ class RegisterListing extends EventComponent {
             var str = reg.toString(16);
             str = "0000000000000000".slice(str.length) + str;
             var regName = Simulator.REGISTER_NAMES[i];
-            this._element.querySelector("tr." + regName + " td.value").textContent = "0x" + str;
+            var element = this._element.querySelector("tr." + regName + " td.value");
+            if (element) {
+                var oldContent = element.textContent;
+                var newContent = "0x" + str;
+                if (oldContent != newContent) {
+                    element.textContent = newContent;
+                    element.parentNode.classList.add("updated");
+                }
+            }
         });
     }
 }

@@ -22,7 +22,5 @@ html lang="en-US"
         == partial(:"run-panel")
       li.tab-panel        id=:"guidance-panel"
         == partial(:"guidance-panel")
-    ol.toolbar
-      li
-        button#assemble
+    == partial(:toolbar)
     == partial(:scripts)
