@@ -168,23 +168,20 @@ class RARS < Sinatra::Base
 
       stream do |out|
         # We need to write out the <svg> tab and then the stylesheet
-        begin
-          File.open("assets/images/#{params[:name]}.svg") do |f|
-            stylesheet_line = "<?xml-stylesheet type=\"text/css\" href=\"data:text/css;charset=utf-8;base64,#{embed.strip}\" ?>"
-            line = f.readline
-            if line.include?("<?xml")
-              parts = line.split("?>", 2)
-              out << parts[0]
-              out << "?>"
-              out << stylesheet_line
-              out << parts[1]
-            else
-              out << stylesheet_line
-              out << line
-            end
-            out << f.read
+        File.open("assets/images/#{params[:name]}.svg") do |f|
+          stylesheet_line = "<?xml-stylesheet type=\"text/css\" href=\"data:text/css;charset=utf-8;base64,#{embed.strip}\" ?>"
+          line = f.readline
+          if line.include?("<?xml")
+            parts = line.split("?>", 2)
+            out << parts[0]
+            out << "?>"
+            out << stylesheet_line
+            out << parts[1]
+          else
+            out << stylesheet_line
+            out << line
           end
-        rescue
+          out << f.read
         end
       end
     else
