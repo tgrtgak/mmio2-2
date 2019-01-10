@@ -46,6 +46,9 @@ class RARS {
                 case "run":
                     this.run();
                     break;
+                case "step":
+                    this.step();
+                    break;
                 default:
                     // Unknown button
                     break;
@@ -67,6 +70,21 @@ class RARS {
     }
 
     static step() {
+        if (RARS.simulator) {
+            // If the current instruction is an ecall... we want to breakpoint
+            // to the following instruction instead of stepping.
+            //
+            // Since, if we step, we step into the kernel.
+            var info = RARS.codeListing.highlightedLine;
+            if (info && info.code == "ecall") {
+                RARS.simulator.breakpointSet((window.BigInt("0x" + info.address) + window.BigInt(4)).toString(16));
+                RARS._clearBreakpoint = true;
+                RARS.simulator.resume();
+            }
+            else {
+                RARS.simulator.step();
+            }
+        }
     }
 
     static assemble() {
@@ -142,6 +160,22 @@ class RARS {
                     RARS.registerListing.update(sim.registers);
                 });
                 sim.on("breakpoint", () => {
+                    // Get register dump
+                    RARS.registerListing.unhighlight();
+                    RARS.registerListing.update(sim.registers);
+
+                    // Get updated memory
+                    // TODO
+
+                    // Highlight code line and scroll to it
+                    RARS.codeListing.highlight(sim.pc.toString(16));
+
+                    if (RARS._clearBreakpoint) {
+                        RARS._clearBreakpoint = false;
+                        sim.breakpointClear(sim.pc.toString(16));
+                    }
+                });
+                sim.on("paused", () => {
                     // Get register dump
                     RARS.registerListing.unhighlight();
                     RARS.registerListing.update(sim.registers);

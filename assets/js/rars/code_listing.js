@@ -53,6 +53,9 @@ class CodeListing extends EventComponent {
         this._element.querySelectorAll("tbody tr").forEach( (x) => x.remove() );
     }
 
+    /**
+     * Unhighlights any highlighted line.
+     */
     unhighlight() {
         this._highlighted = null;
         this._element.querySelectorAll(".highlighted").forEach( (element) => {
@@ -78,6 +81,26 @@ class CodeListing extends EventComponent {
         if (element) {
             element.parentNode.classList.add("highlighted");
         }
+    }
+
+    /**
+     * Retrieves the highlighted instruction.
+     */
+    get highlightedLine() {
+        let highlighted = this._element.querySelector(".highlighted");
+        if (!highlighted) {
+            return null;
+        }
+
+        let ret = {};
+
+        ret.machineCode = highlighted.querySelector("td.machine-code").textContent;
+        ret.address     = highlighted.querySelector("td.address").textContent;
+        // TODO: original,code,row may be on the preceding line
+        ret.code        = highlighted.querySelector("td.code").textContent;
+        ret.row         = highlighted.querySelector("td.row").textContent;
+
+        return ret;
     }
 
     /**

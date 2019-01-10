@@ -91,6 +91,10 @@ class Simulator extends EventComponent {
             this.trigger("ready");
         };
 
+        Module.onVMPaused = () => {
+            this.trigger("paused");
+        };
+
         Module.preRun = () => {
             this._initializeFS([
                 {
@@ -183,6 +187,7 @@ class Simulator extends EventComponent {
         this._vm_start             = Module.cwrap('vm_start', null, ["string", "number", "string", "string", "number", "number", "number", "string"]);
         this._vm_pause             = Module.cwrap('vm_pause', null, []);
         this._vm_resume            = Module.cwrap('vm_resume', null, []);
+        this._vm_step              = Module.cwrap('vm_step', null, []);
         this._cpu_get_regs         = Module.cwrap('cpu_get_regs', null, ["number"]);
         this._cpu_set_breakpoint   = Module.cwrap('cpu_set_breakpoint', null, ["number"]);
         this._cpu_clear_breakpoint = Module.cwrap('cpu_clear_breakpoint', null, ["number"]);
@@ -401,6 +406,17 @@ class Simulator extends EventComponent {
     resume() {
         if (this._ready) {
             this._vm_resume();
+            // TODO: move pause/running events to come from the emulator itself
+            this.trigger('running');
+        }
+    }
+
+    /**
+     * Steps a single instruction.
+     */
+    step() {
+        if (this._ready) {
+            this._vm_step();
             // TODO: move pause/running events to come from the emulator itself
             this.trigger('running');
         }
