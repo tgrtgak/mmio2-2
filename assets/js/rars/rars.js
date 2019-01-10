@@ -76,6 +76,7 @@ class RARS {
             //
             // Since, if we step, we step into the kernel.
             var info = RARS.codeListing.highlightedLine;
+            RARS.codeListing.unhighlight();
             if (info && info.code == "ecall") {
                 RARS.simulator.breakpointSet((window.BigInt("0x" + info.address) + window.BigInt(4)).toString(16));
                 RARS._clearBreakpoint = true;
