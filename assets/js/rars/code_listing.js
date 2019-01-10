@@ -49,6 +49,7 @@ class CodeListing extends EventComponent {
      * Clears the code listing.
      */
     clear() {
+        this.unhighlight();
         this._element.classList.add("empty");
         this._element.querySelectorAll("tbody tr").forEach( (x) => x.remove() );
     }
