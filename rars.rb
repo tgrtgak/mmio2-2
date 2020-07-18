@@ -1,4 +1,4 @@
-# RARS - RISC-V Assembler and Runtime Simulator
+# RAWRS - RISC-V Assembler and Workable, Rewritable System
 # Copyright (C) 2017-2019 wilkie
 #
 # This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ class HTML < Redcarpet::Render::HTML
     include Rouge::Plugins::Redcarpet # yep, that's it. (That's Jeanine!!)
 end
 
-class RARS < Sinatra::Base
+class RAWRS < Sinatra::Base
   # Use HTML5
   set :haml, :format => :html5
 

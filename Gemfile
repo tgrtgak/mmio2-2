@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '2.4.4'
+ruby '2.6.3'
 
 # Web Framework
 gem 'sinatra', '~> 2.0.1'

@@ -74,6 +74,9 @@ class MemoryListing extends EventComponent {
             // Probably gonna have some edge cases that are missed
             var uri = encodeURI(chr);
             if (uri.length == 1 || uri === "%25" ||
+                                   uri === "%3C" ||
+                                   uri === "%3E" ||
+                                   uri === "%22" ||
                                    uri === "%20" ||
                                    uri === "%5E" ||
                                    uri === "%60" ||

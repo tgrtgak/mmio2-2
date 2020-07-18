@@ -1,6 +1,6 @@
-# RARS: RISC-V Assembler and Runtime Simulator
+# RAWRS: RISC-V Assembler and Workable, Rewritable System
 
-RARS is based on the ideas presented by MARS, its MIPS equivalent. RARS is
+RAWRS is based on the ideas presented by MARS, its MIPS equivalent. RAWRS is
 meant to be a teaching application for introductory to advanced architecture
 and computer science students.
 
@@ -26,7 +26,7 @@ Generation" subsection in the "Development" section below.
 **This is a work in progress... and the build scripts and modifications to the simulator are not yet included.**
 
 This section contains information about how to create your own development
-environment for adding features or fixing bugs in RARS. There are quite a few
+environment for adding features or fixing bugs in RAWRS. There are quite a few
 moving pieces, so each subsection breaks down each one independently. However,
 it is assumed that each is installed in the written order as some depend on
 others.
@@ -196,4 +196,4 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 
 ## License
 
-RARS is licensed under the AGPL 3.0, with select code under other licenses as noted. Refer to the [LICENSE.txt](LICENSE.txt) file in the root of the repository for specific details.
+RAWRS is licensed under the AGPL 3.0, with select code under other licenses as noted. Refer to the [LICENSE.txt](LICENSE.txt) file in the root of the repository for specific details.

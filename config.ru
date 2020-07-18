@@ -1,2 +1,2 @@
 require './rars'
-run RARS
+run RAWRS

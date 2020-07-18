@@ -20,7 +20,7 @@ if (!window.BigUint64Array) {
     };
 }
 
-import RARS from './rars/rars';
+import RAWRS from './rars/rars';
 
 let cols = 80;
 let rows = 30;
@@ -33,6 +33,6 @@ window.term.open(document.getElementById("term_container"),
           document.getElementById("term_paste"));
 window.term.term_el.style.fontSize = font_size + "px";
 
-RARS.load();
+RAWRS.load();
 
-export default RARS;
+export default RAWRS;

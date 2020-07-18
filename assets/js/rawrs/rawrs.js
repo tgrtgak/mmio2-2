@@ -14,31 +14,31 @@ import CodeListing     from './code_listing';
 import MemoryListing   from './memory_listing';
 import RegisterListing from './register_listing';
 
-class RARS {
+class RAWRS {
     static load() {
         Tabs.load();
         Editor.load();
-        RARS.toolbar  = new Toolbar(document.body);
-        RARS.fileList = new FileList(document.body);
-        RARS.fileList.loadItem(RARS.fileList.startupItem);
-        RARS.codeListing = new CodeListing(document.body);
-        RARS.registerListing = new RegisterListing(document.body);
-        RARS.memoryListing = new MemoryListing(document.body);
-        RARS.simulator = null;
+        RAWRS.toolbar  = new Toolbar(document.body);
+        RAWRS.fileList = new FileList(document.body);
+        RAWRS.fileList.loadItem(RAWRS.fileList.startupItem);
+        RAWRS.codeListing = new CodeListing(document.body);
+        RAWRS.registerListing = new RegisterListing(document.body);
+        RAWRS.memoryListing = new MemoryListing(document.body);
+        RAWRS.simulator = null;
 
-        RARS.codeListing.on("breakpoint-set", (info) => {
-            if (RARS.simulator) {
-                RARS.simulator.breakpointSet(info.address);
+        RAWRS.codeListing.on("breakpoint-set", (info) => {
+            if (RAWRS.simulator) {
+                RAWRS.simulator.breakpointSet(info.address);
             }
         });
 
-        RARS.codeListing.on("breakpoint-clear", (info) => {
-            if (RARS.simulator) {
-                RARS.simulator.breakpointClear(info.address);
+        RAWRS.codeListing.on("breakpoint-clear", (info) => {
+            if (RAWRS.simulator) {
+                RAWRS.simulator.breakpointClear(info.address);
             }
         });
 
-        RARS.toolbar.on('click', (button) => {
+        RAWRS.toolbar.on('click', (button) => {
             switch (button.getAttribute("id")) {
                 case "assemble":
                     this.assemble();
@@ -57,33 +57,33 @@ class RARS {
     }
 
     static run() {
-        if (RARS.simulator) {
-            RARS.codeListing.unhighlight();
-            RARS.simulator.resume();
+        if (RAWRS.simulator) {
+            RAWRS.codeListing.unhighlight();
+            RAWRS.simulator.resume();
         }
     }
 
     static pause() {
-        if (RARS.simulator) {
-            RARS.simulator.pause();
+        if (RAWRS.simulator) {
+            RAWRS.simulator.pause();
         }
     }
 
     static step() {
-        if (RARS.simulator) {
+        if (RAWRS.simulator) {
             // If the current instruction is an ecall... we want to breakpoint
             // to the following instruction instead of stepping.
             //
             // Since, if we step, we step into the kernel.
-            var info = RARS.codeListing.highlightedLine;
-            RARS.codeListing.unhighlight();
+            var info = RAWRS.codeListing.highlightedLine;
+            RAWRS.codeListing.unhighlight();
             if (info && info.code == "ecall") {
-                RARS.simulator.breakpointSet((window.BigInt("0x" + info.address) + window.BigInt(4)).toString(16));
-                RARS._clearBreakpoint = true;
-                RARS.simulator.resume();
+                RAWRS.simulator.breakpointSet((window.BigInt("0x" + info.address) + window.BigInt(4)).toString(16));
+                RAWRS._clearBreakpoint = true;
+                RAWRS.simulator.resume();
             }
             else {
-                RARS.simulator.step();
+                RAWRS.simulator.step();
             }
         }
     }
@@ -92,12 +92,12 @@ class RARS {
         var text = window.editor.getValue();
         var terminal = new Terminal(document.body);
 
-        RARS.codeListing.clear();
-        RARS.codeListing.source = text;
+        RAWRS.codeListing.clear();
+        RAWRS.codeListing.source = text;
 
-        RARS.registerListing.clear();
+        RAWRS.registerListing.clear();
 
-        RARS.memoryListing.clear();
+        RAWRS.memoryListing.clear();
 
         var linkerScript = "SECTIONS { . = 0x00400000; .text : { *(.text) } . = 0x10010000; .data : { *(.data) } }";
 
@@ -116,12 +116,12 @@ class RARS {
 
         var disassembler = new Disassembler();
         disassembler.on('instruction', (instruction) => {
-            RARS.codeListing.add(instruction);
+            RAWRS.codeListing.add(instruction);
         });
 
         var dumper = new Dumper();
         dumper.on('update', (row) => {
-            RARS.memoryListing.update(row.address, row.data);
+            RAWRS.memoryListing.update(row.address, row.data);
         });
 
         assembler.on('done', () => {
@@ -158,34 +158,34 @@ class RARS {
                 // Start the simulation
                 let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", binary);
                 sim.on("quit", () => {
-                    RARS.registerListing.update(sim.registers);
+                    RAWRS.registerListing.update(sim.registers);
                 });
                 sim.on("breakpoint", () => {
                     // Get register dump
-                    RARS.registerListing.unhighlight();
-                    RARS.registerListing.update(sim.registers);
+                    RAWRS.registerListing.unhighlight();
+                    RAWRS.registerListing.update(sim.registers);
 
                     // Get updated memory
                     // TODO
 
                     // Highlight code line and scroll to it
-                    RARS.codeListing.highlight(sim.pc.toString(16));
+                    RAWRS.codeListing.highlight(sim.pc.toString(16));
 
-                    if (RARS._clearBreakpoint) {
-                        RARS._clearBreakpoint = false;
+                    if (RAWRS._clearBreakpoint) {
+                        RAWRS._clearBreakpoint = false;
                         sim.breakpointClear(sim.pc.toString(16));
                     }
                 });
                 sim.on("paused", () => {
                     // Get register dump
-                    RARS.registerListing.unhighlight();
-                    RARS.registerListing.update(sim.registers);
+                    RAWRS.registerListing.unhighlight();
+                    RAWRS.registerListing.update(sim.registers);
 
                     // Get updated memory
                     // TODO
 
                     // Highlight code line and scroll to it
-                    RARS.codeListing.highlight(sim.pc.toString(16));
+                    RAWRS.codeListing.highlight(sim.pc.toString(16));
                 });
 
                 sim.run();
@@ -205,4 +205,4 @@ class RARS {
     }
 }
 
-export default RARS;
+export default RAWRS;

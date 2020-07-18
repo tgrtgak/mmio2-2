@@ -1,7 +1,7 @@
 {
-  "name": "RARS",
+  "name": "RAWRS",
   "version": "1.0.0",
-  "description": "The javascript dependencies for RARS",
+  "description": "The javascript dependencies for RAWRS",
   "main": "webpack.config.js",
   "dependencies": {},
   "devDependencies": {
