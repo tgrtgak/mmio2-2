@@ -3,16 +3,16 @@
 
 - Dir["#{path}/#{filter}"].each do |f|
   - if File.directory?(f)
-    li.directory
-      img        src="images/dynamic/hex/46b1e4/group.svg"
+    li.directory.built-in
+      img        src="images/dynamic/hex/aaaaaa/group.svg"
       img.active src="images/dynamic/hex/ffffff/group.svg"
-      img.hover  src="images/dynamic/hex/46b1e4/group.svg"
+      img.hover  src="images/dynamic/hex/aaaaaa/group.svg"
       span.name
         = f[(path.length+1)..-1]
       ol
         == partial(:"project-pane-directory", :locals => { :path => f, :root => File.join(root, File.basename(f)) })
   - else
-    li.file data-url=File.join(root, File.basename(f))
+    li.file.built-in data-url=File.join(root, File.basename(f))
       img        src="images/dynamic/hex/46b1e4/text.svg"
       img.active src="images/dynamic/hex/ffffff/text.svg"
       img.hover  src="images/dynamic/hex/46b1e4/text.svg"

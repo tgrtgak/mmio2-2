@@ -1,23 +1,30 @@
 ol
   template.directory
     li.directory
-      img        src="images/group.svg"
-      img.active src="images/group.svg"
-      img.hover  src="images/group.svg"
+      img        src="images/dynamic/hex/46b1e4/group.svg"
+      img.active src="images/dynamic/hex/ffffff/group.svg"
+      img.hover  src="images/dynamic/hex/46b1e4/group.svg"
       span.name
       ol
   template.file
     li.file
-      img        src="images/text.svg"
-      img.active src="images/text.svg"
-      img.hover  src="images/text.svg"
+      img        src="images/dynamic/hex/46b1e4/text.svg"
+      img.active src="images/dynamic/hex/ffffff/text.svg"
+      img.hover  src="images/dynamic/hex/46b1e4/text.svg"
       span.name
   -# Render all files in assets/files
-  == partial(:"project-pane-directory", :locals => { :path => "assets/files", :root => "files" })
-  li.directory
+  li.directory.root
     img        src="images/dynamic/hex/46b1e4/group.svg"
     img.active src="images/dynamic/hex/ffffff/group.svg"
     img.hover  src="images/dynamic/hex/46b1e4/group.svg"
+    span.name
+      | My Files
+    ol
+  == partial(:"project-pane-directory", :locals => { :path => "assets/files", :root => "files" })
+  li.directory.built-in
+    img        src="images/dynamic/hex/aaaaaa/group.svg"
+    img.active src="images/dynamic/hex/ffffff/group.svg"
+    img.hover  src="images/dynamic/hex/aaaaaa/group.svg"
     span.name
       | kernel
     ol
