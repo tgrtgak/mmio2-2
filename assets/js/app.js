@@ -20,7 +20,7 @@ if (!window.BigUint64Array) {
     };
 }
 
-import RAWRS from './rars/rars';
+import RAWRS from './rawrs/rawrs';
 
 let cols = 80;
 let rows = 30;

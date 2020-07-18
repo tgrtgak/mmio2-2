@@ -1,2 +1,2 @@
-require './rars'
+require './rawrs'
 run RAWRS

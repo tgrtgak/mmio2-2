@@ -13,8 +13,8 @@ module.exports = {
    */
   output: {
     path: __dirname + "/assets/js",
-    filename: "rars.js",
-    sourceMapFilename: "rars.js.map"
+    filename: "rawrs.js",
+    sourceMapFilename: "rawrs.js.map"
   },
 
   /* We want source maps!

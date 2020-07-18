@@ -88,7 +88,7 @@ npm install
 
 Now, we can compile the JavaScript using [webpack](https://webpack.js.org/) and [babel](https://babeljs.io/), which
 lets us use future JavaScript features and cross-compile them for older browsers.
-This produces the file "./public/js/rars.js":
+This produces the file "./public/js/rawrs.js":
 
 ```
 npx webpack
