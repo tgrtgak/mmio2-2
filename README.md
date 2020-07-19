@@ -111,10 +111,11 @@ rackup -o 0.0.0.0 -p 8080
 
 ### Static Site Generation
 
-To create a static site, simply run `rackula` like the following:
+To create a static site, simply run the provided `package.sh` script like the
+following:
 
 ```
-rackula generate
+./package.sh
 ```
 
 As long as each other step was taken, the site will be complete and working.

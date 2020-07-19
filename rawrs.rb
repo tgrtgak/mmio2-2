@@ -22,7 +22,19 @@ require_relative './lib/rouge/lexers/riscv.rb'
 require 'rouge/plugins/redcarpet'
 
 class HTML < Redcarpet::Render::HTML
-    include Rouge::Plugins::Redcarpet # yep, that's it. (That's Jeanine!!)
+    include Rouge::Plugins::Redcarpet # yep, that's it. (Thanks Jeanine!!)
+
+    def codespan(code)
+      classes = ""
+      if code.start_with?("{.")
+        # Add class
+        klass = code[2...code.index('}')]
+        code = code[3 + klass.length..-1]
+        classes = " class=\"#{klass}\""
+      end
+
+      "<code#{classes}>#{code}</code>"
+    end
 end
 
 class RAWRS < Sinatra::Base

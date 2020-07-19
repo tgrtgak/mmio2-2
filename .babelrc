@@ -1,5 +1,19 @@
 {
-  "presets": ["es2015"],
+  "presets": [
+    [
+      "@babel/preset-env", {
+        "useBuiltIns": "entry",
+        "corejs": "2.x"
+      }
+    ]
+  ],
+  "plugins": [
+    [
+      "@babel/plugin-transform-runtime", {
+         "regenerator": true
+      }
+    ]
+  ],
   "env": {
     "test": {
       "plugins": [

@@ -20,7 +20,30 @@ class RAWRS {
         Editor.load();
         RAWRS.toolbar  = new Toolbar(document.body);
         RAWRS.fileList = new FileList(document.body);
-        RAWRS.fileList.loadItem(RAWRS.fileList.startupItem);
+
+        var saveTimer = null;
+        window.editor.getSession().on('change', () => {
+            if (saveTimer) {
+                window.clearTimeout(saveTimer);
+            }
+
+            saveTimer = window.setTimeout( () => {
+                var data = window.editor.getValue();
+                RAWRS.fileList.save(data);
+            }, 500);
+        });
+
+        // Load local storage directory
+        //RAWRS.fileList._storage.clear().then( () => {
+        RAWRS.fileList.loadRoot().then( () => {
+            RAWRS.fileList.revealPath(RAWRS.fileList.startupFile).then( () => {
+                let item = RAWRS.fileList.startupItem;
+                if (item) {
+                    RAWRS.fileList.loadItem(item);
+                }
+            });
+        });
+        //});
         RAWRS.codeListing = new CodeListing(document.body);
         RAWRS.registerListing = new RegisterListing(document.body);
         RAWRS.memoryListing = new MemoryListing(document.body);

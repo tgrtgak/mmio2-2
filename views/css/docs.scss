@@ -90,24 +90,34 @@ body.documentation     {
   }
 
   pre {
-    //background: #272822;
     box-sizing: border-box;
     color: white;
-
     margin-top: 1rem;
     margin-bottom: 1rem;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     padding-left: 2rem;
-
     outline: 1px solid #272822;
     border-top: 1px solid white;
     border-bottom: 1px solid white;
+    background: url('../images/noise_black.png');
 
     // Style overrides
     &.highlight .c1 {
       color: #a8c8d8; //#bb91b8;
     }
+  }
+
+  code.instruction {
+    color: #9260c3;
+  }
+
+  code.file {
+    color: #3b75bd;
+  }
+
+  code.register {
+    color: #da3d3d;
   }
 
   ul {

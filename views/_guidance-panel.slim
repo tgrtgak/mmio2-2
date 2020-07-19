@@ -4,6 +4,7 @@ ol.tabs
   - tabCount = 0
   - topics.each_with_index do |topic, i|
     li.tab class=(i == 0 ? "active" : "")
+      a href="guidance/#{topic}" hidden=true aria-hidden="true"
       button aria-controls="guidance-panel-#{i}"
         = I18n.t(:"guidance.#{topic}.tab")
     - tabCount += 1

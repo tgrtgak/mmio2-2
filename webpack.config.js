@@ -1,13 +1,15 @@
 const webpack = require('webpack');
+const path = require('path');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 /* This describes the behavior of webpack.
  */
 module.exports = {
   /* The main javascript file for the application
    */
-  entry: [
-    "./assets/js/app.js"
-  ],
+  entry: {
+    rawrs: ["./assets/js/app.js"]
+  },
 
   /* The eventual transpiled output file.
    */
@@ -16,6 +18,8 @@ module.exports = {
     filename: "rawrs.js",
     sourceMapFilename: "rawrs.js.map"
   },
+
+  mode: "production",
 
   /* We want source maps!
    */
@@ -30,12 +34,22 @@ module.exports = {
   /* How to load/import modules (for each file).
    */
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
-        loaders: ["babel-loader", "jshint-loader"]
+        use: [
+          "babel-loader",
+          "eslint-loader"
+        ]
       }
+    ]
+  },
+
+  /* Minimize all vendored css/js */
+  optimization: {
+    minimizer: [
+      //new UglifyJsPlugin()
     ]
   },
 

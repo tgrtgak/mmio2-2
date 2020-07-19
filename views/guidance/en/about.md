@@ -15,6 +15,10 @@ Bellard, and is itself permissively licensed and open. Without this, the modific
 work in an educational environment would not have been possible. And in the same spirit, RAWRS is offered,
 along with the educational RISC-V kernel written alongside it, completely openly and free.
 
+## Source Code
+
+You can find the source code for RAWRS on [GitLab](https://gitlab.com/wilkie/rawrs).
+
 ## License
 
 The main web application and program content is licensed under the terms of the [GNU AGPLv3.0 license](https://www.gnu.org/licenses/agpl-3.0.en.html).
