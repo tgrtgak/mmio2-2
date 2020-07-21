@@ -22,17 +22,6 @@ if (!window.BigUint64Array) {
 
 import RAWRS from './rawrs/rawrs';
 
-let cols = 80;
-let rows = 30;
-let term_handler = (str) => {
-};
-let font_size = 15;
-
-window.term = new window.Term(cols, rows, term_handler, 10000);
-window.term.open(document.getElementById("term_container"),
-          document.getElementById("term_paste"));
-window.term.term_el.style.fontSize = font_size + "px";
-
 RAWRS.load();
 
 export default RAWRS;

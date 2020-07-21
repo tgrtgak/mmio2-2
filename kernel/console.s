@@ -31,11 +31,17 @@
 #
 # Arguments
 #   a0: The virtio device address.
+#   a1: The irq for this
 console_init:
   push  ra
   push  s0
 
-  move  a0, s0
+  move  s0, a0
+
+  # Register irq handler
+  move  a0, a1
+  la    a1, console_irq_resolve
+  jal   irq_register
 
   # Retain the virtio address of this console
   la    t0, console_virtio_addr
@@ -200,8 +206,8 @@ _console_write_strcpy_done:
   sh    t1, 2(t0)
 
   # Notify device of change
-  move  a0, s0
-  li    a1, 1
+  move  a0, s0 # console_virtio_addr
+  li    a1, 1  # queue 1 (read queue)
   jal   virtio_queue_notify
 
   pop   s1
@@ -209,6 +215,11 @@ _console_write_strcpy_done:
   pop   ra
   jr    ra
 
+# Reads console input to the given buffer.
+#
+# Arguments
+#   a0: address of the buffer
+#   a1: maximum length of string
 console_read:
   push  ra
   push  s0
@@ -220,7 +231,13 @@ console_read:
   # Check for updates (you'll want an interrupt, usually)
   # (particularly, the length of the buffer)
 
+  # Wait until queue notifies it has data
+
   # Read the data
+
+  # Reset queue/buffer
+
+  # Loop back until we meet the conditions
 
   pop   s0
   pop   ra
@@ -248,6 +265,18 @@ console_descriptor_init:
 
   pop   s1
   pop   s0
+  pop   ra
+  jr    ra
+
+# console_irq() - Handles the console notify irq.
+console_irq_resolve:
+  push  ra
+
+  # ACK the interrupt
+  la    a0, console_virtio_addr
+  ld    a0, 0(a0)
+  jal   virtio_ack_interrupt
+
   pop   ra
   jr    ra
 

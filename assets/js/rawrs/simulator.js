@@ -9,9 +9,10 @@ class Simulator extends EventComponent {
      * @param {number} memorySize The size of memory in MiB.
      * @param {string} configurationURL The URL of the simulation configuration.
      */
-    constructor(memorySize, configurationURL, kernelBinaryOrURL, appBinaryOrURL) {
+    constructor(memorySize, configurationURL, kernelBinaryOrURL, appBinaryOrURL, konsole) {
         super();
 
+        this._console = konsole;
         this._memorySize = memorySize;
         this._loaded = false;
         this._started = false;
@@ -19,6 +20,20 @@ class Simulator extends EventComponent {
         this._startRequested = false;
         this._canStart = false;
         this._ready = false;
+
+        this._console.on('keydown', (event) => {
+            if (!event.repeat) {
+                if (this._display_key_event) {
+                    this._display_key_event(1, event.keyCode);
+                }
+            }
+        });
+
+        this._console.on('keyup', (event) => {
+            if (this._display_key_event) {
+                this._display_key_event(0, event.keyCode);
+            }
+        });
 
         window.update_downloading = () => {
         };
@@ -72,14 +87,13 @@ class Simulator extends EventComponent {
         alloc_size = (alloc_size + 15) & -16; /* align to 16 MB */
 
         // Convert to bytes and set it in the runtime.
-        Module.TOTAL_MEMORY = alloc_size << 20;
+        Module.INITIAL_MEMORY = alloc_size << 20;
 
-        var config = "\n{\n    version: 1,\n    machine: \"riscv64\",\n    memory_size: 256,\n    bios: \"kernel.bin\",    kernel: \"test.elf\"\n}";
+        var config = "\n{\n    version: 1,\n    machine: \"riscv64\",\n    memory_size: 256,\n    input_device: \"virtio\",\n    bios: \"kernel.bin\",    kernel: \"test.elf\"\n}";
 
         // Action to happen on quit.
         Module.quit = (status, ex) => {
             this._quit();
-            throw ex;
         };
 
         Module.onBreakpoint = () => {
@@ -374,8 +388,11 @@ class Simulator extends EventComponent {
         if (this._loaded || this._loadStarted) {
             return;
         }
+
         // Clear the terminal
-        window.term.write("\x1b[2J\x1b[0;0H");
+        this._console.clear();
+
+        // Load the emulator
         this._loadStarted = true;
         window.TinyEmu(this._module).then( (Module) => {
             this._loaded = true;

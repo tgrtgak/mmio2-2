@@ -45,6 +45,12 @@ main:
     li      a0, 1
     ecall                               # printInt(n)
     
+    move    a1, a0
+    li      a0, 8
+    la      a1, strBuffer
+    li      a2, 10
+    ecall                               # readString(n)
+    
     li      a0, 10
     li      a1, 0
     ecall                               # exit(0)
@@ -82,3 +88,4 @@ _fibonacci_exit:
 
 strNewline: .string   "\n"
 strResult:  .string   "Result... "
+strBuffer:  .string   "                                          "

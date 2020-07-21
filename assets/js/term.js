@@ -135,6 +135,7 @@ Term.prototype.open = function(parent_el, textarea_el)
     /* terminal content */
     this.content_el = document.createElement("div");
     this.content_el.className = "term_content";
+    this.content_el.setAttribute("tabindex", "0");
     this.content_el.style.width = (this.w) + "ch";
     this.term_el.appendChild(this.content_el);
     
@@ -154,16 +155,14 @@ Term.prototype.open = function(parent_el, textarea_el)
     this.refresh(0, this.h - 1);
     
     // key handler
-    /*
-    document.addEventListener("keydown", 
+    this.content_el.addEventListener("keydown", 
                               this.keyDownHandler.bind(this), true);
-    document.addEventListener("keyup", 
+    this.content_el.addEventListener("keyup", 
                               this.keyUpHandler.bind(this), true);
-    document.addEventListener("blur", 
+    this.content_el.addEventListener("blur", 
                               this.blurHandler.bind(this), true);
-    document.addEventListener("keypress", 
+    this.content_el.addEventListener("keypress", 
                               this.keyPressHandler.bind(this), true);
-                              */
     // wheel
     this.term_el.addEventListener("wheel", 
                                   this.wheelHandler.bind(this), false);

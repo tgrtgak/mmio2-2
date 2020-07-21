@@ -393,6 +393,7 @@ println:
   la    a0, str_print_newline
   jal   console_writez
   pop   ra
+  jr    ra
 
 .data
 .balign 8, 0

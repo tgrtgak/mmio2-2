@@ -7,7 +7,7 @@
 .global syscall_init
 .global syscall
 
-.set SYSCALL_COUNT,   41
+.set SYSCALL_COUNT, 41
 
 syscall_init:
   jr    ra
@@ -43,10 +43,10 @@ _syscall_table:
   j syscall_print_float     # a0: 2
   j syscall_print_double    # a0: 3
   j syscall_print_string    # a0: 4
-  jr ra                     # a0: 5
-  jr ra                     # a0: 6
-  jr ra                     # a0: 7
-  jr ra                     # a0: 8
+  j syscall_read_integer    # a0: 5
+  j syscall_read_float      # a0: 6
+  j syscall_read_double     # a0: 7
+  j syscall_read_string     # a0: 8
   jr ra                     # a0: 9
   j syscall_exit            # a0: 10
   jr ra                     # a0: 11
@@ -94,11 +94,11 @@ syscall_print_integer:
   pop   ra
   jr    ra
 
-# syscall_print_float(): Prints the float in a1
+# syscall_print_float(): Prints the float in f0
 syscall_print_float:
   jr    ra
 
-# syscall_print_double(): Prints the double in a1
+# syscall_print_double(): Prints the double in f0
 syscall_print_double:
   jr    ra
 
@@ -107,6 +107,27 @@ syscall_print_string:
   push  ra
   move  a0, a1
   jal   console_writez
+  pop   ra
+  jr    ra
+
+# syscall_read_integer(): Reads input until a newline and parses integer to a1
+syscall_read_integer:
+  jr    ra
+
+# syscall_read_float(): Reads input until a newline and parses float to f0
+syscall_read_float:
+  jr    ra
+
+# syscall_read_double(): Reads input until a newline and parses double to f0
+syscall_read_double:
+  jr    ra
+
+# syscall_read_string(): Reads input until a newline and writes to memory at a1
+syscall_read_string:
+  push  ra
+  move  a0, a1
+  move  a1, a2
+  jal   console_read
   pop   ra
   jr    ra
 

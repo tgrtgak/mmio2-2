@@ -4,6 +4,7 @@ OBJ=$(SRC:.s=.o)
 
 kernel.bin: kernel.elf
 	${RISCV_BIN}riscv64-unknown-elf-objcopy -O binary kernel.elf kernel.bin
+	cp kernel.bin ../assets/kernel/kernel.bin
 
 kernel.elf: ${OBJ} linker.ld
 	${RISCV_BIN}riscv64-unknown-elf-ld -o kernel.elf -T linker.ld ${OBJ}

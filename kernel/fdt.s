@@ -9,7 +9,10 @@
 
 .global fdt_read
 .global fdt_get_virtio_base_addr
+.global fdt_get_virtio_irq
+.global fdt_get_virtio_count
 .global fdt_get_clint_base_addr
+.global fdt_get_plic_base_addr
 .global fdt_get_cpu_timebase_frequency
 .global fdt_get_memory_base_addr
 .global fdt_get_memory_length
@@ -171,10 +174,46 @@ fdt_get_cpu_timebase_frequency:
 #
 # Does not clobber any registers except a0.
 #
+# Arguments
+#   a0: The index of the virtio device.
+#
 # Returns
 #   a0: The address of the virtio MMIO region.
 fdt_get_virtio_base_addr:
-  la    a0, fdt_virtio_base_addr
+  push  s0
+  sll   a0, a0, 3
+  la    s0, fdt_virtio_base_addrs
+  add   a0, a0, s0
+  ld    a0, 0(a0)
+  pop   s0
+  jr    ra
+
+# fdt_get_virtio_irq(): Returns the irq for the virtio device
+#
+# Does not clobber any registers except a0.
+#
+# Arguments
+#   a0: The index of the virtio device.
+#
+# Returns
+#   a0: The irq for the virtio device.
+fdt_get_virtio_irq:
+  push  s0
+  sll   a0, a0, 3
+  la    s0, fdt_virtio_irqs
+  add   a0, a0, s0
+  ld    a0, 0(a0)
+  pop   s0
+  jr    ra
+
+# fdt_get_virtio_count(): Returns the number of virtio devices. 
+#
+# Does not clobber any registers except a0.
+#
+# Returns
+#   a0: The number of virtio devices.
+fdt_get_virtio_count:
+  la    a0, fdt_virtio_count
   ld    a0, 0(a0)
   jr    ra
 
@@ -186,6 +225,17 @@ fdt_get_virtio_base_addr:
 #   a0: The address of the clint MMIO region.
 fdt_get_clint_base_addr:
   la    a0, fdt_clint_base_addr
+  ld    a0, 0(a0)
+  jr    ra
+
+# fdt_get_plic_base_addr(): Returns the address of the plic MMIO region. 
+#
+# Does not clobber any registers except a0.
+#
+# Returns
+#   a0: The address of the plic MMIO region.
+fdt_get_plic_base_addr:
+  la    a0, fdt_plic_base_addr
   ld    a0, 0(a0)
   jr    ra
 
@@ -210,9 +260,6 @@ fdt_get_memory_length:
   la    a0, fdt_memory_length
   ld    a0, 0(a0)
   jr    ra
-
-.global fdt_get_application_base_addr
-.global fdt_get_application_length
 
 # fdt_get_application_base_addr(): Returns the application binary address.
 #
@@ -411,6 +458,9 @@ fdt_read_nodes:
   push  s2
   push  s3
 
+  # s0: The current pointer into the FDT table
+  # s1: The address of the end of the FDT tables
+  # s2: The offset to the strings table
   # s3: The most recent node name
 
   # Get pointer of structure block
@@ -475,11 +525,11 @@ _fdt_read_nodes_entry_property:
   jal   toBE32
   move  t0, a0
 
-  move  a0, s3
-  move  a1, t1
-  move  a2, s0
-  add   a2, a2, 8
-  move  a3, t0
+  move  a0, s3    # a0: The pointer to the node name
+  move  a1, t1    # a1: The pointer to the property name
+  move  a2, s0    #
+  add   a2, a2, 8 # a2: The pointer to the property value
+  move  a3, t0    # a3: The property value length
 
   # Consume the value, and the length/name struct
   add   s0, s0, t0
@@ -565,6 +615,13 @@ fdt_parse_property:
   jal   strncmp
   beqz  a0, _fdt_parse_property_clint
 
+  # Check for "plic" nodes
+  move  a0, s0
+  la    a1, str_fdt_check_node_plic
+  li    a2, 5
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_plic
+
   # Check for "cpus" nodes
   move  a0, s0
   la    a1, str_fdt_check_node_cpus
@@ -617,6 +674,7 @@ _fdt_parse_property_root_size_cells:
   j _fdt_parse_property_exit
 
 _fdt_parse_property_chosen:
+
   # Check for the memory size "riscv,kernel-start"
   move  a0, s1
   la    a1, str_fdt_check_prop_kernel_start
@@ -636,6 +694,7 @@ _fdt_parse_property_chosen:
 _fdt_parse_property_chosen_kernel_start:
 
   # Read a 64-bit value
+
   ld    a0, 0(s2)
   jal   toBE64
   la    t0, fdt_application_start
@@ -654,19 +713,90 @@ _fdt_parse_property_chosen_kernel_end:
   j _fdt_parse_property_exit
 
 _fdt_parse_property_virtio:
-  # Skip if we already know the base address
-  la    t0, fdt_virtio_base_addr
-  ld    t0, 0(t0)
-  bnez  t0, _fdt_parse_property_exit
-  
-  # Get the address by parsing the string
-  move  a0, s0
-  add   a0, a0, 7
-  li    a1, 16
-  jal   parse_int
-  la    t0, fdt_virtio_base_addr
+  # Check for the "reg" property
+  move  a0, s1
+  la    a1, str_fdt_check_prop_reg
+  li    a2, 4
+  jal   strncmp
+  bnez  a0, _fdt_parse_property_virtio_irq
+
+  # Pull the 'reg' value which is a <base, length> pair
+  # The <base> part has a number of bytes given by "#address-cells" x 2
+  # And the <length> part has "#size-cells" x 2 number of bytes
+
+  # Get the number of address cells
+  la    t1, fdt_address_cells
+  ld    t1, 0(t1)
+
+  # Read address
+  lwu   a0, 0(s2)
+  jal   toBE32
+  li    t2, 1
+  beq   t1, t2, _fdt_parse_property_virtio_addr_commit
+
+  # 64-bit address
+  move  t2, a0
+  lwu   a0, 4(s2)
+  jal   toBE32
+  sll   t2, t2, 32
+  add   a0, a0, t2
+
+  # We ignore the size, for now
+
+_fdt_parse_property_virtio_addr_commit:
+  # Retrieve the next index
+  la    t0, fdt_virtio_count
+  ld    t1, 0(t0)
+
+  # Multiply by 8 and add to the base address
+  sll   t1, t1, 3
+  la    t0, fdt_virtio_base_addrs
+  add   t0, t0, t1
   sd    a0, 0(t0)
 
+  # Increment fdt_virtio_count (restoring it first)
+  la    t0, fdt_virtio_count
+  srl   t1, t1, 3
+  add   t1, t1, 1
+  sd    t1, 0(t0)
+
+  j _fdt_parse_property_exit
+
+_fdt_parse_property_virtio_irq:
+  # Check for the "interrupts-extended" property
+  move  a0, s1
+  la    a1, str_fdt_check_prop_interrupts_ex
+  li    a2, 20
+  jal   strncmp
+  bnez  a0, _fdt_parse_property_exit
+
+  # This is a tuple of 2 32-bit values
+  # The first 32-bit value is the plic identifier
+  # The second 32-bit value is the device IRQ
+
+  # Get PLIC ID
+  lwu   a0, 0(s2)
+  jal   toBE32
+
+  # Get IRQ
+  lwu   a0, 4(s2)
+  jal   toBE32
+
+  # Write the IRQ
+  la    t0, fdt_virtio_irq_count
+  ld    t1, 0(t0)
+  sll   t1, t1, 3
+  la    t0, fdt_virtio_irqs
+  add   t0, t0, t1
+  sd    a0, 0(t0)
+
+  # Increment the irq count
+  la    t0, fdt_virtio_irq_count
+  ld    t1, 0(t0)
+  add   t1, t1, 1
+  sd    t1, 0(t0)
+
+  # Done
   j _fdt_parse_property_exit
 
 _fdt_parse_property_clint:
@@ -681,6 +811,50 @@ _fdt_parse_property_clint:
   li    a1, 16
   jal   parse_int
   la    t0, fdt_clint_base_addr
+  sd    a0, 0(t0)
+
+  j _fdt_parse_property_exit
+
+_fdt_parse_property_plic:
+  # Skip if we already know the base address
+  la    t0, fdt_plic_base_addr
+  ld    t0, 0(t0)
+  bnez  t0, _fdt_parse_property_exit
+
+  # Check for the "reg" property
+  move  a0, s1
+  la    a1, str_fdt_check_prop_reg
+  li    a2, 4
+  jal   strncmp
+  bnez  a0, _fdt_parse_property_exit
+
+  # Pull the 'reg' value which is a <base, length> pair
+  # The <base> part has a number of bytes given by "#address-cells" x 2
+  # And the <length> part has "#size-cells" x 2 number of bytes
+
+  # Get the number of address cells
+  la    t1, fdt_address_cells
+  ld    t1, 0(t1)
+
+  # Read address
+  lwu   a0, 0(s2)
+  jal   toBE32
+  li    t2, 1
+  beq   t1, t2, _fdt_parse_property_plic_addr_commit
+
+  # 64-bit address
+  move  t2, a0
+  lwu   a0, 4(s2)
+  jal   toBE32
+  sll   t2, t2, 32
+  add   a0, a0, t2
+
+  # We ignore the size, for now
+
+_fdt_parse_property_plic_addr_commit:
+  
+  # Write the base address
+  la    t0, fdt_plic_base_addr
   sd    a0, 0(t0)
 
   j _fdt_parse_property_exit
@@ -717,7 +891,7 @@ _fdt_parse_property_memory:
   move  t0, s2
   la    t1, fdt_address_cells
   ld    t1, 0(t1)
-  sll   t1, t1, 2
+  sll   t1, t1, 1
   add   t0, t0, t1
 
   # Get the number of size cells
@@ -771,7 +945,6 @@ _fdt_parse_property_exit:
   jr    ra
 
 .data
-.balign 8, 0
 
 # Retain certain information discovered within the FDT
 
@@ -790,8 +963,12 @@ fdt_size_cells:                   .dword  1
 fdt_cpu_timebase_frequency:       .dword  0
 
 # FDT regions of interest:
-fdt_virtio_base_addr:             .dword  0
+fdt_virtio_base_addrs:            .dword  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+fdt_virtio_irqs:                  .dword  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+fdt_virtio_irq_count:             .dword  0
+fdt_virtio_count:                 .dword  0
 fdt_clint_base_addr:              .dword  0
+fdt_plic_base_addr:               .dword  0
 fdt_memory_base_addr:             .dword  0
 fdt_memory_length:                .dword  0
 fdt_application_start:            .dword  0
@@ -804,6 +981,7 @@ str_fdt_check_node_cpus:          .string "cpus"
 str_fdt_check_node_virtio:        .string "virtio@"
 str_fdt_check_node_clint:         .string "clint@"
 str_fdt_check_node_chosen:        .string "chosen"
+str_fdt_check_node_plic:          .string "plic@"
 
 # FDT property names to check for
 str_fdt_check_prop_reg:           .string "reg"
@@ -812,3 +990,5 @@ str_fdt_check_prop_address_cells: .string "#address-cells"
 str_fdt_check_prop_size_cells:    .string "#size-cells"
 str_fdt_check_prop_kernel_start:  .string "riscv,kernel-start"
 str_fdt_check_prop_kernel_end:    .string "riscv,kernel-end"
+str_fdt_check_prop_plic:          .string "riscv,plic0"
+str_fdt_check_prop_interrupts_ex: .string "interrupts-extended"

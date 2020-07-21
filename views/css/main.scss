@@ -45,7 +45,7 @@ template, *[hidden] {
 
 .editor-pane {
   textarea, pre {
-      background: #272822;
+      background: #262626;
       box-sizing: border-box;
       color: white;
 
@@ -819,8 +819,25 @@ iframe {
 }
 
 .ace_scroller {
-  background-repeat: no-repeat;
+  background-repeat: no-repeat, repeat;
   background-position: center;
-  background-size: 80%;
-  background-image: url("../images/dynamic/hex/252620/dinosaurs/stegosaurus.svg");
+  background-size: 80%, auto;
+  background-image: url("../images/dynamic/hex/232323/dinosaurs/stegosaurus.svg"), url("../images/noisy-texture-200x200-o3-d21-c-242424-t0.png");
 }
+
+.ace-monokai .ace_gutter,
+.ace_gutter {
+  background-color: #333;
+}
+
+.ace-monokai .ace_gutter-active-line,
+.ace_gutter-active-line {
+  background-color: #46b1e4;
+  color: white;
+}
+
+.ace-monokai .ace_marker-layer .ace_selection,
+.ace_marker-layer .ace_selection {
+  background: #253846;
+}
+

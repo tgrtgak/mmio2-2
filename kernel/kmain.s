@@ -22,19 +22,38 @@ kmain:
   # establish traps
   jal   trap_init
 
+  li s9, 0
+
   # Read the FDT
   jal   fdt_read
+
+  # Initialize Interrupt Controller
+  jal   fdt_get_plic_base_addr
+  li    t0, MEM_BASE
+  add   a0, a0, t0
+  jal   irq_init
 
   # The age-old question of the chicken or egg:
   # What comes first, your memory manager, or your ability to print
   # strings? Tricky.
 
-  # Search at the VIRTIO base address
-  # (which is well-known in our tinyEmu emulator)
+  # Initialize the virtio devices
+  jal   fdt_get_virtio_count
+  move  s1, a0
+  li    s0, 0
+
+_kmain_virtio_init_loop:
+  move  a0, s0
+  jal   fdt_get_virtio_irq
+  move  a1, a0
+  move  a0, s0
   jal   fdt_get_virtio_base_addr
   li    t0, MEM_BASE
   add   a0, a0, t0
   jal   virtio_init
+
+  add   s0, s0, 1
+  bne   s0, s1, _kmain_virtio_init_loop
 
   # Initialize the memory mapper
 
@@ -74,6 +93,10 @@ kmain:
   # Get the root page table
   jal   paging_get_root
   move  s0, a0
+
+  # Clear/Enable interrupts
+  jal trap_clear_interrupts
+  jal trap_enable_interrupts
 
   # Load the application
   jal   fdt_get_application_base_addr
@@ -132,7 +155,6 @@ kmain:
 exit:
   # We write htif_tohost to be 0x80000000
   # And htif_fromhost to 1
-
   li    s11, HTIF_BASE
 
   # HTIF_TO_LOW

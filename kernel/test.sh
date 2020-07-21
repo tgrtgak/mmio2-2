@@ -1,1 +1,4 @@
-../../bkup_tinyemu/temu -ctrlc basic-riscv64.cfg
+cd ../tinyemu
+make -s
+cd ../kernel
+../tinyemu/temu -ctrlc basic-riscv64.cfg

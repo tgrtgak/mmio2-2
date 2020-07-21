@@ -1,6 +1,7 @@
 "use strict";
 
 import Tabs            from './tabs';
+import Console         from './console';
 import Editor          from './editor';
 import Toolbar         from './toolbar';
 import Simulator       from './simulator';
@@ -16,6 +17,8 @@ import RegisterListing from './register_listing';
 
 class RAWRS {
     static load() {
+        this._console = new Console(30, 80, 15);
+
         Tabs.load();
         Editor.load();
         RAWRS.toolbar  = new Toolbar(document.body);
@@ -155,7 +158,7 @@ class RAWRS {
             window.editor.getSession().setAnnotations(annotations);
         });
 
-        window.term.write("\x1b[0;40;37m\x1b[2J\x1b[0;0H");
+        this._console.clear();
         assembler.assemble("foo.s", text, terminal, (object) => {
             linker.link(linkerScript, object, terminal, (binary) => {
                 // On success, go to the run tab
@@ -179,7 +182,7 @@ class RAWRS {
                 }
 
                 // Start the simulation
-                let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", binary);
+                let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", binary, this._console);
                 sim.on("quit", () => {
                     RAWRS.registerListing.update(sim.registers);
                 });

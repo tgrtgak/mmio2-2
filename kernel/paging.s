@@ -102,6 +102,7 @@ paging_init:
 
   # We will also want to map in our virtio MMIO space (as non-execute)
   # so we can print to the screen and read input using our console driver.
+  move  a0, zero
   jal   fdt_get_virtio_base_addr
   move  a1, a0        # virtio_base is the physical address
   move  a0, s0        # our root page table
