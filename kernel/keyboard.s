@@ -8,7 +8,22 @@
 
 .globl keyboard_init
 .globl keyboard_read
+.globl keyboard_read_line
 .globl keyboard_loop
+
+# The keyboard buffer size in bytes
+.set KEYBOARD_BUFFER_SIZE,    64
+
+# Some keycodes
+.set KEYBOARD_CODE_BACKSPACE, 0x08
+.set KEYBOARD_CODE_SHIFT,     0x10
+.set KEYBOARD_CODE_CONTROL,   0x11
+.set KEYBOARD_CODE_ALT,       0x12
+.set KEYBOARD_CODE_CAPSLOCK,  0x14
+
+# The keyboard events we care about
+.set VIRTIO_INPUT_EV_SYN,     0x00
+.set VIRTIO_INPUT_EV_KEY,     0x01
 
 .text
 
@@ -41,7 +56,7 @@ keyboard_init:
   li    a1, 0
   jal   virtio_queue_select
 
-  # Create a buffer descriptor (write)
+  # Create a buffer descriptor (event)
   la    a0, keyboard_event_descriptor
   jal   keyboard_descriptor_init
 
@@ -67,6 +82,8 @@ keyboard_init:
   move  a0, s0
   jal   virtio_queue_size
   move  s1, a0
+  la    t0, keyboard_event_queue_len
+  sd    s1, 0(t0)
 
   # We need to allocate those buffers
   # s1: The number of entries in the queue
@@ -91,7 +108,7 @@ _keyboard_init_buffer_allocation_loop:
 
   add   s3, s3, 1  # Increment counter
   add   s2, s2, 16 # Each buffer descriptor header is 16 bytes
-  add   s4, s4, 64 # Each buffer is 64 bytes
+  add   s4, s4, KEYBOARD_BUFFER_SIZE # Go to the next buffer address
 
   # Loop until we allocated the same number of buffers as the device's queue
   bne   s3, s1, _keyboard_init_buffer_allocation_loop
@@ -147,9 +164,9 @@ keyboard_create_event_buffer:
   jal   virtio_descriptor_set_address
 
   # Update the buffer length
-  move  t0, s1
-  li    t1, 64
-  sw    t1, 8(t0)
+  move  a0, s0
+  li    a1, KEYBOARD_BUFFER_SIZE
+  jal   virtio_descriptor_set_length
 
   pop   s1
   pop   s0
@@ -177,6 +194,7 @@ keyboard_read:
   push  s0
   push  s1
   push  s2
+  push  s3
 
   # We keep looping until we have read every buffer
 _keyboard_read_query_loop:
@@ -205,7 +223,94 @@ _keyboard_read_loop:
 
   # Read the buffer at that index
   # s1: index of the buffer
-  print_hex s1
+
+  # Get the number of buffers: count
+  la    t0, keyboard_event_queue_len
+  ld    t0, 0(t0)
+
+  # Get the index into the ring buffer: real_index = (index % count)
+  rem   t0, s1, t0
+
+  # Get the effective address of that buffer: buffers[real_index]
+  # t1: buffer = keyboard_event_queue + (real_index * KEYBOARD_BUFFER_SIZE)
+  li    t1, KEYBOARD_BUFFER_SIZE
+  mul   t0, t1, t0
+  la    t1, keyboard_event_queue
+  add   t1, t1, t0
+
+  # Read from the buffer
+
+  # A keyboard event is:
+  # | 16 bits | 16 bits | 32 bits |
+  # |  type   | keycode |  value  |
+
+  # Read 64 bits
+  ld    t0, 0(t1)
+
+  # Read the event type
+  li    t1, 0xffff
+  and   t1, t0, t1
+  li    t2, VIRTIO_INPUT_EV_KEY
+  bne   t1, t2, _keyboard_read_loop_continue
+
+  # This is a keyboard event.
+  # Read the key code
+  srl   t0, t0, 16
+  li    t1, 0xffff
+  and   t2, t0, t1
+
+  # Read whether or not the key is down
+  srl   t1, t0, 16
+
+  # t1: keystate (0: released, 1: down)
+  # t2: keycode
+
+  # If keystate is something greater than 1 (strange), skip it
+  li    t0, 0x1
+  bgt   t1, t0, _keyboard_read_loop_continue
+
+  # If they keycode is greater than 255, skip it
+  li    t0, 0xff
+  bgt   t2, t0, _keyboard_read_loop_continue
+
+  # Save the keystate to the keystate bitmap
+  la    t0, keyboard_state
+  add   t0, t0, t2
+  sb    t1, 0(t0)
+
+  # If the key is an 'up' then skip the next part
+  beqz  t1, _keyboard_read_loop_continue
+
+  # If we have a line buffer active, write to it
+  la    t0, keyboard_line_buffer
+  ld    s3, 0(t0)
+  beqz  s3, _keyboard_read_loop_continue
+
+  # If the buffer is empty, do not write to it
+  la    t0, keyboard_line_buffer_len
+  ld    t0, 0(t0)
+  beqz  t0, _keyboard_read_loop_continue
+
+  # Skip if the character is not printable (translate returns 0x0)
+  move  a0, t2
+  jal   keyboard_translate
+  beqz  a0, _keyboard_read_loop_continue
+
+  # Write to the buffer
+  sb    a0, 0(s3)
+
+  # Decrement the buffer size
+  la    t0, keyboard_line_buffer_len
+  ld    t1, 0(t0)
+  add   t1, t1, -1
+  sd    t1, 0(t0)
+
+  # Increment the buffer
+  add   s3, s3, 1
+  la    t0, keyboard_line_buffer
+  sd    s3, 0(t0)
+
+_keyboard_read_loop_continue:
 
   add   s1, s1, 1
   add   s0, s0, -1
@@ -228,10 +333,105 @@ _keyboard_read_loop:
   j     _keyboard_read_query_loop
 
 _keyboard_read_exit:
+  pop   s3
   pop   s2
   pop   s1
   pop   s0
   pop   ra
+  jr    ra
+
+# keyboard_read_line(buffer, max): Returns characters until it sees a newline.
+#
+# Arguments
+#   a0: The buffer to read into.
+#   a1: The maximum number of characters to read.
+keyboard_read_line:
+  push  ra
+  push  s0
+  push  s1
+
+  # Keep track of the buffer and size
+  move  s0, a0
+  move  s1, a1
+
+  # Zero buffer
+  move  a0, s0
+  move  a1, s1
+  jal   memzero
+
+  # Set the buffer size
+  la    t0, keyboard_line_buffer_len
+  sd    s1, 0(t0)
+
+  # Set the buffer
+  la    t0, keyboard_line_buffer
+  sd    s0, 0(t0)
+
+  # Wait until the buffer updates
+_keyboard_read_line_loop:
+  lbu   t0, 0(s0)
+  beqz  t0, _keyboard_read_line_loop
+
+  # Print out character
+  move  a0, s0
+  li    a1, 1
+  jal   console_write
+
+  # Decrement our buffer length so far
+  add   s1, s1, -1
+
+  # Bail if we have exhausted our buffer
+  beqz  s1, _keyboard_read_line_exit
+
+  # If character is a newline, exit
+  lbu   t0, 0(s0)
+  li    t1, '\n'
+  beq   t0, t1, _keyboard_read_line_found_newline
+
+  # Increment the buffer
+  add   s0, s0, 1
+
+  j _keyboard_read_line_loop
+
+_keyboard_read_line_found_newline:
+  # Replace newline with null terminator
+  li    t0, 0
+  sb    t0, 0(s0)
+
+  # Continue to exit
+
+_keyboard_read_line_exit:
+  pop   s1
+  pop   s0
+  pop   ra
+  jr    ra
+
+# keyboard_translate(code): Yields the ASCII character for the given code
+#
+# Will respect the current key state. If shift is down, the code will be a
+# capitalized letter. If the key is a number, it will translate to the US
+# keyboard layout.
+#
+# Arguments
+#   a0: The key code to translate.
+keyboard_translate:
+  la    t0, keyboard_state
+  li    t1, KEYBOARD_CODE_SHIFT
+  add   t0, t0, t1
+  lbu   t1, 0(t0)
+
+  bnez  t1, _keyboard_translate_use_shift
+
+  la    t0, keyboard_translation_table
+  j _keyboard_translate_load
+
+_keyboard_translate_use_shift:
+  la    t0, keyboard_translation_shift
+
+_keyboard_translate_load:
+  add   t0, t0, a0
+  lbu   a0, 0(t0)
+
   jr    ra
 
 keyboard_irq_resolve:
@@ -250,6 +450,48 @@ keyboard_irq_resolve:
 
 .data
 
+# The address to write a character into
+keyboard_line_buffer:       .dword 0
+
+# The current length of that buffer
+keyboard_line_buffer_len:   .dword 0
+
+keyboard_translation_table: .fill  0x0d, 1, 0
+                            .byte  '\n'            # Enter (0x0d)
+                            .fill  0x12, 1, 0
+                            .byte  ' '             # Space (0x20)
+                            .fill  0x0f, 1, 0
+                            .ascii "0123456789"    # Numerics (0x30..0x39)
+                            .fill  0x07, 1, 0
+                            .ascii "abcdefghijklm" # Alphas (0x41..0x5a)
+                            .ascii "nopqrstuvwxyz"
+                            .fill  0x05, 1, 0
+                            .ascii "0123456789*+"  # Numpad (0x60..0x6f)
+                            .fill  0x01, 1, 0
+                            .ascii "-./"
+                            .fill  0x4a, 1, 0
+                            .ascii ";=,-./`"       # Symbols 1 (0xba..0xc0)
+                            .fill  0x1a, 1, 0
+                            .ascii "[\\]'"         # Symbols 2 (0xdb..0xde)
+
+keyboard_translation_shift: .fill  0x0d, 1, 0
+                            .byte  '\n'            # Enter (0x0d)
+                            .fill  0x12, 1, 0
+                            .byte  ' '             # Space (0x20)
+                            .fill  0x0f, 1, 0
+                            .ascii ")!@#$%^&*("    # Numerics (0x30..0x39)
+                            .fill  0x07, 1, 0
+                            .ascii "ABCDEFGHIJKLM" # Alphas (0x41..0x5a)
+                            .ascii "NOPQRSTUVWXYZ"
+                            .fill  0x05, 1, 0
+                            .ascii "0123456789*+"  # Numpad (0x60..0x6f)
+                            .fill  0x01, 1, 0
+                            .ascii "-./"
+                            .fill  0x4a, 1, 0
+                            .ascii ":+<_>?~"       # Symbols 1 (0xba..0xc0)
+                            .fill  0x1a, 1, 0
+                            .ascii "{|}\""         # Symbols 2 (0xdb..0xde)
+
 .balign 8, 0
 # VirtIO base address
 keyboard_virtio_addr:      .dword  0
@@ -259,7 +501,7 @@ keyboard_virtio_addr:      .dword  0
 .balign 4096, 0
 keyboard_event_queue:      .fill   1024, 1, 0
                            .fill   1024, 1, 0
-keyboard_event_queue_len:  .word   1024
+keyboard_event_queue_len:  .dword  0
 
 # VirtIO queue descriptors (event)
 .balign 4096, 0
@@ -274,3 +516,9 @@ keyboard_event_used:       .fill   22, 1, 0
 
 .balign 4096, 0
 keyboard_last_index:       .dword  0
+
+# The keyboard state will be a page in memory mapped to userspace
+# It will be a bytemap of all keycodes. A '1' when they are pressed.
+.balign 4096, 0
+keyboard_state:            .fill   1024, 1, 0
+.balign 4096, 0

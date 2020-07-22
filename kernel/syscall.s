@@ -9,6 +9,9 @@
 
 .set SYSCALL_COUNT, 41
 
+# The maximum number of characters in our line buffer
+.set SYSCALL_LINE_BUFFER_MAX, 256
+
 syscall_init:
   jr    ra
 
@@ -112,6 +115,20 @@ syscall_print_string:
 
 # syscall_read_integer(): Reads input until a newline and parses integer to a1
 syscall_read_integer:
+  push  ra
+
+  # Read the string
+  la    a1, syscall_line_buffer
+  li    a2, SYSCALL_LINE_BUFFER_MAX
+  jal   syscall_read_string
+
+  # And then parse the integer
+  la    a0, syscall_line_buffer
+  li    a1, 10
+  jal   parse_int
+
+  # parse_int(...) returns the integer in a0
+  pop   ra
   jr    ra
 
 # syscall_read_float(): Reads input until a newline and parses float to f0
@@ -125,9 +142,22 @@ syscall_read_double:
 # syscall_read_string(): Reads input until a newline and writes to memory at a1
 syscall_read_string:
   push  ra
-  move  a0, a1
-  move  a1, a2
-  jal   console_read
+  push  s0
+  push  s1
+
+  move  s0, a1
+  move  s1, a2
+
+  # Enable interrupts (allows keyboard events to trigger)
+  jal   trap_enable_interrupts
+
+  # Read the line
+  move  a0, s0
+  move  a1, s1
+  jal   keyboard_read_line
+
+  pop   s1
+  pop   s0
   pop   ra
   jr    ra
 
@@ -170,3 +200,7 @@ syscall_rand:
   jal   random_get_word
   pop   ra
   jr    ra
+
+.data
+
+  syscall_line_buffer: .fill SYSCALL_LINE_BUFFER_MAX + 1, 1, 0
