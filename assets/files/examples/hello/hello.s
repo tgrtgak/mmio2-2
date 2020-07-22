@@ -13,12 +13,12 @@
 .text
 
   # Say hello! using an environment call
-  li    a0, 4
-  la    a1, str_hello
+  li    a7, 4
+  la    a0, str_hello
   ecall
 
   # Power off the machine
-  li    a0, 10
+  li    a7, 10
   ecall
 
 

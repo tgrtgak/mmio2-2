@@ -9,17 +9,16 @@ main:
 
     move    t0, a0
 
-    li      a0, 4
-    la      a1, strResult
+    li      a7, 4
+    la      a0, strResult
     ecall                               # printString(strResult)
     
-    move    a1, t0
-    li      a0, 1
+    li      a7, 1
+    move    a0, t0
     ecall                               # printInt(n)
     
-    li      a0, 10
-    li      a1, 0
-    ecall                               # exit(0)
+    li      a7, 10
+    ecall                               # exit()
 
 # fibonacci(n): Returns the fibonacci sequence requested.
 # 
