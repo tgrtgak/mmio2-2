@@ -13,50 +13,50 @@
 .text
 
   # Ask a question using an environment call
-  li    a0, 4
-  la    a1, str_greet
+  li    a7, 4
+  la    a0, str_greet
   ecall
   
   # Read string
-  li    a0, 8
-  la    a1, str_buffer
-  li    a2, 255
+  li    a7, 8
+  la    a0, str_buffer
+  li    a1, 255
   ecall
   
   # Say hello! using an environment call
-  li    a0, 4
-  la    a1, str_hello
+  li    a7, 4
+  la    a0, str_hello
   ecall
   
   # Print out that string
-  li    a0, 4
-  la    a1, str_buffer
+  li    a7, 4
+  la    a0, str_buffer
   ecall
   
   # Say hello! using an environment call
-  li    a0, 4
-  la    a1, str_hello_end
+  li    a7, 4
+  la    a0, str_hello_end
   ecall
 
   # Ask another question using an environment call
-  li    a0, 4
-  la    a1, str_ask_age
+  li    a7, 4
+  la    a0, str_ask_age
   ecall
   
   # Read integer
-  li    a0, 5
+  li    a7, 5
   ecall
   
   move  s0, a0
 
   # Print newline
-  li    a0, 4
-  la    a1, str_newline
+  li    a7, 4
+  la    a0, str_newline
   ecall
   
   # Print integer
-  li    a0, 1
-  move  a1, s0
+  li    a7, 1
+  move  a0, s0
   ecall
   
   li    t0, 10
@@ -71,35 +71,35 @@
   j _respond3
   
 _respond0:
-  li    a0, 4
-  la    a1, str_respond_0
+  li    a7, 4
+  la    a0, str_respond_0
   ecall
   
   j _exit
   
 _respond1:
-  li    a0, 4
-  la    a1, str_respond_1
+  li    a7, 4
+  la    a0, str_respond_1
   ecall
   
   j _exit
   
 _respond2:
-  li    a0, 4
-  la    a1, str_respond_2
+  li    a7, 4
+  la    a0, str_respond_2
   ecall
   
   j _exit
   
 _respond3:
-  li    a0, 4
-  la    a1, str_respond_3
+  li    a7, 4
+  la    a0, str_respond_3
   ecall
   
 _exit:
 
   # Power off the machine
-  li    a0, 10
+  li    a7, 10
   ecall
 
 
@@ -116,3 +116,4 @@ str_respond_0:  .string     "?! Your reading level is impressive!!"
 str_respond_1:  .string     ", eh? Stay in school!"
 str_respond_2:  .string     "!! Wow! So adult!"
 str_respond_3:  .string     "!!!! SO OLD!!!"
+

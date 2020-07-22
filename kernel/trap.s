@@ -150,13 +150,17 @@ trap:
   # [userspace T2] 0x30(sp)
   # [userspace T1] 0x38(sp)
   # [userspace T0] 0x40(sp)
-  # [userspace A3] 0x48(sp)
-  # [userspace A2] 0x50(sp)
-  # [userspace A1] 0x58(sp)
-  # [userspace A0] 0x60(sp)
+  # [userspace A7] 0x48(sp)
+  # [userspace A6] 0x50(sp)
+  # [userspace A5] 0x58(sp)
+  # [userspace A4] 0x60(sp)
+  # [userspace A3] 0x68(sp)
+  # [userspace A2] 0x70(sp)
+  # [userspace A1] 0x78(sp)
+  # [userspace A0] 0x80(sp)
   # So, write a0 and a1 to overwrite the userspace's a0/a1
-  sd    a0, 0x60(sp)
-  sd    a1, 0x58(sp)
+  sd    a0, 0x80(sp)
+  sd    a1, 0x78(sp)
 
   # Disable interrupts
   jal   trap_disable_interrupts

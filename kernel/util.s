@@ -16,6 +16,10 @@
   push  a1
   push  a2
   push  a3
+  push  a4
+  push  a5
+  push  a6
+  push  a7
   push  t0
   push  t1
   push  t2
@@ -33,6 +37,10 @@
   pop   t2
   pop   t1
   pop   t0
+  pop   a7
+  pop   a6
+  pop   a5
+  pop   a4
   pop   a3
   pop   a2
   pop   a1
