@@ -33,32 +33,98 @@ Refer to the table below for more information.
 | a0 | Name            | Sets (if any) | Arguments | Description                                                  |
 |:--:|:---------------:|---------------|-----------|--------------------------------------------------------------|
 | 1  | print integer   |               | `{.register}a1`: integer to print | Prints the integer given in `{.register}a1`. It does not print a newline. |
-| 2  | print float     |               | `{.register}f0`: float to print | Prints the float given in `{.register}f0`. It does not print a newline.   |
-| 3  | print double    |               | `{.register}f0`: double to print | Prints the double given in `{.register}f0`. It does not print a newline.  |
 | 4  | print string    |               | `{.register}a1`: address of string | Prints the null-terminated string given in `{.register}a1`. It does not print a newline.  |
 | 5  | read integer    | `{.register}a0`: integer read |           | |
-| 6  | read float      | `{.register}f0`: float read |           | |
-| 7  | read double     | `{.register}f0`: double read |           | |
 | 8  | read string     | `{.register}a0`: characters read | `{.register}a1`: address of buffer<br>`{.register}a2`: maximum number of characters to read. | |
-| 9  | sbrk            |               | `{.register}a1`: number of bytes to allocate | |
 | 10 | exit            |               | `{.register}a1`: exit code | Terminates the program and powers down the machine.          |
-| 11 | print character |               | `{.register}a1`: character to print | Prints the character given in `{.register}a1`.                            |
 | 30 | system time     | `{.register}a0`: milliseconds since boot | | Gets the number of milliseconds since booting the machine. Will not be incredibly accurate. |
 | 40 | set seed        | | `{.register}a1`: id of generator | Sets the given random number generator to the given seed. |
 | 41 | random word     | `{.register}a0`: random word | `{.register}a1`: The id of the generator to use. |
+
+<!--
+| 2  | print float     |               | `{.register}f0`: float to print | Prints the float given in `{.register}f0`. It does not print a newline.   |
+| 3  | print double    |               | `{.register}f0`: double to print | Prints the double given in `{.register}f0`. It does not print a newline.  |
+| 6  | read float      | `{.register}f0`: float read |           | |
+| 7  | read double     | `{.register}f0`: double read |           | |
+| 9  | sbrk            |               | `{.register}a1`: number of bytes to allocate | |
+| 11 | print character |               | `{.register}a1`: character to print | Prints the character given in `{.register}a1`.                            |
+-->
 
 ## Descriptions and Usage
 
 ### print integer
 
-Set `{.register}a0` to 4.
+Set `{.register}a0` to 1.
 
 Prints the given integer in `{.register}a1`.
 
 ```riscv
-  li    a0, 4     # Select environment call 4 (print integer)
+  li    a0, 1     # Select environment call 1 (print integer)
   li    a1, 42    # Pass in arguments using the a1 register (see the table)
   ecall           # Invoke the environment call (it will print '42')
 ```
 
-### print float
+### print string
+
+Set `{.register}a0` to 4.
+
+Prints the given string whose address is within `{.register}a1`.
+
+```riscv
+  li    a0, 4     # Select environment call 4 (print string)
+  li    a1, str   # Pass in arguments using the a1 register (see the table)
+  ecall           # Invoke the environment call (it will print 'Hello!')
+
+.data
+
+  str: .string "Hello!"
+```
+
+### read integer
+
+Set `{.register}a0` to 5.
+
+Waits for something to be typed in and parses that as an integer which it stores in `{.register}a0`.
+
+```riscv
+  li    a0, 5     # Select environment call 5 (read integer)
+  ecall           # Invoke the environment call (it will wait here until something is typed in)
+
+  # Now, a0 is the number typed in (or your program errors if the input was not a number!)
+  # Let's double the number with a shift left
+  sll   a0, a0, 1
+
+  move  t0, a0    # Keep track of that number (we will be overwriting a0!)
+  li    a0, 1     # Now, we will print it out using the print integer environment call
+  move  a1, t0    # We transfer the number back into a1 according to the print integer ecall
+  ecall           # Prints the number (double the input) back out!
+```
+
+### read string
+
+Set `{.register}a0` to 8.
+
+Waits for something to be typed in (ends with an 'enter' press) and writes it to the buffer given in `{.register}a1`.
+
+```riscv
+  li    a0, 8     # Select environment call 8 (read string)
+  la    a1, buff  # Give it the address of our memory we want to use to write the string to
+  li    a2, 99    # We can write up to 99 characters into our buffer
+  ecall           # Invoke the environment call (it will wait for a line to be entered)
+
+  # Now, our buffer in `buff` is filled with the line just typed in
+  # Let's print it out again
+
+  li    a0, 4     # Use the print string ecall
+  la    a1, str   # Prints a helpful string
+  ecall
+
+  li    a0, 4     # Use the print string ecall again
+  la    a1, buff  # Prints the typed in string
+  ecall
+
+.data
+
+  buff: .fill 100, 1, 0 # Fills 100 bytes with 0s
+  str:  .string "\nYou typed in: "
+```

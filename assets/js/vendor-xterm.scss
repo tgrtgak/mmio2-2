@@ -1,0 +1,9 @@
+@import "~xterm/css/xterm.css";
+
+.xterm .xterm-accessibility {
+  z-index: auto;
+}
+
+.xterm .live-region {
+  top: 0;
+}

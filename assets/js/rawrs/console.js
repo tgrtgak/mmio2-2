@@ -6,23 +6,33 @@ class Console extends EventComponent {
     constructor(rows, cols, fontSize) {
         super();
 
-        let term_handler = (str) => {
+        this._term = new window.XTerm({
+          cols: cols,
+          rows: rows,
+          cursorBlink:      true,     // Whether or not the cursor caret blinks
+          cursorStyle:      "block",  // Cursor style: block, underline, or bar
+          screenReaderMode: true,     // Enables screen-reader support
+          tabStopWidth:     8,        // Default tab stop width (in spaces)
+          convertEol:       true,     // Turn any '\n' into '\r\n'
+        });
+        this._term.open(document.getElementById("term_container"));
+        this._term.resize(cols, rows);
+
+        this._term.onKey( (event) => {
+            // TODO: Convert printable key to appropriate scancode
+            //       (will better support international keyboards)
+            this.trigger('keydown', event.domEvent);
+        });
+
+        // TinyEMU looks for this:
+        window.term = {
+            write: (x) => {
+                this._term.write(x);
+            },
+            getSize: (x) => {
+                return [cols, rows];
+            }
         };
-
-        this._term = new window.Term(cols, rows, term_handler, 10000);
-        this._term.open(document.getElementById("term_container"),
-                        document.getElementById("term_paste"));
-        this._term.term_el.style.fontSize = fontSize + "px";
-
-        this._term.content_el.addEventListener('keydown', (event) => {
-            this.trigger('keydown', event);
-        });
-
-        this._term.content_el.addEventListener('keyup', (event) => {
-            this.trigger('keyup', event);
-        });
-
-        window.term = this._term;
     }
 
     clear() {

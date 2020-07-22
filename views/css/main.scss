@@ -193,7 +193,7 @@ ol.tabs li.tab.active {
   margin-top: 0.25rem;
   background: #333;
   box-shadow: 0px 0px 0.25rem 0px #464646;
-  z-index: 999;
+  z-index: 9;
 }
 
 ol.tabs li.tab.active:after {
@@ -236,21 +236,28 @@ ol.tab-panels {
   overflow: hidden;
   margin: 0;
   padding: 0;
+  position: relative;
+  background-color: white;
 }
 
 ol.tab-panels li.tab-panel {
-  display: none;
-  position: relative;
+  display: flex;
+  position: absolute;
   flex-direction: column;
   max-height: 100%;
   height: 100%;
   box-sizing: border-box;
   overflow: hidden;
   padding-top: 0.2rem;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 ol.tab-panels li.tab-panel.active {
-  display: flex;
+  z-index: auto;
 }
 
 .project-pane {
@@ -580,20 +587,16 @@ ol.tab-panels li.tab-panel.active {
 
   .top {
     display: flex;
+    flex: 1 0 auto;
     flex-direction: row;
-
+    flex-basis: 511px;
     font-family: monospace,courier,fixed,swiss,sans-serif;
     font-size: 15px;
     font-weight: normal;
     font-variant-ligatures: none;
     overflow: hidden;
-
-    flex: 1 0 auto;
-
     line-height: 1.2;
-    height: 36em;
-
-    flex-basis: 36em;
+    height: 511px;
 
     #term_wrap {
       flex: 1 0 auto;
