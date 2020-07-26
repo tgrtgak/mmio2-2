@@ -3,6 +3,7 @@
 import EventComponent from './event_component.js';
 import LocalStorage from './local_storage.js';
 import Dropdown from './dropdown.js';
+import Util from './util.js';
 
 /**
  * This represents the file listing.
@@ -68,6 +69,10 @@ class FileList extends EventComponent {
      * @returns {string} The URL of the file to load on startup.
      */
     get startupFile() {
+        if (Util.getParameterByName("open")) {
+            return Util.getParameterByName("open");
+        }
+
         if (window.localStorage.rawrsStartupFile) {
             return window.localStorage.rawrsStartupFile;
         }
