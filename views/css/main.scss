@@ -1,26 +1,21 @@
 /* Basic page details */
 body, html {
-    display: flex;
-    flex-direction: column;
-
-    font-size: 16px;
-
-    overflow: hidden;
-
-    margin: 0;
-    padding: 0;
-
-    width: 100vw;
-    height: 100vh;
-
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
 }
 
 /* 4k support */
 @media (min-width: 2561px) {
-    /* If we did our job, this is all we need to scale everything! */
-    body, html {
-        font-size: 24px;
-    }
+  /* If we did our job, this is all we need to scale everything! */
+  body, html {
+    font-size: 24px;
+  }
 }
 
 /* Making sure hidden things are hidden */
@@ -29,108 +24,162 @@ template, *[hidden] {
 }
 
 .editor-pane {
-    box-sizing: border-box;
+  box-sizing: border-box;
 
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
+
+  flex: 1 1 100%;
+
+  overflow: auto;
+
+  margin: 0;
+
+  width: 100%;
+}
+
+.editor-pane {
+  textarea, pre {
+    background: #262626;
+    box-sizing: border-box;
+    color: white;
 
     flex: 1 1 100%;
 
     overflow: auto;
 
     margin: 0;
-
-    width: 100%;
-}
-
-.editor-pane {
-  textarea, pre {
-      background: #262626;
-      box-sizing: border-box;
-      color: white;
-
-      flex: 1 1 100%;
-
-      overflow: auto;
-
-      margin: 0;
   }
 }
 
 pre#output {
-    background: #0e0e0e;
-    color: #d4d4d4;
+  background: #0e0e0e;
+  color: #d4d4d4;
 
-    flex: 0 1 25%;
-    box-sizing: border-box;
-    overflow: auto;
-    overflow-y: scroll;
+  flex: 0 1 25%;
+  box-sizing: border-box;
+  overflow: auto;
+  overflow-y: scroll;
 
-    max-height: 25%;
+  max-height: 25%;
 
-    margin: 0;
-    margin-top: 0.2rem;
-    padding: 0.2rem;
+  margin: 0;
+  margin-top: 0.2rem;
+  padding: 0.2rem;
 
-    h1 {
-      margin: 0.3rem;
-      padding: 0.1rem;
+  h1 {
+    margin: 0.3rem;
+    padding: 0.1rem;
 
-      font: 400 0.8rem Lato;
+    font: 400 0.8rem Lato;
 
-      border: 1px solid #71526e;
-      border-radius: 0.5rem;
+    border: 1px solid #71526e;
+    border-radius: 0.5rem;
 
-      background: #382c37;
+    background: #382c37;
 
-      text-align: center;
-      color: white;
-    }
+    text-align: center;
+    color: white;
+  }
 }
 
 pre#output.initial {
-    font: 300 1rem Lato;
-    font-style: italic;
+  font: 300 1rem Lato;
+  font-style: italic;
 }
 
 ol.toolbar {
   position: absolute;
   top: 0.3rem;
   right: 0.4rem;
-
   padding: 0;
   margin:  0;
-
   list-style: none;
 
   li {
     display: inline-block;
     line-height: 0;
-    margin-left: 0.2rem;
+    margin-left: 0.5rem;
+
     button {
       height: 1.40rem;
       width:  1.40rem;
-
       position: relative;
-
-      background: white;
-      border: 1px solid #46b1e4;
-      //border-radius: 50%;
-      box-shadow: 0px 0px 0px 2px white;
+      background: #585858;
+      border: 1px solid #3a3a3a;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0px 0px 0px 2px #ddd;
       outline: none;
 
       &#run {
-        background-image: url('../images/dynamic/hex/46b1e4/toolbar/play.svg');
-        background-position: 56% 50%;
-        background-size: 0.70rem;
+        background-image: url('../images/dynamic/hex/84c5e4/toolbar/play.svg');
+        background-position: 65% 50%;
+        background-size: 0.6rem;
         background-repeat: no-repeat;
+
+        &[data-status="success"],
+        &[data-status="active"] {
+          background-image: url('../images/dynamic/hex/84c5e4/toolbar/restart.svg');
+          background-position: 65% 55%;
+          background-size: 1.1rem;
+          background-repeat: no-repeat;
+        }
+      }
+
+      &#step {
+        background-image: url('../images/dynamic/hex/84c5e4/toolbar/pause.svg');
+        background-position: 45% 55%;
+        background-size: 0.8rem;
+        background-repeat: no-repeat;
+
+        &[data-status="active"] {
+          background-image: url('../images/dynamic/hex/84c5e4/toolbar/step.svg');
+          background-position: 50% 50%;
+          background-size: 0.6rem;
+          background-repeat: no-repeat;
+        }
       }
 
       &#assemble {
-        background-image: url('../images/dynamic/hex/46b1e4/toolbar/assemble.svg');
-        background-position: 50% 50%;
-        background-size: 0.85rem;
+        background-image: url('../images/dynamic/hex/84c5e4/toolbar/assemble.svg');
+        background-position: 45% 50%;
+        background-size: 0.8rem;
         background-repeat: no-repeat;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0px 0px 0px 2px #9bcbea;
+        }
+        100% {
+          box-shadow: 0px 0px 0px 2px #46b1e4;
+        }
+      }
+
+      &[data-status="paused"] {
+        box-shadow: 0px 0px 0px 2px #a681e8;
+      }
+
+      &[data-status="active"] {
+        animation: 1s infinite alternate pulse;
+      }
+
+      &[data-status="success"] {
+        box-shadow: 0px 0px 0px 2px #a5ea9b;
+      }
+
+      &[data-status="failure"] {
+        box-shadow: 0px 0px 0px 2px #ea9b9b;
+      }
+
+      &[disabled] {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      &:hover:not([disabled]) {
+        background: #fff;
       }
 
       &:focus {

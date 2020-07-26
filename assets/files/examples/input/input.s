@@ -68,7 +68,10 @@
   li    t0, 30
   blt   s0, t0, _respond2
   
-  j _respond3
+  li    t0, 40
+  blt   s0, t0, _respond3
+  
+  j _respond4
   
 _respond0:
   li    a7, 4
@@ -96,6 +99,13 @@ _respond3:
   la    a0, str_respond_3
   ecall
   
+  j _exit
+  
+_respond4:
+  li    a7, 4
+  la    a0, str_respond_4
+  ecall
+  
 _exit:
 
   # Power off the machine
@@ -116,4 +126,5 @@ str_respond_0:  .string     "?! Your reading level is impressive!!"
 str_respond_1:  .string     ", eh? Stay in school!"
 str_respond_2:  .string     "!! Wow! So adult!"
 str_respond_3:  .string     "!!!! SO OLD!!!"
+str_respond_4:  .string     ". Nice to meet you."
 

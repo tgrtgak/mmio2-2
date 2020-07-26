@@ -37,7 +37,6 @@ class RAWRS {
         });
 
         // Load local storage directory
-        //RAWRS.fileList._storage.clear().then( () => {
         RAWRS.fileList.loadRoot().then( () => {
             RAWRS.fileList.revealPath(RAWRS.fileList.startupFile).then( () => {
                 let item = RAWRS.fileList.startupItem;
@@ -46,11 +45,11 @@ class RAWRS {
                 }
             });
         });
-        //});
+
         RAWRS.codeListing = new CodeListing(document.body);
         RAWRS.registerListing = new RegisterListing(document.body);
         RAWRS.memoryListing = new MemoryListing(document.body);
-        RAWRS.simulator = null;
+        RAWRS._simulator = null;
 
         RAWRS.codeListing.on("breakpoint-set", (info) => {
             if (RAWRS.simulator) {
@@ -67,13 +66,33 @@ class RAWRS {
         RAWRS.toolbar.on('click', (button) => {
             switch (button.getAttribute("id")) {
                 case "assemble":
+                    RAWRS.toolbar.setStatus("run", "disabled");
+                    RAWRS.toolbar.setStatus("assemble", "active");
+                    this.runRequested = false;
                     this.assemble();
                     break;
                 case "run":
-                    this.run();
+                    RAWRS.toolbar.setStatus("step", "disabled");
+                    RAWRS.toolbar.setStatus("run", "active");
+                    this.runRequested = true;
+                    if (RAWRS.toolbar.getStatus("assemble") === "success") {
+                        this.run();
+                    }
+                    else {
+                        RAWRS.toolbar.setStatus("run", "disabled");
+                        RAWRS.toolbar.setStatus("assemble", "active");
+                        this.assemble();
+                    }
                     break;
                 case "step":
-                    this.step();
+                    if (RAWRS.simulator && RAWRS.simulator.running) {
+                        // Pause, if still running
+                        this.pause();
+                    }
+                    else {
+                        // Otherwise, step
+                        this.step();
+                    }
                     break;
                 default:
                     // Unknown button
@@ -82,10 +101,79 @@ class RAWRS {
         });
     }
 
+    /**
+     * Retrieves the current active Simulator instance.
+     */
+    static get simulator() {
+        return this._simulator;
+    }
+
     static run() {
-        if (RAWRS.simulator) {
-            RAWRS.codeListing.unhighlight();
+        RAWRS.codeListing.unhighlight();
+
+        if (RAWRS.simulator && RAWRS.simulator.paused) {
+            // Resume simulation
+            RAWRS.toolbar.setStatus("step", "");
+            RAWRS.toolbar.setStatus("run", "active");
             RAWRS.simulator.resume();
+        }
+        else {
+            // Create and start the simulation (or restart, if it is running.)
+            let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", this._binary, this._console);
+            console.log(sim, this._binary);
+
+            sim.on("quit", () => {
+                RAWRS.toolbar.setStatus("run", "success");
+                RAWRS.toolbar.setStatus("step", "disabled");
+                RAWRS.registerListing.update(sim.registers);
+                RAWRS._simulator = undefined;
+            });
+
+            sim.on("breakpoint", () => {
+                RAWRS.toolbar.setStatus("step", "active");
+
+                // Get register dump
+                RAWRS.registerListing.unhighlight();
+                RAWRS.registerListing.update(sim.registers);
+
+                // Get updated memory
+                // TODO
+
+                // Highlight code line and scroll to it
+                RAWRS.codeListing.highlight(sim.pc.toString(16));
+
+                if (RAWRS._clearBreakpoint) {
+                    RAWRS._clearBreakpoint = false;
+                    sim.breakpointClear(sim.pc.toString(16));
+                }
+            });
+
+            sim.on("paused", () => {
+                RAWRS.toolbar.setStatus("run", "paused");
+                RAWRS.toolbar.setStatus("step", "active");
+
+                // Get register dump
+                RAWRS.registerListing.unhighlight();
+                RAWRS.registerListing.update(sim.registers);
+
+                // Get updated memory
+                // TODO
+
+                // Highlight code line and scroll to it
+                RAWRS.codeListing.highlight(sim.pc.toString(16));
+            });
+
+            sim.on("ready", () => {
+                if (RAWRS.runRequested) {
+                    RAWRS.toolbar.setStatus("step", "");
+                    RAWRS.toolbar.setStatus("run", "active");
+                    RAWRS.simulator.resume();
+                }
+            });
+
+            RAWRS._simulator = sim;
+
+            RAWRS.simulator.run();
         }
     }
 
@@ -131,11 +219,13 @@ class RAWRS {
         var linker    = new Linker();
         var annotations = [];
         assembler.on('error', (error) => {
+            RAWRS.toolbar.setStatus("assemble", "failure");
             error.type = 'error';
             annotations.push(error);
         });
 
         linker.on('error', (error) => {
+            RAWRS.toolbar.setStatus("assemble", "failure");
             error.type = 'error';
             annotations.push(error);
         });
@@ -161,6 +251,10 @@ class RAWRS {
         this._console.clear();
         assembler.assemble("foo.s", text, terminal, (object) => {
             linker.link(linkerScript, object, terminal, (binary) => {
+                RAWRS.toolbar.setStatus("assemble", "success");
+                RAWRS.toolbar.setStatus("run", "");
+                this._binary = binary;
+
                 // On success, go to the run tab
                 var runTab = document.body.querySelector("button[aria-controls=\"run-panel\"]");
                 if (runTab) {
@@ -181,44 +275,6 @@ class RAWRS {
                     }
                 }
 
-                // Start the simulation
-                let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", binary, this._console);
-                sim.on("quit", () => {
-                    RAWRS.registerListing.update(sim.registers);
-                });
-                sim.on("breakpoint", () => {
-                    // Get register dump
-                    RAWRS.registerListing.unhighlight();
-                    RAWRS.registerListing.update(sim.registers);
-
-                    // Get updated memory
-                    // TODO
-
-                    // Highlight code line and scroll to it
-                    RAWRS.codeListing.highlight(sim.pc.toString(16));
-
-                    if (RAWRS._clearBreakpoint) {
-                        RAWRS._clearBreakpoint = false;
-                        sim.breakpointClear(sim.pc.toString(16));
-                    }
-                });
-                sim.on("paused", () => {
-                    // Get register dump
-                    RAWRS.registerListing.unhighlight();
-                    RAWRS.registerListing.update(sim.registers);
-
-                    // Get updated memory
-                    // TODO
-
-                    // Highlight code line and scroll to it
-                    RAWRS.codeListing.highlight(sim.pc.toString(16));
-                });
-
-                sim.run();
-                this.simulator = sim;
-
-                //let b2 = new Blob([binary], {type: binary.type});
-
                 // Also, disassemble the binary
                 disassembler.disassemble(binary, terminal, () => {
                 });
@@ -226,6 +282,9 @@ class RAWRS {
                 // And dump its memory (data segment)
                 dumper.dump(binary, ".data", terminal, () => {
                 });
+
+                // Run
+                this.run();
             });
         });
     }

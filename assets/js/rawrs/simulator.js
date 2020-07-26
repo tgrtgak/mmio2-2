@@ -20,9 +20,11 @@ class Simulator extends EventComponent {
         this._startRequested = false;
         this._canStart = false;
         this._ready = false;
+        this._running = false;
+        this._paused = false;
 
         this._console.on('keydown', (event) => {
-            if (!event.repeat) {
+            if (!event.repeat && this.running) {
                 if (this._display_key_event) {
                     this._display_key_event(1, event.keyCode);
                 }
@@ -30,8 +32,10 @@ class Simulator extends EventComponent {
         });
 
         this._console.on('keyup', (event) => {
-            if (this._display_key_event) {
-                this._display_key_event(0, event.keyCode);
+            if (this.running) {
+                if (this._display_key_event) {
+                    this._display_key_event(0, event.keyCode);
+                }
             }
         });
 
@@ -103,6 +107,7 @@ class Simulator extends EventComponent {
         Module.onVMReady = () => {
             this._ready = true;
             this.trigger("ready");
+            console.log("ready");
         };
 
         Module.onVMPaused = () => {
@@ -127,6 +132,7 @@ class Simulator extends EventComponent {
                     file: this._appBinary
                 }
             ]);
+            console.log("_start...");
             this._start();
         };
 
@@ -185,6 +191,20 @@ class Simulator extends EventComponent {
         });
     }
 
+    /**
+     * Returns whether or not the simulator is loaded, and running.
+     */
+    get running() {
+        return this._running;
+    }
+
+    /**
+     * Returns whether or not the simulator is loaded, but paused.
+     */
+    get paused() {
+        return this._paused;
+    }
+
     /*
      * Called internally when the simulator starts.
      */
@@ -213,6 +233,7 @@ class Simulator extends EventComponent {
         }
 
         this._started = true;
+        console.log("_vm_start...");
         this._vm_start(this.configurationURL,
                        this.memorySize,
                        "",   // cmdline
@@ -389,12 +410,16 @@ class Simulator extends EventComponent {
             return;
         }
 
+        // We aren't running anymore (restarting)
+        this._running = false;
+
         // Clear the terminal
         this._console.clear();
 
         // Load the emulator
         this._loadStarted = true;
         window.TinyEmu(this._module).then( (Module) => {
+            this._running = true;
             this._loaded = true;
             this._module = Module;
         });
@@ -404,6 +429,8 @@ class Simulator extends EventComponent {
      * Internal function that is the breakpoint callback.
      */
     _breakpoint() {
+        this._running = false;
+        this._paused = true;
         this.trigger("breakpoint");
     }
 
@@ -412,6 +439,8 @@ class Simulator extends EventComponent {
      */
     pause() {
         if (this._ready) {
+            this._running = false;
+            this._paused = true;
             this._vm_pause();
             this.trigger('paused');
         }
@@ -423,6 +452,8 @@ class Simulator extends EventComponent {
     resume() {
         if (this._ready) {
             this._vm_resume();
+            this._paused = false;
+            this._running = true;
             // TODO: move pause/running events to come from the emulator itself
             this.trigger('running');
         }

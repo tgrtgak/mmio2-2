@@ -15,6 +15,7 @@ class Console extends EventComponent {
           tabStopWidth:     8,        // Default tab stop width (in spaces)
           convertEol:       true,     // Turn any '\n' into '\r\n'
         });
+
         this._term.open(document.getElementById("term_container"));
         this._term.resize(cols, rows);
 

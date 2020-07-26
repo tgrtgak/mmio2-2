@@ -29,6 +29,48 @@ class Toolbar extends EventComponent {
     get element() {
         return this._element;
     }
+
+    /**
+     * Sets the status of the given button.
+     *
+     * @param {String} button The button identifier.
+     */
+    setStatus(button, status) {
+        let buttonElement = this.element.querySelector("button#" + button);
+
+        if (buttonElement) {
+            if (status) {
+                buttonElement.setAttribute("data-status", status);
+
+                if (status === "disabled") {
+                    buttonElement.setAttribute("disabled", "");
+                }
+                else {
+                    buttonElement.removeAttribute("disabled");
+                }
+            }
+            else {
+                buttonElement.removeAttribute("data-status");
+                buttonElement.removeAttribute("disabled");
+            }
+        }
+    }
+
+    /**
+     * Retrieves the status of the specified button or undefined if not set.
+     *
+     * @param {String} button The button identifier.
+     * @returns String The status.
+     */
+    getStatus(button) {
+        let buttonElement = this.element.querySelector("button#" + button);
+
+        if (buttonElement) {
+            return buttonElement.getAttribute("data-status");
+        }
+
+        return undefined;
+    }
 }
 
 export default Toolbar;
