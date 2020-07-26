@@ -18,6 +18,9 @@
 .global fdt_get_memory_length
 .global fdt_get_application_base_addr
 .global fdt_get_application_length
+.global fdt_get_framebuffer_base_addr
+.global fdt_get_framebuffer_width
+.global fdt_get_framebuffer_height
 
 # The magic number to look for
 .set FDT_MAGIC,                 0xd00dfeed
@@ -286,6 +289,39 @@ fdt_get_application_length:
   ld    a0, 0(a0)
   sub   a0, t0, a0
   pop   t0
+  jr    ra
+
+# fdt_get_framebuffer_base_addr(): Returns the framebuffer base address.
+#
+# Does not clobber any registers except a0.
+#
+# Returns
+#   a0: The address of the framebuffer.
+fdt_get_framebuffer_base_addr:
+  la    a0, fdt_framebuffer_base_addr
+  ld    a0, 0(a0)
+  jr    ra
+
+# fdt_get_framebuffer_width(): Returns the framebuffer width.
+#
+# Does not clobber any registers except a0.
+#
+# Returns
+#   a0: The width in pixels of the framebuffer.
+fdt_get_framebuffer_width:
+  la    a0, fdt_framebuffer_width
+  ld    a0, 0(a0)
+  jr    ra
+
+# fdt_get_framebuffer_height(): Returns the framebuffer height.
+#
+# Does not clobber any registers except a0.
+#
+# Returns
+#   a0: The height in pixels of the framebuffer.
+fdt_get_framebuffer_height:
+  la    a0, fdt_framebuffer_height
+  ld    a0, 0(a0)
   jr    ra
 
 # fdt_scan(): Scans RAM for the FDT header (which should be early in RAM)
@@ -636,6 +672,13 @@ fdt_parse_property:
   jal   strncmp
   beqz  a0, _fdt_parse_property_memory
 
+  # Check for "framebuffer" nodes
+  move  a0, s0
+  la    a1, str_fdt_check_node_framebuffer
+  li    a2, 12
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_framebuffer
+
   j     _fdt_parse_property_exit
 
 _fdt_parse_property_root:
@@ -936,6 +979,85 @@ _fdt_parse_property_memory_addr:
 
   j _fdt_parse_property_exit
 
+_fdt_parse_property_framebuffer:
+  # Check for the "reg" property
+  move  a0, s1
+  la    a1, str_fdt_check_prop_reg
+  li    a2, 4
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_framebuffer_addr
+
+  # Check for the "width" property
+  move  a0, s1
+  la    a1, str_fdt_check_prop_width
+  li    a2, 6
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_framebuffer_width
+
+  # Check for the "height" property
+  move  a0, s1
+  la    a1, str_fdt_check_prop_height
+  li    a2, 7
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_framebuffer_height
+
+  j _fdt_parse_property_exit
+
+_fdt_parse_property_framebuffer_width:
+
+  # Pull the 'width' value which is a simple 32-bit word.
+  lwu   a0, 0(s2)
+  jal   toBE32
+  
+  # Write the value
+  la    t0, fdt_framebuffer_width
+  sd    a0, 0(t0)
+
+  j _fdt_parse_property_exit
+
+_fdt_parse_property_framebuffer_height:
+
+  # Pull the 'height' value which is a simple 32-bit word.
+  lwu   a0, 0(s2)
+  jal   toBE32
+  
+  # Write the value
+  la    t0, fdt_framebuffer_height
+  sd    a0, 0(t0)
+
+  j _fdt_parse_property_exit
+
+_fdt_parse_property_framebuffer_addr:
+
+  # Pull the 'reg' value which is a <base, length> pair
+  # The <base> part has a number of bytes given by "#address-cells" x 2
+  # And the <length> part has "#size-cells" x 2 number of bytes
+
+  # Get the number of address cells
+  la    t1, fdt_address_cells
+  ld    t1, 0(t1)
+
+  # Read address
+  lwu   a0, 0(s2)
+  jal   toBE32
+  li    t2, 1
+  beq   t1, t2, _fdt_parse_property_framebuffer_addr_commit
+
+  # 64-bit address
+  move  t2, a0
+  lwu   a0, 4(s2)
+  jal   toBE32
+  sll   t2, t2, 32
+  add   a0, a0, t2
+
+_fdt_parse_property_framebuffer_addr_commit:
+  
+  # Write the base address
+  la    t0, fdt_framebuffer_base_addr
+  sd    a0, 0(t0)
+
+  j _fdt_parse_property_exit
+
 _fdt_parse_property_exit:
   pop   s3
   pop   s2
@@ -969,14 +1091,20 @@ fdt_virtio_irq_count:             .dword  0
 fdt_virtio_count:                 .dword  0
 fdt_clint_base_addr:              .dword  0
 fdt_plic_base_addr:               .dword  0
+fdt_framebuffer_base_addr:        .dword  0
 fdt_memory_base_addr:             .dword  0
 fdt_memory_length:                .dword  0
 fdt_application_start:            .dword  0
 fdt_application_end:              .dword  0
 
+# FDT properties of interest:
+fdt_framebuffer_width:            .dword  0
+fdt_framebuffer_height:           .dword  0
+
 # FDT node names to check for
 str_fdt_check_node_root:          .string ""
 str_fdt_check_node_memory:        .string "memory@"
+str_fdt_check_node_framebuffer:   .string "framebuffer@"
 str_fdt_check_node_cpus:          .string "cpus"
 str_fdt_check_node_virtio:        .string "virtio@"
 str_fdt_check_node_clint:         .string "clint@"
@@ -985,6 +1113,8 @@ str_fdt_check_node_plic:          .string "plic@"
 
 # FDT property names to check for
 str_fdt_check_prop_reg:           .string "reg"
+str_fdt_check_prop_width:         .string "width"
+str_fdt_check_prop_height:        .string "height"
 str_fdt_check_prop_timebase_freq: .string "timebase-frequency"
 str_fdt_check_prop_address_cells: .string "#address-cells"
 str_fdt_check_prop_size_cells:    .string "#size-cells"

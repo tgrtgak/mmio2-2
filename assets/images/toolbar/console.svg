@@ -9,13 +9,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="106.21346mm"
-   height="122.64474mm"
-   viewBox="0 0 376.34689 434.56796"
+   width="122mm"
+   height="122mm"
+   viewBox="0 0 432.28344 432.28346"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="step.svg">
+   sodipodi:docname="console.svg">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -26,10 +26,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="294.76619"
+     inkscape:cx="118.33762"
      inkscape:cy="398.56675"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="text3430"
      showgrid="false"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -48,7 +48,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -56,17 +56,16 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-192.08339,-244.32141)">
-    <path
-       style="opacity:1;fill:#666666;fill-opacity:1;stroke:#4d4d4d;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="M 0.5 0.86523438 L 0.5 217.2832 L 0.5 433.70117 L 127.5957 360.32227 L 126.11133 181.32227 L 113.92969 184.86133 A 50.004718 50.004718 0 0 1 51.447266 148.85938 L 42.935547 114.47266 A 50.004718 50.004718 0 0 1 70.537109 57.052734 L 85.707031 50.058594 L 0.5 0.86523438 z M 280.98633 162.80469 L 280.98633 271.76172 L 375.34766 217.2832 L 280.98633 162.80469 z "
-       transform="translate(192.08337,244.32141)"
-       id="path4136" />
-    <path
-       sodipodi:nodetypes="cccccccc"
-       inkscape:connector-curvature="0"
-       id="path3363"
-       style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:medium;line-height:125%;font-family:Inconsolata;-inkscape-font-specification:'Inconsolata Medium';letter-spacing:0px;word-spacing:0px;fill:#ff8080;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 423.07011,301.57158 -41.44855,0 -98.0661,45.20942 8.51001,34.3876 75.58075,-21.95347 2.27407,274.24681 53.14982,0 z" />
+     transform="translate(-192.08339,-246.60591)">
+    <g
+       style="font-style:normal;font-weight:normal;font-size:783.18737793px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="text3430">
+      <path
+         d="M 243.36416,334.33362 483.13018,452.95778 241.0146,587.2457 l 0,78.73905 334.42101,-195.01366 0,-37.59299 -332.07145,-173.8676 z"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:Inconsolata;-inkscape-font-specification:'Inconsolata Medium';fill:#4d4d4d"
+         id="path3435"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccccccc" />
+    </g>
   </g>
 </svg>

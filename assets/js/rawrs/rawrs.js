@@ -2,6 +2,7 @@
 
 import Tabs            from './tabs';
 import Console         from './console';
+import Video           from './video';
 import Editor          from './editor';
 import Toolbar         from './toolbar';
 import Simulator       from './simulator';
@@ -18,6 +19,7 @@ import RegisterListing from './register_listing';
 class RAWRS {
     static load() {
         this._console = new Console(30, 80, 15);
+        this._video = new Video(640, 480, document.querySelector("#video canvas"));
 
         Tabs.load();
         Editor.load();
@@ -119,7 +121,7 @@ class RAWRS {
         }
         else {
             // Create and start the simulation (or restart, if it is running.)
-            let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", this._binary, this._console);
+            let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", this._binary, this._console, this._video);
             console.log(sim, this._binary);
 
             sim.on("quit", () => {
@@ -169,6 +171,30 @@ class RAWRS {
                     RAWRS.toolbar.setStatus("run", "active");
                     RAWRS.simulator.resume();
                 }
+            });
+
+            let framebufferRefresh = 0;
+            sim.on("framebuffer-refresh", () => {
+                // On the first refresh, switch to video
+                if (framebufferRefresh == 0) {
+                    let videoButton = document.querySelector("button[aria-controls=\"video\"]");
+                    if (videoButton) {
+                        videoButton.parentNode.parentNode.querySelectorAll("li.tab").forEach( (tabElement) => {
+                            tabElement.classList.remove("active");
+                        });
+                        videoButton.parentNode.classList.add("active");
+                    }
+
+                    let videoPanel = document.querySelector(".tab-panel#video");
+                    if (videoPanel) {
+                        videoPanel.parentNode.querySelectorAll("li.tab-panel").forEach( (panelElement) => {
+                            panelElement.classList.remove("active");
+                        });
+                        videoPanel.classList.add("active");
+                    }
+
+                }
+                framebufferRefresh++;
             });
 
             RAWRS._simulator = sim;

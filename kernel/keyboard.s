@@ -10,6 +10,7 @@
 .globl keyboard_read
 .globl keyboard_read_line
 .globl keyboard_loop
+.globl keyboard_map
 
 # The keyboard buffer size in bytes
 .set KEYBOARD_BUFFER_SIZE,    64
@@ -132,8 +133,6 @@ _keyboard_init_buffer_allocation_loop:
   jal   virtio_queue_notify
 
   # TODO: status queue
-_foo:
-#j _foo
 
   pop   s3
   pop   s2
@@ -142,6 +141,42 @@ _foo:
   pop   ra
   jr    ra
 
+# keyboard_map(root_page_table): Maps in keyboard memory to userspace.
+#
+# Arguments:
+#   a0: The root page table address.
+keyboard_map:
+  push  ra
+  push  s0
+  push  s1
+
+  # s0 will retain the root page table
+  move  s0, a0
+
+  # We will compute the physical address of the keyboard state table
+  la    s1, keyboard_state
+  la    t0, _start
+  sub   s1, s1, t0
+  jal   fdt_get_memory_base_addr
+  add   s1, s1, a0
+
+  # Move root table address and physical address of keyboard state to arguments
+  move  a0, s0
+  move  a1, s1
+  # We will map the table to this userspace virtual address:
+  li    a2, 0x80000000
+  # It will be accessible to userspace and readonly
+  li    a3, PTE_USER | PTE_READ
+  # Engage
+  jal   paging_map
+
+  pop   s1
+  pop   s0
+  pop   ra
+  jr    ra
+
+# keyboard_create_event_buffer(desc_addr, buffer_addr): Creates event buffer.
+#
 # Arguments:
 #   a0: descriptor address
 #   a1: buffer address

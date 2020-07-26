@@ -308,9 +308,12 @@ memory_free_page:
 
 # Our bitmap address.
 memory_bitmap_addr:   .dword  0
+
 # Our bitmap size.
 memory_bitmap_size:   .dword  0
+
 # The total available memory in RAM
 memory_ram_size:      .dword  0
 
+# Error messages
 str_memory_error:     .string "Memory: Cannot allocate memory.\n"

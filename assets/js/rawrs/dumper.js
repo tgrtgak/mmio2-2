@@ -39,16 +39,20 @@ class Dumper extends EventComponent {
                         // Convert the hexdump to a byte array
                         // Each segment in the hexdump is a 4 byte little-endian word
                         let dataString = matches.slice(2).join('');
-                        let row = new Uint8Array(dataString.match(/.{1,2}/g).map( (byte) => parseInt(byte, 16)));
+                        let data = new Uint8Array(dataString.match(/.{1,2}/g).map( (byte) => parseInt(byte, 16)));
 
                         if (lastRow) {
-                            lastRow.data = lastRow.data.concat(row);
+                            lastRow.data.set(data, lastRow.length)
+                            lastRow.length = lastRow.data.byteLength;
                             this.trigger('update', lastRow);
                             lastRow = null;
                         }
                         else {
+                            let row = new Uint8Array(data.length * 2);
+                            row.set(data, 0);
                             lastRow = {
                                 address: matches[1],
+                                length:  data.byteLength,
                                 data:    row
                             };
                         }

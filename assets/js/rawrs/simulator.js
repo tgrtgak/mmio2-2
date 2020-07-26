@@ -9,10 +9,11 @@ class Simulator extends EventComponent {
      * @param {number} memorySize The size of memory in MiB.
      * @param {string} configurationURL The URL of the simulation configuration.
      */
-    constructor(memorySize, configurationURL, kernelBinaryOrURL, appBinaryOrURL, konsole) {
+    constructor(memorySize, configurationURL, kernelBinaryOrURL, appBinaryOrURL, konsole, video) {
         super();
 
         this._console = konsole;
+        this._video = video;
         this._memorySize = memorySize;
         this._loaded = false;
         this._started = false;
@@ -93,7 +94,7 @@ class Simulator extends EventComponent {
         // Convert to bytes and set it in the runtime.
         Module.INITIAL_MEMORY = alloc_size << 20;
 
-        var config = "\n{\n    version: 1,\n    machine: \"riscv64\",\n    memory_size: 256,\n    input_device: \"virtio\",\n    bios: \"kernel.bin\",    kernel: \"test.elf\"\n}";
+        var config = "\n{\n    version: 1,\n    machine: \"riscv64\",\n    memory_size: 256,\n    display_device: \"simplefb\",\n    input_device: \"virtio\",\n    bios: \"kernel.bin\",    kernel: \"test.elf\"\n}";
 
         // Action to happen on quit.
         Module.quit = (status, ex) => {
@@ -107,11 +108,14 @@ class Simulator extends EventComponent {
         Module.onVMReady = () => {
             this._ready = true;
             this.trigger("ready");
-            console.log("ready");
         };
 
         Module.onVMPaused = () => {
             this.trigger("paused");
+        };
+
+        Module.onFBRefresh = () => {
+            this.trigger("framebuffer-refresh");
         };
 
         Module.preRun = () => {
@@ -132,7 +136,6 @@ class Simulator extends EventComponent {
                     file: this._appBinary
                 }
             ]);
-            console.log("_start...");
             this._start();
         };
 
@@ -223,6 +226,7 @@ class Simulator extends EventComponent {
         this._vm_resume            = Module.cwrap('vm_resume', null, []);
         this._vm_step              = Module.cwrap('vm_step', null, []);
         this._cpu_get_regs         = Module.cwrap('cpu_get_regs', null, ["number"]);
+        this._force_refresh        = Module.cwrap('force_refresh', null, []);
         this._cpu_set_breakpoint   = Module.cwrap('cpu_set_breakpoint', null, ["number"]);
         this._cpu_clear_breakpoint = Module.cwrap('cpu_clear_breakpoint', null, ["number"]);
     }
@@ -233,13 +237,12 @@ class Simulator extends EventComponent {
         }
 
         this._started = true;
-        console.log("_vm_start...");
         this._vm_start(this.configurationURL,
                        this.memorySize,
                        "",   // cmdline
                        "",   // password
-                       0,    // width
-                       0,    // height
+                       640,  // width
+                       480,  // height
                        0,    // net_state
                        "");  // drive_url
                       //*/
@@ -249,6 +252,7 @@ class Simulator extends EventComponent {
      * Called internally when the simulator ends.
      */
     _quit() {
+        this.forceRefresh();
         this.dump();
         this.trigger("quit");
     }
@@ -393,6 +397,13 @@ class Simulator extends EventComponent {
             str = "0000000000000000".slice(str.length) + str;
             window.console.log(Simulator.REGISTER_NAMES[i] + ": 0x" + str);
         });
+    }
+
+    /**
+     * Forces a refresh of the display.
+     */
+    forceRefresh() {
+        this._force_refresh();
     }
 
     /**

@@ -1,6 +1,22 @@
 .top
-  div#term_wrap
-    div#term_container
+  div.container
+    div.output
+      ol.tabs.side
+        li.tab.active
+          button aria-controls=:"console"
+            img src="images/dynamic/hex/1e151e/toolbar/console.svg"
+            span.caption
+              = I18n.t(:"run.devices.console")
+        li.tab
+          button aria-controls=:"video"
+            img src="images/dynamic/hex/1e151e/toolbar/video.svg"
+            span.caption
+              = I18n.t(:"run.devices.video")
+      ol.tab-panels
+        li.tab-panel.active#console
+          div#term_container
+        li.tab-panel#video
+          canvas#video width="640" height="480"
   .register-file
     ol.tabs
       li.tab.active

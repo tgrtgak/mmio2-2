@@ -8,6 +8,10 @@ en:
   run:
     tab:                "Run"
 
+    devices:
+      console:          "Serial"
+      video:            "Video"
+
     memory:
       tab:              "Memory"
       headers:

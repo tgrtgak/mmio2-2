@@ -91,8 +91,34 @@ _kmain_virtio_init_loop:
   # (Optional)
 
   # Get the root page table
+  # s0: The root page table address
   jal   paging_get_root
   move  s0, a0
+
+  # Map in keyboard driver memory
+  move  a0, s0
+  jal   keyboard_map
+
+  # Initialize the framebuffer device
+  jal   fdt_get_framebuffer_base_addr
+  move  s1, a0
+  jal   fdt_get_framebuffer_width
+  move  s2, a0
+  jal   fdt_get_framebuffer_height
+  move  s3, a0
+
+  move  a0, s1
+  move  a1, s2
+  move  a2, s3
+  jal   framebuffer_init
+
+  # Map in framebuffer
+  move  a0, s0
+  jal   framebuffer_map
+
+  # Map in user stack
+  move  a0, s0
+  jal   stack_map
 
   # Clear/Enable interrupts
   jal trap_clear_interrupts
@@ -145,6 +171,9 @@ _kmain_virtio_init_loop:
   move  x29, zero
   move  x30, zero
   move  x31, zero
+
+  # Switch to application stack
+  li    sp, 0x100000000
 
   # sret to userspace!
   sret

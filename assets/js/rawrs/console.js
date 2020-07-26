@@ -34,6 +34,8 @@ class Console extends EventComponent {
                 return [cols, rows];
             }
         };
+
+        this.clear();
     }
 
     clear() {
