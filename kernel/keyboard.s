@@ -403,8 +403,16 @@ keyboard_read_line:
   sd    s0, 0(t0)
 
   # Wait until the buffer updates
+_keyboard_read_line_loop_wfi:
+  # We wait until there is an interrupt
+  wfi
+
+  li    t1, 100
 _keyboard_read_line_loop:
+  # We read from the buffer until we see an update
   lbu   t0, 0(s0)
+  add   t1, t1, -1
+  beqz  t1, _keyboard_read_line_loop_wfi # go to sleep
   beqz  t0, _keyboard_read_line_loop
 
   # Print out character
