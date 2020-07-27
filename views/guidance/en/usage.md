@@ -1,3 +1,5 @@
 # Usage
 
-![Logo](../images/dynamic/hex/ae8bab/dinosaurs/spinosaurus.svg)
+![A Spinosaurus](../images/dynamic/hex/ae8bab/dinosaurs/spinosaurus.svg)
+
+

@@ -136,6 +136,13 @@ class Simulator extends EventComponent {
                     file: this._appBinary
                 }
             ]);
+
+            // Clear the terminal
+            this._console.clear();
+
+            // Clear video
+            this._video.clear();
+
             this._start();
         };
 
@@ -426,6 +433,9 @@ class Simulator extends EventComponent {
 
         // Clear the terminal
         this._console.clear();
+
+        // Clear video
+        this._video.clear();
 
         // Load the emulator
         this._loadStarted = true;

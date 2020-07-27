@@ -14,20 +14,19 @@ class Video extends EventComponent {
         this._height = height;
 
         // Get context
-        let ctx = this._canvas.getContext('2d');
+        this._context = this._canvas.getContext('2d');
 
         // Clear screen
-        ctx.fillStyle = "#000";
-        ctx.fillRect(0, 0, width, height);
+        this.clear();
 
-        let image = ctx.createImageData(width, height);
+        let image = this.context.createImageData(width, height);
 
         // TinyEMU looks for this:
         window.graphic_display = {
             image: image,
             width: width,
             height: height,
-            ctx: ctx
+            ctx: this.context
         };
     }
 
@@ -50,6 +49,18 @@ class Video extends EventComponent {
      */
     get canvas() {
         return this._canvas;
+    }
+
+    /**
+     * Returns the drawing context for the display.
+     */
+    get context() {
+        return this._context;
+    }
+
+    clear() {
+        this.context.fillStyle = "#000";
+        this.context.fillRect(0, 0, this.width, this.height);
     }
 }
 
