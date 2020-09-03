@@ -94,7 +94,16 @@ class Simulator extends EventComponent {
         // Convert to bytes and set it in the runtime.
         Module.INITIAL_MEMORY = alloc_size << 20;
 
-        var config = "\n{\n    version: 1,\n    machine: \"riscv64\",\n    memory_size: 256,\n    display_device: \"simplefb\",\n    input_device: \"virtio\",\n    bios: \"kernel.bin\",    kernel: \"test.elf\"\n}";
+        // TinyEMU configuration
+        var config = JSON.stringify({
+            version: 1,
+            machine: "riscv64",
+            memory_size: 256,
+            display_device: "simplefb",
+            input_device: "virtio",
+            bios: "kernel.bin",
+            kernel: "test.elf"
+        });
 
         // Action to happen on quit.
         Module.quit = (status, ex) => {
