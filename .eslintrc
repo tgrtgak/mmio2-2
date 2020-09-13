@@ -1,0 +1,11 @@
+{
+    "env": {
+        "browser": true,
+        "jasmine": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 8,
+        "impliedStrict": true,
+        "sourceType": "module",
+    }
+}
