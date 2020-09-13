@@ -1,0 +1,9 @@
+tinyemu/
+node_modules/
+emsdk/
+riscv-gnu-toolchain/
+utils/
+assets/js/riscv64*
+assets/js/compiled-*
+assets/js/ace-builds/
+assets/css/
