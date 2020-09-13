@@ -31,6 +31,15 @@ moving pieces, so each subsection breaks down each one independently. However,
 it is assumed that each is installed in the written order as some depend on
 others.
 
+### Requirements
+
+You will need to install on your own system the following packages:
+
+* gcc
+* bison
+* flex
+* make
+
 ### Gather All of the Things
 
 Provided is an install script that will gather the various things we need from
@@ -139,7 +148,18 @@ This will spawn the static version of the site on localhost and port 8081.
 
 ## Testing
 
-## Installing
+Once everything is installed, you can spin up a dynamic webserver to test things
+with the command:
+
+```
+rackup -o 0.0.0.0 -p 8080
+```
+
+Which spins up a webserver that is world-facing (0.0.0.0) and on port 8080. If
+it complains about the port being used, you can switch to another just fine.
+
+Then you can point your web-browser to the address of the server (localhost if
+your local machine) alongside the port: http://localhost:8080
 
 ## Contributing
 

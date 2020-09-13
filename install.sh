@@ -4,8 +4,8 @@ echo "=========="
 if [ ! -d "emsdk" ]; then
   git clone https://github.com/emscripten-core/emsdk.git
   cd emsdk
-  ./emsdk install latest
-  ./emsdk activate latest
+  ./emsdk install 1.39.19
+  ./emsdk activate 1.39.19
   cd ..
 else
   echo "emscripten already exists. delete the emsdk directory to reinstall"
@@ -54,3 +54,10 @@ if [ ! -d "tinyemu" ]; then
 else
   echo "tinyemu already exists. delete the tinyemu directory to reinstall"
 fi
+
+echo ""
+echo "Dependencies"
+echo "============"
+
+bundle install
+npm install
