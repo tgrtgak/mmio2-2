@@ -12,4 +12,9 @@ else
   echo "TinyEMU seems to exist. Remove assets/js/tinyemu to rebuild."
 fi
 
+# Build the kernel
+cd kernel
+make
+cd ..
+
 npm run build
