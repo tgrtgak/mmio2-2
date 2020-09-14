@@ -2,6 +2,7 @@
 
 * wilkie
 * Luís Oliveira
+* jason
 
 ## Documentation
 
