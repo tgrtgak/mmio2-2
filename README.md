@@ -62,7 +62,7 @@ manage your ruby installation using `rvm` (from [rvm.io](https://rvm.io/))
 Afterward, use the install script to gather, well, all the things:
 
 ```
-sh install.sh
+./install.sh
 ```
 
 You can build everything with one command, if you want. However, you may want
@@ -73,7 +73,7 @@ and a Linux environment. We handle most of everything else to lock down the
 versions of things we've modified.
 
 ```
-sh build.sh
+./build.sh
 ```
 
 ### Toolchain
