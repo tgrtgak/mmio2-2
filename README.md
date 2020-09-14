@@ -39,6 +39,8 @@ You will need to install on your own system the following packages:
 * bison
 * flex
 * make
+* ruby
+* node.js
 
 ### Gather All of the Things
 
@@ -47,7 +49,17 @@ their respective homes. Let us know if anything disappears. I'm an archivist,
 so I have many many solutions. (But it is never fun to see this happen in
 practice)
 
-Use the script to gather, well, all the things:
+You'll need to install 'bundler' for the ruby side of things, which you can do
+using:
+
+```
+gem install bundler
+```
+
+And then bundler itself will install the ruby packages. It may be useful to
+manage your ruby installation using `rvm` (from [rvm.io](https://rvm.io/))
+
+Afterward, use the install script to gather, well, all the things:
 
 ```
 sh install.sh
