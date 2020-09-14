@@ -7,3 +7,5 @@ assets/js/riscv64*
 assets/js/compiled-*
 assets/js/ace-builds/
 assets/css/
+kernel/*.o
+kernel/kernel.elf
