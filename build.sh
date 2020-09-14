@@ -1,3 +1,5 @@
+#!/bin/bash
+
 source "$PWD/emsdk/emsdk_env.sh"
 
 if [ ! -f assets/js/riscv64-unknown-elf-as.wasm ] || [ ! -f assets/js/riscv64-unknown-elf-ld.wasm ] || [ ! -f assets/js/riscv64-unknown-elf-objdump.wasm ] || [ ! -f assets/js/riscv64-unknown-elf-readelf.wasm ]; then
