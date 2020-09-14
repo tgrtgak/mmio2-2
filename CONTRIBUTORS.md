@@ -1,6 +1,7 @@
 # Contributors
 
 * wilkie
+* Luís Oliveira
 
 ## Documentation
 
