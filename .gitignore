@@ -6,6 +6,8 @@ utils/
 assets/js/riscv64*
 assets/js/compiled-*
 assets/js/ace-builds/
+assets/kernel/kernel.bin
 assets/css/
 kernel/*.o
+kernel/kernel.bin
 kernel/kernel.elf
