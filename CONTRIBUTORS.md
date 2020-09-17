@@ -3,6 +3,7 @@
 * wilkie
 * Luís Oliveira
 * jason
+* Austin Oldham
 
 ## Documentation
 
