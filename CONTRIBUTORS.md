@@ -4,6 +4,7 @@
 * Luís Oliveira
 * jason
 * Austin Oldham
+* Nate Stump
 
 ## Documentation
 
