@@ -1,6 +1,17 @@
-image: ruby:2.4
+stages:
+  - test
+  - deploy
+
+services:
+  - selenium/standalone-chrome:latest
+
+variables:
+  RACK_ENV: "test"
+  SELENIUM_URL: "http://selenium__standalone-chrome:4444/wd/hub"
+  GITLAB_CI: "true"
 
 pages:
+  image: ruby:2.4
   stage: deploy
   script:
     - sh install.sh
@@ -15,3 +26,14 @@ pages:
       - public
   only:
     - deployed
+
+tests:
+  stage: test
+  image: node:latest
+  cache:
+    paths:
+      - node_modules/
+  before_script:
+    - npm install --prefer-offline
+  script:
+    - npm run test

@@ -41,15 +41,15 @@ module.exports = function(config) {
 
         jsonReporter: {
             stdout: false,
-            outputFile: 'spec/js/karma-result.json'
+            outputFile: 'test/karma-result.json'
         },
 
         files: [
-            'spec/js/**/*_spec.js'
+            'test/**/*_test.js'
         ],
 
         preprocessors: {
-            'spec/js/**/*_spec.js':  ['webpack', 'sourcemap'],
+            'test/**/*_test.js':  ['webpack', 'sourcemap'],
         },
 
         coverageIstanbulReporter: {
