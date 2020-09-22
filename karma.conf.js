@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
-process.env["NODE_ENV"] = "test";
+var address = 'localhost';
 
 module.exports = function(config) {
     let webpackConfig = require('./webpack.config.js');
@@ -10,13 +10,29 @@ module.exports = function(config) {
     webpackConfig.devtool = "inline-source-map";
 
     let browsers = ["ChromeHeadless",  "ChromiumHeadless"];
+    let seleniumChromeConfig = {};
+    let seleniumFirefoxConfig = {};
     if (process.env["SELENIUM_URL"]) {
+        var url = new URL(process.env["SELENIUM_URL"]);
         browsers = ["Chrome_selenium"];
+        seleniumChromeConfig = {
+            hostname: url.hostname,
+            port: url.port,
+            protocol: url.protocol,
+            path: url.pathname
+        };
+
+        var ifaces = require('os').networkInterfaces();
+        for (var dev in ifaces) {
+            ifaces[dev].filter((details) => details.family === 'IPv4' && details.internal === false ? address = details.address: undefined);
+        }
     }
+
     config.set({
         // These might be useful to run without the origin checking:
         //browsers: ["ChromeHeadless", "Chrome_without_security", "ChromiumHeadless", "Chromium_without_security"],
 
+        hostname: address,
         browsers: browsers,
 
         customLaunchers: {
@@ -29,14 +45,11 @@ module.exports = function(config) {
                 flags: ['--disable-web-security']
             },
             Chrome_selenium: {
-                base: 'SeleniumWebdriver',
-                browserName: 'Chrome',
-                getDriver: function() {
-                    return new webdriver.Builder()
-                        .forBrowser('chrome')
-                        .usingServer(process.env["SELENIUM_URL"] || 'http://localhost:4444/wd/hub')
-                        .build()
-                }
+                base: 'WebDriver',
+                browserName: 'chrome',
+                platform: 'ANY',
+                version: 'ANY',
+                config: seleniumChromeConfig
             }
         },
 

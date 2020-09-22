@@ -2,14 +2,6 @@ stages:
   - test
   - deploy
 
-services:
-  - selenium/standalone-chrome:latest
-
-variables:
-  RACK_ENV: "test"
-  SELENIUM_URL: "http://selenium__standalone-chrome:4444/wd/hub"
-  GITLAB_CI: "true"
-
 pages:
   image: ruby:2.4
   stage: deploy
@@ -30,6 +22,12 @@ pages:
 tests:
   stage: test
   image: node:latest
+  services:
+    - selenium/standalone-chrome:latest
+  variables:
+    RACK_ENV: "test"
+    SELENIUM_URL: "http://selenium__standalone-chrome:4444/wd/hub"
+    GITLAB_CI: "true"
   cache:
     paths:
       - node_modules/
