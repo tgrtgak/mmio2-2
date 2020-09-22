@@ -1,5 +1,6 @@
 stages:
-  - test
+  - test-firefox
+  - test-chrome
   - deploy
 
 pages:
@@ -19,14 +20,31 @@ pages:
   only:
     - deployed
 
-tests:
-  stage: test
+test-chrome:
+  stage: test-chrome
   image: node:latest
   services:
     - selenium/standalone-chrome:latest
   variables:
     RACK_ENV: "test"
     SELENIUM_URL: "http://selenium__standalone-chrome:4444/wd/hub"
+    GITLAB_CI: "true"
+  cache:
+    paths:
+      - node_modules/
+  before_script:
+    - npm install --prefer-offline
+  script:
+    - npm run test
+
+test-firefox:
+  stage: test-firefox
+  image: node:latest
+  services:
+    - selenium/standalone-firefox:latest
+  variables:
+    RACK_ENV: "test"
+    SELENIUM_FIREFOX_URL: "http://selenium__standalone-firefox:4444/wd/hub"
     GITLAB_CI: "true"
   cache:
     paths:
