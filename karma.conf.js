@@ -9,23 +9,39 @@ module.exports = function(config) {
     // We want inline source maps with jasmine/karma
     webpackConfig.devtool = "inline-source-map";
 
-    let browsers = ["ChromeHeadless",  "ChromiumHeadless"];
-    let seleniumChromeConfig = {};
-    let seleniumFirefoxConfig = {};
+    let browsers = [];
+    let seleniumChromeConfig = null;
     if (process.env["SELENIUM_URL"]) {
         var url = new URL(process.env["SELENIUM_URL"]);
-        browsers = ["Chrome_selenium"];
         seleniumChromeConfig = {
             hostname: url.hostname,
             port: url.port,
             protocol: url.protocol,
             path: url.pathname
         };
+        browsers.push("Chrome_selenium");
+    }
 
+    let seleniumFirefoxConfig = null;
+    if (process.env["SELENIUM_FIREFOX_URL"]) {
+        var url = new URL(process.env["SELENIUM_FIREFOX_URL"]);
+        seleniumFirefoxConfig = {
+            hostname: url.hostname,
+            port: url.port,
+            protocol: url.protocol,
+            path: url.pathname
+        };
+        browsers.push("Firefox_selenium");
+    }
+
+    if (seleniumChromeConfig || seleniumFirefoxConfig) {
         var ifaces = require('os').networkInterfaces();
         for (var dev in ifaces) {
             ifaces[dev].filter((details) => details.family === 'IPv4' && details.internal === false ? address = details.address: undefined);
         }
+    }
+    else {
+        browsers = ["ChromeHeadless", "ChromiumHeadless"];
     }
 
     config.set({
@@ -50,6 +66,13 @@ module.exports = function(config) {
                 platform: 'ANY',
                 version: 'ANY',
                 config: seleniumChromeConfig
+            },
+            Firefox_selenium: {
+                base: 'WebDriver',
+                browserName: 'firefox',
+                platform: 'ANY',
+                version: 'ANY',
+                config: seleniumFirefoxConfig
             }
         },
 
