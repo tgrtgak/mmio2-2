@@ -87,7 +87,7 @@ module.exports = function(config) {
 
         frameworks: ['jasmine'],
 
-        reporters: ['coverage-istanbul', 'coverage', 'json'],
+        reporters: ['coverage-istanbul', 'coverage', 'json', 'dots'],
 
         jsonReporter: {
             stdout: false,

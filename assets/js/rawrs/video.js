@@ -5,7 +5,7 @@ import EventComponent from './event_component';
 /**
  * This represents the video device.
  */
-class Video extends EventComponent {
+export class Video extends EventComponent {
     constructor(width, height, canvas) {
         super();
 
