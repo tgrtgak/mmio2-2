@@ -989,3 +989,14 @@ iframe {
     background: #253846;
 }
 
+.ace_tooltip {
+  font-family: 'Lato', sans-serif;
+  font-weight: normal;
+
+  code {
+    color: #9260c3;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    margin: 0;
+    padding: 0;
+  }
+}
