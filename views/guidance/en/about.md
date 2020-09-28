@@ -32,7 +32,7 @@ The main web application and program content is licensed under the terms of the 
 
 ## Development
 
-* **RAWRS Programming and Design**: [wilkie](https://wilkie.how)
+* **RAWRS Programming and Design**: [wilkie](https://wilkie.how), Luís Oliveira, jason, Austin Oldham, Nate Stump
 * **TinyEmu RISC-V System Emulator**: Fabrice Bellard, modifications by wilkie
 * **GNU Binutils**: {% binutils_authors %}
 

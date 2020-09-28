@@ -52,7 +52,7 @@ practice)
 You'll need to install 'bundler' for the ruby side of things, which you can do
 using:
 
-```
+```shell
 gem install bundler
 ```
 
@@ -61,7 +61,7 @@ manage your ruby installation using `rvm` (from [rvm.io](https://rvm.io/))
 
 Afterward, use the install script to gather, well, all the things:
 
-```
+```shell
 ./install.sh
 ```
 
@@ -72,7 +72,7 @@ Generally, you will need a C compiler (gcc), relatively new version of Python,
 and a Linux environment. We handle most of everything else to lock down the
 versions of things we've modified.
 
-```
+```shell
 ./build.sh
 ```
 
@@ -85,15 +85,13 @@ native copy and a JavaScript version.
 
 For this, we need a Linux environment with the basic `gcc` build tools
 available. Then, you can install everything we need with the `install.sh`
-script.
-
-This will unpack everything from other repositories. It also unpacks some stuff
-from 
+script. This will unpack everything from the necessary repositories.
 
 ### Simulator
 
 We use the TinyEmu simulator. This has already been installed and built if
-you used the general scripts above.
+you used the general scripts above. We use our own fork of TinyEmu which has
+some patches in place to enable dynamic breakpoints and code stepping.
 
 ### JavaScript
 
@@ -103,7 +101,7 @@ backwards compatible format.
 First, install node.js through your system package manager.
 Using npm (node's package manager), install the JavaScript dependencies.
 
-```
+```shell
 npm install
 ```
 
@@ -117,25 +115,40 @@ npx webpack
 
 We can run a local server using `rackup`:
 
-```
+```shell
 rackup
 ```
 
 Which spawns a server on localhost running on port 9292. If you want to use
 a different host or port, use `-o` and `-p` respectively.
 
-For instance, to launch it world-facing:
+For instance, to launch it world-facing on port 8080:
 
-```
+```shell
 rackup -o 0.0.0.0 -p 8080
 ```
+
+### Testing
+
+To test the JavaScript components with our unit test suite, we will run the
+karma harness using this command:
+
+```shell
+npm run test
+```
+
+This requires at least Chrome or Chromium to exist on your system which it will
+use to run the test suite against.
+
+The output will show dots for each test if the test is successful. For each
+test failure, the expected result and some log will be provided.
 
 ### Static Site Generation
 
 To create a static site, simply run the provided `package.sh` script like the
 following:
 
-```
+```shell
 ./package.sh
 ```
 
@@ -152,7 +165,7 @@ For testing, you can use the `server.rb` file in the `/scripts` directory. This
 is a modified Webrick instance that serves `.wasm` correctly. While in the new
 `static` directory, invoke it like this:
 
-```
+```shell
 ruby ../scripts/server.rb
 ```
 
@@ -163,7 +176,7 @@ This will spawn the static version of the site on localhost and port 8081.
 Once everything is installed, you can spin up a dynamic webserver to test things
 with the command:
 
-```
+```shell
 rackup -o 0.0.0.0 -p 8080
 ```
 
@@ -211,7 +224,7 @@ copy the English (`en.yml`) file and translate the strings, you should see
 the effect when you restart a server or rebuild the static site and go to
 the "/en" route (replace 'en' with your language code).
 
-The next aspect are the documentation files. These are within `views/guidance`
+The next set are the documentation files. These are within `views/guidance`
 and are then in the subdirectory consisting of that same language code. When
 a document is not found for a particular language, it will default to the
 English one, so you do not need to translate every page... any will help.
