@@ -72,6 +72,9 @@ class Editor {
             // We need to account for the gutter
             left += editor.renderer.gutterWidth;
 
+            // We need to account for the editor scroll
+            top -= editor.renderer.scrollTop;
+
             // If the word is an instruction (and not within a comment) then
             // popover the help text.
             let docHTML = null;
