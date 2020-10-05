@@ -28,3 +28,14 @@ gem 'thin'
 
 # Runs Rakefiles
 gem 'rake'
+
+# Testing
+gem 'capybara'
+gem 'rack-test', '~> 1.1.0', :require => 'rack/test'
+gem 'minitest', '~> 5.11.3', :require => 'minitest/autorun'
+gem 'selenium-webdriver'
+gem 'chromedriver-helper'
+gem 'capybara-selenium'
+gem "ansi"               # minitest colors
+gem "minitest-reporters" # minitest output
+gem "mocha", "~> 1.1.0"  # stubs

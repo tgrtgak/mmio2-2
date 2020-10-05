@@ -109,7 +109,7 @@ class RAWRS < Sinatra::Base
       end
 
       filename = :"guidance/#{lang.to_s}/#{page}"
-      if not File.exists?("views/#{filename}.md")
+      if not File.exist?("views/#{filename}.md")
         # default to the english docs if we cannot find the requested language
         filename = :"guidance/en/#{page}"
       end
