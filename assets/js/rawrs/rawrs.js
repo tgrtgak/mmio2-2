@@ -121,18 +121,35 @@ class RAWRS {
         }
         else {
             // Create and start the simulation (or restart, if it is running.)
-            let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", this._binary, this._console, this._video);
+
+            // Carry over last breakpoints
+            let bp = undefined;
+            if (RAWRS.simulator) {
+                bp = RAWRS.simulator.breakpoints;
+            }
+
+            let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", this._binary, this._console, this._video, bp);
             console.log(sim, this._binary);
 
             sim.on("quit", () => {
+                // Update the toolbar buttons
                 RAWRS.toolbar.setStatus("run", "success");
                 RAWRS.toolbar.setStatus("step", "disabled");
+
+                // Dump the registers
+                RAWRS.registerListing.unhighlight();
                 RAWRS.registerListing.update(sim.registers);
-                RAWRS._simulator = undefined;
+
+                if (RAWRS._clearBreakpoint) {
+                    sim.breakpointClear(RAWRS._clearBreakpoint);
+                    RAWRS._clearBreakpoint = false;
+                }
             });
 
             sim.on("breakpoint", () => {
+                // Update the toolbar buttons
                 RAWRS.toolbar.setStatus("step", "active");
+                RAWRS.toolbar.setStatus("run", "");
 
                 // Get register dump
                 RAWRS.registerListing.unhighlight();
@@ -144,9 +161,9 @@ class RAWRS {
                 // Highlight code line and scroll to it
                 RAWRS.codeListing.highlight(sim.pc.toString(16));
 
-                if (RAWRS._clearBreakpoint) {
+                if (RAWRS._clearBreakpoint != false) {
+                    sim.breakpointClear(RAWRS._clearBreakpoint);
                     RAWRS._clearBreakpoint = false;
-                    sim.breakpointClear(sim.pc.toString(16));
                 }
             });
 
@@ -198,7 +215,6 @@ class RAWRS {
             });
 
             RAWRS._simulator = sim;
-
             RAWRS.simulator.run();
         }
     }
@@ -218,8 +234,9 @@ class RAWRS {
             var info = RAWRS.codeListing.highlightedLine;
             RAWRS.codeListing.unhighlight();
             if (info && info.code == "ecall") {
-                RAWRS.simulator.breakpointSet((window.BigInt("0x" + info.address) + window.BigInt(4)).toString(16));
-                RAWRS._clearBreakpoint = true;
+                let address = (window.BigInt("0x" + info.address) + window.BigInt(4)).toString(16);
+                RAWRS.simulator.breakpointSet(address)
+                RAWRS._clearBreakpoint = address;
                 RAWRS.simulator.resume();
             }
             else {
@@ -240,6 +257,9 @@ class RAWRS {
         RAWRS.memoryListing.clear();
 
         var linkerScript = "SECTIONS { . = 0x00400000; .text : { *(.text) } . = 0x10010000; .data : { *(.data) } }";
+
+        // Destroy the current simulator
+        RAWRS._simulator = null;
 
         var assembler = new Assembler();
         var linker    = new Linker();

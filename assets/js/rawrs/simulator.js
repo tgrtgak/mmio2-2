@@ -9,7 +9,7 @@ class Simulator extends EventComponent {
      * @param {number} memorySize The size of memory in MiB.
      * @param {string} configurationURL The URL of the simulation configuration.
      */
-    constructor(memorySize, configurationURL, kernelBinaryOrURL, appBinaryOrURL, konsole, video) {
+    constructor(memorySize, configurationURL, kernelBinaryOrURL, appBinaryOrURL, konsole, video, breakpoints) {
         super();
 
         this._console = konsole;
@@ -23,6 +23,8 @@ class Simulator extends EventComponent {
         this._ready = false;
         this._running = false;
         this._paused = false;
+        this._breakpoints = [];
+        this._initialBreakpoints = breakpoints;
 
         this._console.on('keydown', (event) => {
             if (!event.repeat && this.running) {
@@ -224,6 +226,13 @@ class Simulator extends EventComponent {
         return this._paused;
     }
 
+    /**
+     * Returns the list of current breakpoints.
+     */
+    get breakpoints() {
+        return this._breakpoints;
+    }
+
     /*
      * Called internally when the simulator starts.
      */
@@ -262,6 +271,12 @@ class Simulator extends EventComponent {
                        0,    // net_state
                        "");  // drive_url
                       //*/
+
+        if (this._initialBreakpoints) {
+            this._initialBreakpoints.forEach( (address) => {
+                this.breakpointSet(address);
+            });
+        }
     }
 
     /*
@@ -388,6 +403,7 @@ class Simulator extends EventComponent {
         let low  = parseInt(address.slice(8), 16);
         // Call into emulator
         this._cpu_set_breakpoint(high, low);
+        this._breakpoints.push(address);
     }
 
     /**
@@ -402,6 +418,7 @@ class Simulator extends EventComponent {
         let low  = parseInt(address.slice(8), 16);
         // Call into emulator
         this._cpu_clear_breakpoint(high, low);
+        this._breakpoints.splice(this._breakpoints.indexOf(address), 1);
     }
 
     /**
