@@ -388,6 +388,7 @@ class FileList extends EventComponent {
 
         // Attaches event handlers to each dropdown button
         for (let i = 0; buttons && i < buttons.length; ++i) {
+            let dataPath = element.getAttribute('data-path');
             switch(buttons[i].getAttribute("data-action")) {
 
                 // "Copy to My Files" functionality
