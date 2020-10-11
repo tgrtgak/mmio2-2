@@ -386,7 +386,7 @@ class FileList extends EventComponent {
         let buttons = actionDropdown.querySelectorAll('button.action')
         let dataPath = atob(element.getAttribute('data-path'));
 
-        // Attaches event handlers to any dropdown options
+        // Attaches event handlers to each dropdown button
         for (let i = 0; buttons && i < buttons.length; ++i) {
             switch(buttons[i].getAttribute("data-action")) {
                 // "Copy to My Files" functionality
