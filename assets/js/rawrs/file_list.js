@@ -386,11 +386,9 @@ class FileList extends EventComponent {
         let buttons = actionDropdown.querySelectorAll('button.action')
         let dataPath = atob(element.getAttribute('data-path'));
 
-        // Attaches event handlers to each dropdown button
+        // Attaches event handlers to any dropdown options
         for (let i = 0; buttons && i < buttons.length; ++i) {
-            let dataPath = element.getAttribute('data-path');
             switch(buttons[i].getAttribute("data-action")) {
-
                 // "Copy to My Files" functionality
                 // Clones a preset directory or file element to user directory.
                 case "clone": 
@@ -433,7 +431,6 @@ class FileList extends EventComponent {
 
                         for (const entry of listing) {
                             if (entry.type === 'file') {
-
                                 // Loads the text of the file.
                                 const data = await this._storage.load(dataPath + '/' + entry.name);
 
