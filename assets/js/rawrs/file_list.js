@@ -391,12 +391,66 @@ class FileList extends EventComponent {
             switch(buttons[i].getAttribute("data-action")) {
                 // "Copy to My Files" functionality
                 // Clones a preset directory or file element to user directory.
-                case "clone": 
+                case "clone":
                     break;
 
                 // "Delete" functionality
                 // Deletes a directory or file element, and all of its contents.
-                case "delete": 
+                case "delete":
+                    // Deleting an individual file
+                    if (item.type === "file") {
+                        buttons[i].addEventListener("click", async (event) => {
+                            await this.revealPath(path);
+
+                            // Deletes the individual file.
+                            const data = await this._storage.remove(dataPath);
+
+                            // Removes the corresponding DOM elements.
+                            while (element.firstChild) {
+                                element.removeChild(element.firstChild);
+                            }
+
+                            // Removes itself.
+                            if (element.parentNode) {
+                                 element.parentNode.removeChild(element);
+                            }
+
+                            event.preventDefault();
+                            event.stopPropagation();
+                        });
+                    }
+                    
+                    // Deleting a directory and all of its contents
+                    else {
+                        buttons[i].addEventListener("click", async (event) => {
+                            await this.revealPath(path);
+
+                            // Collects every directory and file element.
+                            const listing = await this._storage.list(dataPath);
+    
+                            // Removes each individual file in the directory,
+                            // Removes any subdirectories implicitly.
+                            for (const entry of listing) {
+                                if (entry.type === 'file') {
+                                    await this._storage.remove(dataPath + '/' + entry.name);
+                                }
+                            }
+
+                            // Removes the corresponding DOM elements.
+                            while (element.firstChild) {
+                                element.removeChild(element.firstChild);
+                            }
+
+                            // Removes itself.
+                            if (element.parentNode) {
+                                 element.parentNode.removeChild(element);
+                            }
+    
+                            event.preventDefault();
+                            event.stopPropagation();
+                        });
+                    }
+
                     break;
 
                 // "Download" functionality
@@ -435,7 +489,7 @@ class FileList extends EventComponent {
                                 const data = await this._storage.load(dataPath + '/' + entry.name);
 
                                 // Stores the file,
-                                // Creates the subdirectories implicitly.
+                                // Creates any subdirectories implicitly.
                                 await zip.file(entry.name, data, {
                                     createFolders: true
                                 });
