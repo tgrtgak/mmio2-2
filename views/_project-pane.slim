@@ -20,6 +20,10 @@ ol
           li.dropdown-menu-option
             button.action data-action=:upload role=:menuitem
               | Upload Files
+          li.dropdown-menu-option.new-file style="display:none;"
+            input type=:text value="new-file"
+          li.dropdown-menu-option.upload-files style="display:none;"
+            input type=:file multiple=true accept=".s"
       ol
   template.file
     li.file
@@ -42,7 +46,6 @@ ol
           li.dropdown-menu-option
             button.action data-action=:download role=:menuitem
               | Download
-        input type=:text value="new-file" hidden=true
   -# Render all files in assets/files
   li.directory.root
     span.info
