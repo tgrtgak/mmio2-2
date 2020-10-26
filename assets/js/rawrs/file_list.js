@@ -382,13 +382,16 @@ class FileList extends EventComponent {
 
         // Updates path itself.
         element.setAttribute('data-path', btoa(path + '/' + item.name));
+
+        // Bind events
+        this.bind(element);
         
         let buttons = actionDropdown.querySelectorAll('button.action')
         let dataPath = atob(element.getAttribute('data-path'));
 
         // Attaches event handlers to each dropdown button
-        for (let i = 0; buttons && i < buttons.length; ++i) {
-            switch(buttons[i].getAttribute("data-action")) {
+        item.dropdown.on("click", async (action) => {
+            switch(action) {
                 // "Copy to My Files" functionality
                 // Clones a preset directory or file element to user directory.
                 case "clone":
@@ -399,76 +402,61 @@ class FileList extends EventComponent {
                 case "delete":
                     // Deleting an individual file
                     if (item.type === "file") {
-                        buttons[i].addEventListener("click", async (event) => {
-                            await this.revealPath(path);
+                        await this.revealPath(path);
 
-                            // Deletes the individual file.
-                            const data = await this._storage.remove(dataPath);
+                        // Deletes the individual file.
+                        const data = await this._storage.remove(dataPath);
 
-                            // Removes the corresponding DOM elements.
-                            while (element.firstChild) {
-                                element.removeChild(element.firstChild);
-                            }
+                        // Removes the corresponding DOM elements.
+                        while (element.firstChild) {
+                            element.removeChild(element.firstChild);
+                        }
 
-                            // Removes itself.
-                            if (element.parentNode) {
-                                 element.parentNode.removeChild(element);
-                            }
-
-                            event.preventDefault();
-                            event.stopPropagation();
-                        });
+                        // Removes itself.
+                        if (element.parentNode) {
+                                element.parentNode.removeChild(element);
+                        }
                     }
                     
                     // Deleting a directory and all of its contents
                     else {
-                        buttons[i].addEventListener("click", async (event) => {
-                            await this.revealPath(path);
+                        await this.revealPath(path);
 
-                            // Collects every directory and file element.
-                            const listing = await this._storage.list(dataPath);
-    
-                            // Removes each individual file in the directory,
-                            // Removes any subdirectories implicitly.
-                            for (const entry of listing) {
-                                if (entry.type === 'file') {
-                                    await this._storage.remove(dataPath + '/' + entry.name);
-                                }
-                            }
+                        // Collects every directory and file element.
+                        const listing = await this._storage.list(dataPath);
 
-                            // Removes the corresponding DOM elements.
-                            while (element.firstChild) {
-                                element.removeChild(element.firstChild);
+                        // Removes each individual file in the directory,
+                        // Removes any subdirectories implicitly.
+                        for (const entry of listing) {
+                            if (entry.type === 'file') {
+                                await this._storage.remove(dataPath + '/' + entry.name);
                             }
+                        }
 
-                            // Removes itself.
-                            if (element.parentNode) {
-                                 element.parentNode.removeChild(element);
-                            }
-    
-                            event.preventDefault();
-                            event.stopPropagation();
-                        });
+                        // Removes the corresponding DOM elements.
+                        while (element.firstChild) {
+                            element.removeChild(element.firstChild);
+                        }
+
+                        // Removes itself.
+                        if (element.parentNode) {
+                                element.parentNode.removeChild(element);
+                        }
                     }
 
                     break;
 
                 // "Download" functionality
                 // Downloads a file element to the client.
-                case "download": 
-                    buttons[i].addEventListener("click", async (event) => {
-                        await this.revealPath(path);
+                case "download":                
+                    await this.revealPath(path);
 
-                        // Loads the text of the file.
-                        const data = await this._storage.load(dataPath);
+                    // Loads the text of the file.
+                    const data = await this._storage.load(dataPath);
 
-                        // Creates and downloads the text blob to the client.
-                        const dataBlob = new Blob([data], {type: "text/plain;charset=utf-8"});
-                        await FileSaver.saveAs(dataBlob, item.name);
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                    });
+                    // Creates and downloads the text blob to the client.
+                    const dataBlob = new Blob([data], {type: "text/plain;charset=utf-8"});
+                    await FileSaver.saveAs(dataBlob, item.name);
 
                     break;
 
@@ -477,37 +465,32 @@ class FileList extends EventComponent {
                 case "downloadzip":
                     let zip = new JSZip();
 
-                    buttons[i].addEventListener("click", async (event) => {
-                        await this.revealPath(path);
+                    await this.revealPath(path);
 
-                        // Collects every directory and file element.
-                        const listing = await this._storage.list(dataPath);
+                    // Collects every directory and file element.
+                    const listing = await this._storage.list(dataPath);
 
-                        for (const entry of listing) {
-                            if (entry.type === 'file') {
-                                // Loads the text of the file.
-                                const data = await this._storage.load(dataPath + '/' + entry.name);
+                    for (const entry of listing) {
+                        if (entry.type === 'file') {
+                            // Loads the text of the file.
+                            const data = await this._storage.load(dataPath + '/' + entry.name);
 
-                                // Stores the file,
-                                // Creates any subdirectories implicitly.
-                                await zip.file(entry.name, data, {
-                                    createFolders: true
-                                });
-                            }
+                            // Stores the file,
+                            // Creates any subdirectories implicitly.
+                            await zip.file(entry.name, data, {
+                                createFolders: true
+                            });
                         }
-                    
-                        // Compresses every file in the directory.
-                        const content = await zip.generateAsync({
-                            type: "blob",
-                            compression: "DEFLATE"
-                        });
-
-                        // Downloads the directory to the client.
-                        await FileSaver.saveAs(content, dataPath.substring(1) + ".zip");
-
-                        event.preventDefault();
-                        event.stopPropagation();
+                    }
+                
+                    // Compresses every file in the directory.
+                    const content = await zip.generateAsync({
+                        type: "blob",
+                        compression: "DEFLATE"
                     });
+
+                    // Downloads the directory to the client.
+                    await FileSaver.saveAs(content, dataPath.substring(1) + ".zip");
 
                     break;
 
@@ -515,11 +498,33 @@ class FileList extends EventComponent {
                 // Renames the path of the file element.
                 case "rename": 
                     break;
-            }
-        }
+                
+                // "Upload Files" functionality
+                // Uploads file element(s) from the host to the directory.
+                case "upload":
+                    item.dropdown.staysOpen();
+                    let uploader = actionDropdown.querySelector("li.dropdown-menu-option.upload-files");
+                    
+                    for (const file of files) {
+                        const fileData = await file.text();
+                        const filePath = dataPath + "/" + file.name;
 
-        // Bind events
-        this.bind(element);
+                        await this._storage.save(filePath, fileData);
+
+                        const existingItem = this.itemFor(filePath);
+                        if (!existingItem) {
+                            const itemElement = this.newItem(item, dataPath);
+                            //await itemRoot.appendChild(itemElement);
+                        }
+                    }
+
+                    uploader.style.display = "block";
+                    buttons.forEach((button) => button.style.display = "block");
+                    
+
+                    break;
+            }
+        })
 
         // Return new item
         return element;
