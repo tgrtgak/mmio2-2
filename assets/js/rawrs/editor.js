@@ -21,32 +21,49 @@ class Editor {
         // Set the 'mode' for highlighting
         editor.session.setMode("ace/mode/assembly_riscv");
 
+
+        // Loads the Instructions tab
+        Editor.loadInstructionsTab();
+
+
         // Assign the completer
         var langTools = window.ace.require("ace/ext/language_tools");
         let completer = {
             getCompletions: function(editor, session, pos, prefix, callback) {
+                
+                let commandsTable = Editor.getCommandsTable();
+
+                let instructionsList = [];
+
+                for (var i = 0, row; i < commandsTable.rows.length; i++) {
+                    row = commandsTable.rows[i];
+                    let dict = {};
+                    dict["name"] = row.cells[0].innerText;
+                    dict["value"] = row.cells[0].innerText;
+                    dict["score"] = 100;
+                    dict["meta"] = 'instruction';
+                    instructionsList.push(dict);
+                }
+
                 // Return a list of relevant instructions
-                callback(null, [
-                    {name: 'ecall', value: 'ecall', score: 100, meta: 'instruction'},
-                    {name: 'li', value: 'li', score: 100, meta: 'instruction'},
-                    {name: 'la', value: 'la', score: 100, meta: 'instruction'},
-                ])
+                callback(null, instructionsList);
             },
             getDocTooltip: function(item) {
-                if (item.name === "li") {
-                    item.docHTML = "<code>li</code>: Load Immediate"
-                }
-                else if (item.name === "la") {
-                    item.docHTML = "<code>la</code>: Load Address"
-                }
-                else if (item.name === "ecall") {
-                    item.docHTML = "<code>ecall</code>: Environment Call"
+                // Gets the table with the list of commands 
+                let commandsTable = Editor.getCommandsTable();
+
+                let result = Editor.getDefinitionFromTable(commandsTable, item.name);
+
+                if (result !== null) {
+                    item.docHTML = "<code>" + item.name + "</code>: " + result;  // Adjusts the formatting of the output
                 }
             }
         };
 
         // Set the completer to our completer
         editor.completers = [completer];
+
+
 
         // Now, we look at supporting instruction 'popovers'
         // Hook into the mousemove event to track the mouse position:
@@ -75,26 +92,76 @@ class Editor {
             // We need to account for the editor scroll
             top -= editor.renderer.scrollTop;
 
+            // Gets the table with the list of commands 
+            let commandsTable = Editor.getCommandsTable();
+
             // If the word is an instruction (and not within a comment) then
             // popover the help text.
-            let docHTML = null;
-            if (word === "li") {
-                docHTML = "<code>li</code>: Load Immediate"
-            }
-            else if (word === "la") {
-                docHTML = "<code>la</code>: Load Address"
-            }
-            else if (word === "ecall") {
-                docHTML = "<code>ecall</code>: Environment Call"
-            }
+            // TODO: Add a check before this to determine if this is within a comment.
+            let docHTML = Editor.getDefinitionFromTable(commandsTable, word);
 
-            if (docHTML) {
+            if (docHTML !== null) {
+                docHTML = "<code>" + word + "</code>: " + docHTML;  // Adjusts the formatting of the output
                 Editor.showTooltip(docHTML, left, top);
             }
             else {
                 Editor.hideTooltip();
             }
         });
+    }
+
+    static loadInstructionsTab() {
+        document.querySelectorAll(".tabs").forEach( (tabStrip) => {
+            tabStrip.querySelectorAll(".tab > a, .tab > button").forEach( (tabButton) => {
+                var instructionsTabPanel = document.querySelector(".tab-panel#" + tabButton.getAttribute('aria-controls'));
+                if (instructionsTabPanel != null && instructionsTabPanel.getAttribute("data-pjax") === "guidance/instructions") {
+                    if (instructionsTabPanel) {
+
+                        // Check if the instructionsTab is PJAX loaded
+                        if (!instructionsTabPanel.classList.contains("pjax-loaded")) {
+                            var pjaxURL = instructionsTabPanel.getAttribute('data-pjax');
+                            if (pjaxURL) {
+                                // Fetch HTML page and get content at "body.documentation"
+                                instructionsTabPanel.classList.add("pjax-loaded");
+                                fetch(pjaxURL, {
+                                    credentials: 'include'
+                                }).then(function(response) {
+                                    return response.text();
+                                }).then(function(text) {
+                                    // Push text to dummy node
+                                    var dummy = document.createElement("div");
+                                    dummy.setAttribute('hidden', '');
+                                    dummy.innerHTML = text;
+                                    document.body.appendChild(dummy);
+                                    var innerElement = dummy.querySelector(".content.documentation");
+                                    instructionsTabPanel.innerHTML = "";
+                                    instructionsTabPanel.appendChild(innerElement);
+                                    dummy.remove();
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    // Gets the table with commands from the Instructions tab
+    static getCommandsTable() {
+        return document.getElementById("instruction-table-p").nextElementSibling;
+    }
+
+    // Gets the definition of a command given the table and name of the command    
+    static getDefinitionFromTable(commandsTable, word) {
+
+        var myXPath = ".//td[text()='" + word + "']";  // Builds the XPath
+        var leftCell = document.evaluate(myXPath, commandsTable, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;  // Gets the cell containing the instruction
+
+        if (leftCell === null) {
+            return null;
+        }
+
+        return leftCell.nextElementSibling.innerText;  // Returns the string version of the description
     }
 
     static hideTooltip() {

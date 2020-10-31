@@ -50,6 +50,9 @@ en:
     tutorials:
       tab:              "Tutorials"
 
+    instructions:
+      tab:              "Instructions"
+
   console:
     initial: |
       Console output. When you assemble something and stub your toe slightly, those errors will appear here.
