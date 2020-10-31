@@ -21,38 +21,66 @@ class Editor {
         // Set the 'mode' for highlighting
         editor.session.setMode("ace/mode/assembly_riscv");
 
+        // We want to populate these with the instruction documentation
+        Editor._instructionTable = {};
+        Editor._instructionsList = [];
+
+        // We want to populate these with the known labels/globals
+        // TODO: keep track of or parse the labels in the current file.
+        Editor._labelList = ["_testLabel", "_fooLabel"];
 
         // Loads the Instructions tab
-        Editor.loadInstructionsTab();
+        Editor.loadInstructionsTab().then( () => {
+            // Get the instruction listing
+            Editor._instructionTable = document.getElementById("instruction-table-p").nextElementSibling;
 
+            for (const row of Editor._instructionTable.rows) {
+                let dict = {};
+                dict["name"] = row.cells[0].innerText;
+                dict["value"] = row.cells[0].innerText;
+                dict["score"] = 100;
+                dict["meta"] = 'instruction';
+                Editor._instructionsList.push(dict);
+            };
+        });
 
         // Assign the completer
         var langTools = window.ace.require("ace/ext/language_tools");
         let completer = {
-            getCompletions: function(editor, session, pos, prefix, callback) {
-                
-                let commandsTable = Editor.getCommandsTable();
+            getCompletions: (editor, session, pos, prefix, callback) => {
+                // Based on the context, we should either show the instructions
+                // listing or the label listing.
+                let line = session.getLine(pos.row);
+                let linePrefix = line.substring(0, pos.column - prefix.length).trim();
 
-                let instructionsList = [];
+                // Get the first word on the line and assume it is an instruction
+                let instruction = linePrefix.split(" ")[0];
 
-                for (var i = 0, row; i < commandsTable.rows.length; i++) {
-                    row = commandsTable.rows[i];
-                    let dict = {};
-                    dict["name"] = row.cells[0].innerText;
-                    dict["value"] = row.cells[0].innerText;
-                    dict["score"] = 100;
-                    dict["meta"] = 'instruction';
-                    instructionsList.push(dict);
+                // Get the last character on the line before the current word
+                let lastCharacter = linePrefix[linePrefix.length - 1];
+
+                // Determine if it should be a label
+                let instructions = ["la", "bge"];
+                let isLabel = (instructions.indexOf(instruction) >= 0 && lastCharacter == ",");
+
+                if (isLabel) {
+                    // Return a list of relevant labels
+                    callback(null, Editor._labelList.map( (label) => {
+                        return {
+                            name: label,
+                            value: label,
+                            score: 100,
+                            meta: 'label'
+                        };
+                    }));
                 }
-
-                // Return a list of relevant instructions
-                callback(null, instructionsList);
+                else if (!instruction) {
+                    // Return a list of relevant instructions
+                    callback(null, Editor._instructionsList);
+                }
             },
-            getDocTooltip: function(item) {
-                // Gets the table with the list of commands 
-                let commandsTable = Editor.getCommandsTable();
-
-                let result = Editor.getDefinitionFromTable(commandsTable, item.name);
+            getDocTooltip: (item) => {
+                let result = Editor.getDefinitionFromTable(item.name);
 
                 if (result !== null) {
                     item.docHTML = "<code>" + item.name + "</code>: " + result;  // Adjusts the formatting of the output
@@ -63,11 +91,9 @@ class Editor {
         // Set the completer to our completer
         editor.completers = [completer];
 
-
-
         // Now, we look at supporting instruction 'popovers'
         // Hook into the mousemove event to track the mouse position:
-        editor.on("mousemove", function(event) {
+        editor.on("mousemove", (event) => {
             // Get the position within the document
             var pos = event.getDocumentPosition();
 
@@ -92,13 +118,10 @@ class Editor {
             // We need to account for the editor scroll
             top -= editor.renderer.scrollTop;
 
-            // Gets the table with the list of commands 
-            let commandsTable = Editor.getCommandsTable();
-
             // If the word is an instruction (and not within a comment) then
             // popover the help text.
             // TODO: Add a check before this to determine if this is within a comment.
-            let docHTML = Editor.getDefinitionFromTable(commandsTable, word);
+            let docHTML = Editor.getDefinitionFromTable(word);
 
             if (docHTML !== null) {
                 docHTML = "<code>" + word + "</code>: " + docHTML;  // Adjusts the formatting of the output
@@ -110,52 +133,60 @@ class Editor {
         });
     }
 
+    /**
+     * Ensures the instructions tab is loaded.
+     *
+     * This tab contains the documentation for each instruction. This is parsed
+     * and used for auto-complete and popover hints on the editor.
+     *
+     * Acts as a promise that resolves when the tab is loaded.
+     */
     static loadInstructionsTab() {
-        document.querySelectorAll(".tabs").forEach( (tabStrip) => {
-            tabStrip.querySelectorAll(".tab > a, .tab > button").forEach( (tabButton) => {
-                var instructionsTabPanel = document.querySelector(".tab-panel#" + tabButton.getAttribute('aria-controls'));
-                if (instructionsTabPanel != null && instructionsTabPanel.getAttribute("data-pjax") === "guidance/instructions") {
-                    if (instructionsTabPanel) {
+        return new Promise( (resolve, reject) => {
+            document.querySelectorAll(".tabs").forEach( (tabStrip) => {
+                tabStrip.querySelectorAll(".tab > a, .tab > button").forEach( (tabButton) => {
+                    var instructionsTabPanel = document.querySelector(".tab-panel#" + tabButton.getAttribute('aria-controls'));
+                    if (instructionsTabPanel != null && instructionsTabPanel.getAttribute("data-pjax") === "guidance/instructions") {
+                        if (instructionsTabPanel) {
 
-                        // Check if the instructionsTab is PJAX loaded
-                        if (!instructionsTabPanel.classList.contains("pjax-loaded")) {
-                            var pjaxURL = instructionsTabPanel.getAttribute('data-pjax');
-                            if (pjaxURL) {
-                                // Fetch HTML page and get content at "body.documentation"
-                                instructionsTabPanel.classList.add("pjax-loaded");
-                                fetch(pjaxURL, {
-                                    credentials: 'include'
-                                }).then(function(response) {
-                                    return response.text();
-                                }).then(function(text) {
-                                    // Push text to dummy node
-                                    var dummy = document.createElement("div");
-                                    dummy.setAttribute('hidden', '');
-                                    dummy.innerHTML = text;
-                                    document.body.appendChild(dummy);
-                                    var innerElement = dummy.querySelector(".content.documentation");
-                                    instructionsTabPanel.innerHTML = "";
-                                    instructionsTabPanel.appendChild(innerElement);
-                                    dummy.remove();
-                                });
+                            // Check if the instructionsTab is PJAX loaded
+                            if (!instructionsTabPanel.classList.contains("pjax-loaded")) {
+                                var pjaxURL = instructionsTabPanel.getAttribute('data-pjax');
+                                if (pjaxURL) {
+                                    // Fetch HTML page and get content at "body.documentation"
+                                    instructionsTabPanel.classList.add("pjax-loaded");
+                                    fetch(pjaxURL, {
+                                        credentials: 'include'
+                                    }).then(function(response) {
+                                        return response.text();
+                                    }).then(function(text) {
+                                        // Push text to dummy node
+                                        var dummy = document.createElement("div");
+                                        dummy.setAttribute('hidden', '');
+                                        dummy.innerHTML = text;
+                                        document.body.appendChild(dummy);
+                                        var innerElement = dummy.querySelector(".content.documentation");
+                                        instructionsTabPanel.innerHTML = "";
+                                        instructionsTabPanel.appendChild(innerElement);
+                                        dummy.remove();
+
+                                        resolve();
+                                    });
+                                }
                             }
                         }
                     }
-                }
+                });
             });
         });
     }
 
-    // Gets the table with commands from the Instructions tab
-    static getCommandsTable() {
-        return document.getElementById("instruction-table-p").nextElementSibling;
-    }
-
-    // Gets the definition of a command given the table and name of the command    
-    static getDefinitionFromTable(commandsTable, word) {
-
-        var myXPath = ".//td[text()='" + word + "']";  // Builds the XPath
-        var leftCell = document.evaluate(myXPath, commandsTable, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;  // Gets the cell containing the instruction
+    /**
+     * Gets the definition of an instruction and instruction name.
+     */
+    static getDefinitionFromTable(instruction) {
+        var myXPath = ".//td[text()='" + instruction + "']";  // Builds the XPath
+        var leftCell = document.evaluate(myXPath, Editor._instructionTable, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;  // Gets the cell containing the instruction
 
         if (leftCell === null) {
             return null;
