@@ -1,2 +1,8 @@
 dialog#dialog-upload-files
-  input.upload-files type=:file multiple=true accept=".s"
+  input#input-choose-files type=:file multiple=true accept=".s"
+  label#label-choose-files for="choose-files"
+    | Choose Files
+  button#button-upload-files disabled=true
+    | Upload Files
+  button#button-quit-upload
+    | Quit Upload
