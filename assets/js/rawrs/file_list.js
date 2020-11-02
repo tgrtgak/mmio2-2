@@ -117,7 +117,7 @@ class FileList extends EventComponent {
 
     /**
      * Activates the "Upload Files" button on the modal on change.
-    */
+     */
     chooseFiles() {
         if (this._inputChooseFiles.files.length) {
             this._uploadFilesButton.disabled = false;
@@ -128,7 +128,7 @@ class FileList extends EventComponent {
 
     /** 
      * Closes the modal.
-    */
+     */
     async quitUpload() {
         this._uploadFilesButton.disabled = true;
 
@@ -139,7 +139,7 @@ class FileList extends EventComponent {
 
     /**
      * Uploads file(s) as file element(s) into the given directory and closes the modal upon completion.
-    */
+     */
     async uploadFiles() {
         for (const file of this._inputChooseFiles.files) {
             const fileData = await file.text();
