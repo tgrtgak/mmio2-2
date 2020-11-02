@@ -14,6 +14,9 @@ ol
           li.dropdown-menu-option
             button.action data-action=:delete role=:menuitem
               | Delete
+          li.dropdown-menu-option
+            button.action data-action=:downloadzip role=:menuitem
+              | Download ZIP
       ol
   template.file
     li.file
@@ -33,6 +36,9 @@ ol
           li.dropdown-menu-option
             button.action data-action=:delete role=:menuitem
               | Delete
+          li.dropdown-menu-option
+            button.action data-action=:download role=:menuitem
+              | Download
   -# Render all files in assets/files
   li.directory.root
     span.info

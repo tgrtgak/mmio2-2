@@ -71,3 +71,5 @@ This program would not be possible if not for the existing and ongoing effort pr
 * [npm](https://www.npmjs.com/)
 * [webpack](https://webpack.js.org/)
 * [babel](https://babeljs.io/)
+* [FileSaver.js](https://github.com/eligrey/FileSaver.js/)
+* [JSZip](https://stuk.github.io/jszip/)
