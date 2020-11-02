@@ -16,8 +16,6 @@ class Dropdown extends EventComponent {
     constructor(element) {
         super();
 
-        this._close = true;
-
         this._element = element;
 
         this._dropdown = element.nextElementSibling;
@@ -27,8 +25,8 @@ class Dropdown extends EventComponent {
         this._dropdown.querySelectorAll("button").forEach( (button) => {
             button.addEventListener("click", (event) => {
                 this.trigger("click", button.getAttribute("data-action"));
-                this.blurEvent(null, this._close);
-                this._close = true;
+
+                this.blurEvent(null, true);
 
                 event.preventDefault();
                 event.stopPropagation();
@@ -118,10 +116,6 @@ class Dropdown extends EventComponent {
      */
     get element() {
         return this._element;
-    }
-
-    staysOpen() {
-        this._close = true;
     }
 
     /**
