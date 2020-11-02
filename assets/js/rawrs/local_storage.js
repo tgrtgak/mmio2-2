@@ -223,7 +223,7 @@ class LocalStorage {
             let name = path.substring(last + 1);
             path = path.substring(0, last);
 
-            let listing = await this.list(path);
+            let listing = JSON.parse(await this.retrieve('directory-' + path));            
 
             // Remove the file from the listing
             listing.splice(listing.indexOf(type + '-' + name));
