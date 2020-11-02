@@ -5,6 +5,7 @@
   "main": "webpack.config.js",
   "dependencies": {
     "big-integer": "^1.6.48",
+    "dialog-polyfill": "^0.5.3",
     "element-qsa-scope": "^1.1.0",
     "element-remove": "^1.0.4",
     "element-resize-event": "^2.0.7",
