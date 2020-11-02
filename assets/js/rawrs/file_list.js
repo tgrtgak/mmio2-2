@@ -7,6 +7,7 @@ import Util from './util.js';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
 import Editor from './editor';
+import dialogPolyfill from 'dialog-polyfill';
 
 /**
  * This represents the file listing.
@@ -55,6 +56,17 @@ class FileList extends EventComponent {
                 event.preventDefault();
             });
         }
+
+        this._dialog = document.body.querySelector("dialog#dialog-upload-files");
+
+        this._inputChooseFiles = this._dialog.querySelector("input#input-choose-files");
+        this._inputChooseFiles.addEventListener("change", this.chooseFiles.bind(this));
+
+        this._quitUploadButton = this._dialog.querySelector("button#button-quit-upload");
+        this._quitUploadButton.addEventListener("click", this.quitUpload.bind(this));
+
+        this._uploadFilesButton = this._dialog.querySelector("button#button-upload-files");
+        this._uploadFilesButton.addEventListener("click", this.uploadFiles.bind(this));
     }
 
     /**
@@ -100,6 +112,58 @@ class FileList extends EventComponent {
     get startupItem() {
         let path = this.startupFile;
         return this.itemFor(path);
+    }
+
+    /*
+    * Activates the "Upload Files" button on the modal on change.
+    */
+    chooseFiles() {
+        if (this._inputChooseFiles.files.length) {
+            this._uploadFilesButton.disabled = false;
+        } else {
+            this._uploadFilesButton.disabled = true;
+        }
+    }
+
+    /*
+    * Closes the modal.
+    */
+    async quitUpload() {
+        this._uploadFilesButton.disabled = true;
+
+        //Empties out the current selected files.
+        this._inputChooseFiles.value = null;
+        await this._dialog.close();
+    }
+
+    /*
+    * Uploads file(s) as file element(s) into the given directory and closes the modal upon completion.
+    */
+    async uploadFiles() {
+        for (const file of this._inputChooseFiles.files) {
+            const fileData = await file.text();
+            const filePath = this._uploadPath + "/" + file.name;
+
+            //Places the item only if it does not already exist in the given directory.
+            const existingItem = this.itemFor(filePath);
+            if (!existingItem) {
+
+                //Saves the file and its contents.
+                await this._storage.save(filePath.substring(1), fileData);
+
+                //Creates the file item.
+                const newItem = {name: file.name, type: "file"};
+                const itemElement = this.newItem(newItem, this._uploadPath);
+
+                //Adds file element to the DOM.
+                const parentDirectory = this.itemFor(this._uploadPath);
+                const parentListing = parentDirectory.querySelector(":scope > ol");
+                parentListing.appendChild(itemElement);
+            }
+        }
+
+        //Closes modal upon successful completion.
+        await this.quitUpload();
     }
 
     /**
@@ -386,145 +450,129 @@ class FileList extends EventComponent {
         // Bind events
         this.bind(element);
         
-        let buttons = actionDropdown.querySelectorAll('button.action')
         let dataPath = atob(element.getAttribute('data-path'));
 
         // Attaches event handlers to each dropdown button
-        item.dropdown.on("click", async (action) => {
-            switch(action) {
-                // "Copy to My Files" functionality
-                // Clones a preset directory or file element to user directory.
-                case "clone":
-                    break;
+        if (element.dropdown) {
+            element.dropdown.on("click", async (action) => {
+                switch(action) {
+                    // "Copy to My Files" functionality
+                    // Clones a preset directory or file element to user directory.
+                    case "clone":
+                        break;
 
-                // "Delete" functionality
-                // Deletes a directory or file element, and all of its contents.
-                case "delete":
-                    // Deleting an individual file
-                    if (item.type === "file") {
+                    // "Delete" functionality
+                    // Deletes a directory or file element, and all of its contents.
+                    case "delete":
+                        // Deleting an individual file
+                        if (item.type === "file") {
+                            await this.revealPath(path);
+
+                            // Deletes the individual file.
+                            const data = await this._storage.remove(dataPath);
+
+                            // Removes the corresponding DOM elements.
+                            while (element.firstChild) {
+                                element.removeChild(element.firstChild);
+                            }
+
+                            // Removes itself.
+                            if (element.parentNode) {
+                                    element.parentNode.removeChild(element);
+                            }
+                        }
+                        
+                        // Deleting a directory and all of its contents
+                        else {
+                            await this.revealPath(path);
+
+                            // Collects every directory and file element.
+                            const listing = await this._storage.list(dataPath);
+
+                            // Removes each individual file in the directory,
+                            // Removes any subdirectories implicitly.
+                            for (const entry of listing) {
+                                if (entry.type === 'file') {
+                                    await this._storage.remove(dataPath + '/' + entry.name);
+                                }
+                            }
+
+                            // Removes the corresponding DOM elements.
+                            while (element.firstChild) {
+                                element.removeChild(element.firstChild);
+                            }
+
+                            // Removes itself.
+                            if (element.parentNode) {
+                                    element.parentNode.removeChild(element);
+                            }
+                        }
+
+                        break;
+
+                    // "Download" functionality
+                    // Downloads a file element to the client.
+                    case "download":                
                         await this.revealPath(path);
 
-                        // Deletes the individual file.
-                        const data = await this._storage.remove(dataPath);
+                        // Loads the text of the file.
+                        const data = await this._storage.load(dataPath);
 
-                        // Removes the corresponding DOM elements.
-                        while (element.firstChild) {
-                            element.removeChild(element.firstChild);
-                        }
+                        // Creates and downloads the text blob to the client.
+                        const dataBlob = new Blob([data], {type: "text/plain;charset=utf-8"});
+                        await FileSaver.saveAs(dataBlob, item.name);
 
-                        // Removes itself.
-                        if (element.parentNode) {
-                                element.parentNode.removeChild(element);
-                        }
-                    }
-                    
-                    // Deleting a directory and all of its contents
-                    else {
+                        break;
+
+                    // "Download ZIP" functionality
+                    // Downloads a directory as a ZIP file, and all of its contents, to the client.
+                    case "downloadzip":
+                        let zip = new JSZip();
+
                         await this.revealPath(path);
 
                         // Collects every directory and file element.
                         const listing = await this._storage.list(dataPath);
 
-                        // Removes each individual file in the directory,
-                        // Removes any subdirectories implicitly.
                         for (const entry of listing) {
                             if (entry.type === 'file') {
-                                await this._storage.remove(dataPath + '/' + entry.name);
+                                // Loads the text of the file.
+                                const data = await this._storage.load(dataPath + '/' + entry.name);
+
+                                // Stores the file,
+                                // Creates any subdirectories implicitly.
+                                await zip.file(entry.name, data, {
+                                    createFolders: true
+                                });
                             }
                         }
-
-                        // Removes the corresponding DOM elements.
-                        while (element.firstChild) {
-                            element.removeChild(element.firstChild);
-                        }
-
-                        // Removes itself.
-                        if (element.parentNode) {
-                                element.parentNode.removeChild(element);
-                        }
-                    }
-
-                    break;
-
-                // "Download" functionality
-                // Downloads a file element to the client.
-                case "download":                
-                    await this.revealPath(path);
-
-                    // Loads the text of the file.
-                    const data = await this._storage.load(dataPath);
-
-                    // Creates and downloads the text blob to the client.
-                    const dataBlob = new Blob([data], {type: "text/plain;charset=utf-8"});
-                    await FileSaver.saveAs(dataBlob, item.name);
-
-                    break;
-
-                // "Download ZIP" functionality
-                // Downloads a directory as a ZIP file, and all of its contents, to the client.
-                case "downloadzip":
-                    let zip = new JSZip();
-
-                    await this.revealPath(path);
-
-                    // Collects every directory and file element.
-                    const listing = await this._storage.list(dataPath);
-
-                    for (const entry of listing) {
-                        if (entry.type === 'file') {
-                            // Loads the text of the file.
-                            const data = await this._storage.load(dataPath + '/' + entry.name);
-
-                            // Stores the file,
-                            // Creates any subdirectories implicitly.
-                            await zip.file(entry.name, data, {
-                                createFolders: true
-                            });
-                        }
-                    }
-                
-                    // Compresses every file in the directory.
-                    const content = await zip.generateAsync({
-                        type: "blob",
-                        compression: "DEFLATE"
-                    });
-
-                    // Downloads the directory to the client.
-                    await FileSaver.saveAs(content, dataPath.substring(1) + ".zip");
-
-                    break;
-
-                // "Rename" functionality
-                // Renames the path of the file element.
-                case "rename": 
-                    break;
-                
-                // "Upload Files" functionality
-                // Uploads file element(s) from the host to the directory.
-                case "upload":
-                    item.dropdown.staysOpen();
-                    let uploader = actionDropdown.querySelector("li.dropdown-menu-option.upload-files");
                     
-                    for (const file of files) {
-                        const fileData = await file.text();
-                        const filePath = dataPath + "/" + file.name;
+                        // Compresses every file in the directory.
+                        const content = await zip.generateAsync({
+                            type: "blob",
+                            compression: "DEFLATE"
+                        });
 
-                        await this._storage.save(filePath, fileData);
+                        // Downloads the directory to the client.
+                        await FileSaver.saveAs(content, dataPath.substring(1) + ".zip");
 
-                        const existingItem = this.itemFor(filePath);
-                        if (!existingItem) {
-                            const itemElement = this.newItem(item, dataPath);
-                            //await itemRoot.appendChild(itemElement);
-                        }
-                    }
+                        break;
 
-                    uploader.style.display = "block";
-                    buttons.forEach((button) => button.style.display = "block");
+                    // "Rename" functionality
+                    // Renames the path of the file element.
+                    case "rename": 
+                        break;
                     
-
-                    break;
-            }
-        })
+                    // "Upload Files" functionality
+                    // Shows the modal wherein the user may upload file(s) to the given directory.
+                    case "upload":
+                        dialogPolyfill.registerDialog(this._dialog);
+                        this._dialog.showModal();
+                        this._uploadPath = dataPath;
+                        break;
+                }
+            })
+        }
 
         // Return new item
         return element;
