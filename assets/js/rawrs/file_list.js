@@ -57,6 +57,7 @@ class FileList extends EventComponent {
             });
         }
 
+        //Bind events to the modal
         this._dialog = document.body.querySelector("dialog#dialog-upload-files");
 
         this._inputChooseFiles = this._dialog.querySelector("input#input-choose-files");
@@ -114,8 +115,8 @@ class FileList extends EventComponent {
         return this.itemFor(path);
     }
 
-    /*
-    * Activates the "Upload Files" button on the modal on change.
+    /**
+     * Activates the "Upload Files" button on the modal on change.
     */
     chooseFiles() {
         if (this._inputChooseFiles.files.length) {
@@ -125,8 +126,8 @@ class FileList extends EventComponent {
         }
     }
 
-    /*
-    * Closes the modal.
+    /** 
+     * Closes the modal.
     */
     async quitUpload() {
         this._uploadFilesButton.disabled = true;
@@ -136,8 +137,8 @@ class FileList extends EventComponent {
         await this._dialog.close();
     }
 
-    /*
-    * Uploads file(s) as file element(s) into the given directory and closes the modal upon completion.
+    /**
+     * Uploads file(s) as file element(s) into the given directory and closes the modal upon completion.
     */
     async uploadFiles() {
         for (const file of this._inputChooseFiles.files) {
