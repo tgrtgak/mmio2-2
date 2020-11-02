@@ -8,6 +8,8 @@
     "element-qsa-scope": "^1.1.0",
     "element-remove": "^1.0.4",
     "element-resize-event": "^2.0.7",
+    "file-saver": "^2.0.2",
+    "jszip": "^3.5.0",
     "xterm": "^4.9.0",
     "xterm-addon-fit": "^0.4.0"
   },

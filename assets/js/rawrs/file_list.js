@@ -4,6 +4,8 @@ import EventComponent from './event_component.js';
 import LocalStorage from './local_storage.js';
 import Dropdown from './dropdown.js';
 import Util from './util.js';
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
 
 /**
  * This represents the file listing.
@@ -382,6 +384,89 @@ class FileList extends EventComponent {
 
         // Updates path itself.
         element.setAttribute('data-path', path + '/' + item.name);
+        
+        let buttons = actionDropdown.querySelectorAll('button.action')
+        let dataPath = element.getAttribute('data-path');
+
+        // Attaches event handlers to each dropdown button
+        for (let i = 0; buttons && i < buttons.length; ++i) {
+            switch(buttons[i].getAttribute("data-action")) {
+
+                // "Copy to My Files" functionality
+                // Clones a preset directory or file element to user directory.
+                case "clone": 
+                    break;
+
+                // "Delete" functionality
+                // Deletes a directory or file element, and all of its contents.
+                case "delete": 
+                    break;
+
+                // "Download" functionality
+                // Downloads a file element to the client.
+                case "download": 
+                    buttons[i].addEventListener("click", async (event) => {
+                        await this.revealPath(path);
+
+                        // Loads the text of the file.
+                        const data = await this._storage.load(dataPath);
+
+                        // Creates and downloads the text blob to the client.
+                        const dataBlob = new Blob([data], {type: "text/plain;charset=utf-8"});
+                        await FileSaver.saveAs(dataBlob, item.name);
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                    });
+
+                    break;
+
+                // "Download ZIP" functionality
+                // Downloads a directory as a ZIP file, and all of its contents, to the client.
+                case "downloadzip":
+                    let zip = new JSZip();
+
+                    buttons[i].addEventListener("click", async (event) => {
+                        await this.revealPath(path);
+
+                        // Collects every directory and file element.
+                        const listing = await this._storage.list(dataPath);
+
+                        for (const entry of listing) {
+                            if (entry.type === 'file') {
+
+                                // Loads the text of the file.
+                                const data = await this._storage.load(dataPath + '/' + entry.name);
+
+                                // Stores the file,
+                                // Creates the subdirectories implicitly.
+                                await zip.file(entry.name, data, {
+                                    createFolders: true
+                                });
+                            }
+                        }
+                    
+                        // Compresses every file in the directory.
+                        const content = await zip.generateAsync({
+                            type: "blob",
+                            compression: "DEFLATE"
+                        });
+
+                        // Downloads the directory to the client.
+                        await FileSaver.saveAs(content, dataPath.substring(1) + ".zip");
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                    });
+
+                    break;
+
+                // "Rename" functionality
+                // Renames the path of the file element.
+                case "rename": 
+                    break;
+            }
+        }
 
         // Bind events
         this.bind(element);
@@ -391,7 +476,7 @@ class FileList extends EventComponent {
     }
 
     /**
-     * Retrieves the item element for the given pgth.
+     * Retrieves the item element for the given path.
      */
     itemFor(path) {
         if (path[0] == '/') {
