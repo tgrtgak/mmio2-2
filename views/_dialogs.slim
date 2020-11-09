@@ -1,8 +1,24 @@
 dialog#dialog-upload-files
   input#input-choose-files type=:file multiple=true
-  label#label-choose-files for="choose-files"
-    | Choose Files
-  button#button-upload-files disabled=true
-    | Upload Files
-  button#button-quit-upload
-    | Quit Upload
+  button#button-cancel-upload
+    | Cancel
+  button#button-complete-upload
+    | Submit
+  .upload-zone
+    label.drop-area for="input-choose-files" aria-label="Select to upload your files" role="button"
+      .drop-area-header
+        | Drag & Drop
+      .drop-area-caption
+        | Any files accepted. Click to browse.
+    .drop-preview-header
+      .drop-preview-header-file-name
+        | Name
+      .drop-preview-header-file-size
+        | Size
+    .drop-previews
+      .drop-preview
+        .drop-preview-file-name
+          span.file-name
+        .drop-preview-file-size
+          span.file-size
+        .drop-preview-remove-file
