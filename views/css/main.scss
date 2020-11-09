@@ -1033,3 +1033,98 @@ iframe {
     padding: 0;
   }
 }
+
+dialog#dialog-upload-files {
+    height: 40%;
+    width: 35;
+    overflow: scroll;
+    text-align: center;
+    color: black;
+    font-family: 'Lato', sans-serif;
+
+    button#button-complete-upload {
+        background-color: #46b1e4;
+        font-family: 'Lato', sans-serif;
+        border-width: 0;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    button#button-cancel-upload {
+        background-color: #d243c6;
+        font-family: 'Lato', sans-serif;
+        border-width: 0;
+        display: inline-block;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+
+    input#input-choose-files {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .upload-zone {
+        height: 90%;
+        width: 90%;
+
+        label.drop-area {
+            background-color: #d243c6;
+            background-color: rgb(211,211,211);
+            display: inline-block;
+            border: 3px dotted black;
+            cursor: pointer;
+            height: 90%;
+            width: 90%;
+
+            .drop-area-header {
+                font-size: 1.4em;
+                font-weight: 700;
+                padding: 25px;
+            }
+
+            .drop-area-caption {
+                font-size: 1.05em;
+                font-weight: 250;
+            }
+        }
+
+        .drop-preview-header {
+            .drop-preview-header-file-name {
+                font-size: 1em;
+                font-weight: 700;
+            }
+
+            .drop-preview-header-file-size {
+                font-size: 1em;
+                font-weight: 700;
+            }
+        }
+
+        .drop-previews {
+            .drop-preview {
+                .drop-preview-file-name {
+                    span.file-name {
+                        font-size: 1em;
+                        font-weight: 700;
+                    }
+                }
+
+                .drop-preview-file-size {
+                    span.file-size {
+                        font-size: 1em;
+                        font-weight: 700;
+                    }
+                }
+
+                .drop-preview-remove-file {
+                
+                }
+            }
+        }
+    }
+}
