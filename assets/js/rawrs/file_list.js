@@ -13,6 +13,7 @@ import dialogPolyfill from 'dialog-polyfill';
  * This represents the file listing.
  */
 class FileList extends EventComponent {
+
     /**
      * Create a new instance of a file list for the given root element.
      *
@@ -59,15 +60,161 @@ class FileList extends EventComponent {
 
         //Bind events to the modal
         this._dialog = document.body.querySelector("dialog#dialog-upload-files");
+        this._dialog.addEventListener("drop", this.addPreviewFilesOnDrop.bind(this));
+        this._dialog.addEventListener("dragover", this.dragoverFiles.bind(this));
 
-        this._inputChooseFiles = this._dialog.querySelector("input#input-choose-files");
-        this._inputChooseFiles.addEventListener("change", this.chooseFiles.bind(this));
+        this._previewFiles = [];
 
-        this._quitUploadButton = this._dialog.querySelector("button#button-quit-upload");
-        this._quitUploadButton.addEventListener("click", this.quitUpload.bind(this));
+        this._dropArea = this._dialog.querySelector("input#input-choose-files");
+        this._dropArea.addEventListener("change", this.addPreviewFiles.bind(this));
 
-        this._uploadFilesButton = this._dialog.querySelector("button#button-upload-files");
-        this._uploadFilesButton.addEventListener("click", this.uploadFiles.bind(this));
+        this._cancelUploadButton = this._dialog.querySelector("button#button-cancel-upload");
+        this._cancelUploadButton.addEventListener("click", this.cancelUpload.bind(this));
+
+        this._completeUploadButton = this._dialog.querySelector("button#button-complete-upload");
+        this._completeUploadButton.addEventListener("click", this.completeUpload.bind(this));
+
+        this._dropPreviews = this._dialog.querySelector(".upload-zone > .drop-previews");
+    }
+
+    /**
+     * Displays bytes in terms of larger units if possible up to 2 decimal places.
+     * 
+     * @param {Number} bytes The number of bytes.
+     * @returns {string} The display of the number of bytes.
+     */
+    displayBytes(bytes) {
+        if (bytes === 0) return "0 Bytes";
+
+        // Realistically will not encounter terabytes or more being uploaded.
+        const units = ['Bytes', 'KB', 'MB', 'GB'];
+
+        const power = Math.floor(Math.log(bytes) / Math.log(1024));
+        return parseFloat((bytes / Math.pow(1024, power)).toFixed(2)) + ' ' + units[power];
+    }
+
+    /**
+     * Creates a preview file and adds it to the modal.
+     * 
+     * @param {File} file The file from the user.
+     */
+    addPreviewFile(file) {
+        let filePreview = this._dropPreviews.querySelector(".drop-preview").cloneNode(true);
+
+        filePreview.querySelector("span.file-name").textContent = file.name;
+        filePreview.querySelector("span.file-size").textContent = this.displayBytes(file.size);
+
+        filePreview.querySelector(".drop-preview-remove-file").addEventListener("click", () => {
+            this._dropPreviews.removeChild(filePreview);
+            let index = this._previewFiles.indexOf(file);
+
+            if (index != -1) {
+                this._previewFiles.splice(index, 1);
+            }
+
+            if (this._previousFiles.size === 0) {
+                this._dialog.querySelector(".upload-zone > label.drop-area").style.visible = true;
+            }
+        });
+
+        this._dropPreviews.appendChild(filePreview);
+        this._previewFiles.push(file);
+    }
+
+    /**
+     * Adds preview files that are drag-and-dropped.
+     * 
+     * @param {Event} event The drop event to be handled.
+     */
+    addPreviewFilesOnDrop(event) {
+        //Prevents the file from opening in another tab.
+        event.preventDefault();
+        
+        //Access the file(s) using DataTransferItemList interface.
+        if (event.dataTransfer.items) {
+            for (var i = 0; i < event.dataTransfer.items.length; i++) {
+                if (event.dataTransfer.items[i].kind === 'file') {
+                    let file = event.dataTransfer.items[i].getAsFile();
+                    this.addPreviewFile(file);
+                }
+            }
+        } 
+        
+        // Otherwise, access the file(s) using DataTransfer interface.
+        else {
+            for (var i = 0; i < event.dataTransfer.files.length; i++) {
+                this.addPreviewFile(event.dataTransfer.files[i]);
+            }
+        }
+
+        let dropArea = this._dialog.querySelector(".upload-zone > label.drop-area");
+        if (dropArea.style.visible) {
+            dropArea.style.visible = false;
+        }
+    }
+
+    dragoverFiles(event) {
+        event.preventDefault();
+    }
+
+    /**
+     * Adds preview files on click.
+     */
+    addPreviewFiles() {
+        let input = this._dialog.querySelector("input#input-choose-files");
+        let files = input.files;
+        for (let i = 0; i < files.length; ++i) {
+            this.addPreviewFile(files[i]);
+        }
+
+        input.value = null;
+
+        let dropArea = this._dialog.querySelector(".upload-zone > label.drop-area");
+        if (dropArea.style.visible) {
+            dropArea.style.visible = false;
+        }
+    }
+    
+    /** 
+     * Closes the modal.
+     */
+    async cancelUpload() {
+        //Empties out the current selected files.
+        await this._dialog.close();
+    }
+
+    /**
+     * Uploads file(s) as file element(s) into the given directory and closes the modal upon completion.
+     */
+    async completeUpload() {
+        if (this._previewFiles.length === 0) return;
+
+        for (const file of this._previewFiles) {
+            const fileData = await file.text();
+            const filePath = this._uploadPath + "/" + file.name;
+
+            //Places the item only if it does not already exist in the given directory.
+            const existingItem = this.itemFor(filePath);
+            if (!existingItem) {
+
+                //Saves the file and its contents.
+                await this._storage.save(filePath.substring(1), fileData);
+
+                //Creates the file item.
+                const newItem = {name: file.name, type: "file"};
+                const itemElement = this.newItem(newItem, this._uploadPath);
+
+                //Adds file element to the DOM.
+                const parentDirectory = this.itemFor(this._uploadPath);
+                const parentListing = parentDirectory.querySelector(":scope > ol");
+                parentListing.appendChild(itemElement);
+            }
+        }
+
+        this._previewFiles = [];
+
+        //Closes modal upon successful completion.
+        await this.cancelUpload();
     }
 
     /**
@@ -113,58 +260,6 @@ class FileList extends EventComponent {
     get startupItem() {
         let path = this.startupFile;
         return this.itemFor(path);
-    }
-
-    /**
-     * Activates the "Upload Files" button on the modal on change.
-     */
-    chooseFiles() {
-        if (this._inputChooseFiles.files.length) {
-            this._uploadFilesButton.disabled = false;
-        } else {
-            this._uploadFilesButton.disabled = true;
-        }
-    }
-
-    /** 
-     * Closes the modal.
-     */
-    async quitUpload() {
-        this._uploadFilesButton.disabled = true;
-
-        //Empties out the current selected files.
-        this._inputChooseFiles.value = null;
-        await this._dialog.close();
-    }
-
-    /**
-     * Uploads file(s) as file element(s) into the given directory and closes the modal upon completion.
-     */
-    async uploadFiles() {
-        for (const file of this._inputChooseFiles.files) {
-            const fileData = await file.text();
-            const filePath = this._uploadPath + "/" + file.name;
-
-            //Places the item only if it does not already exist in the given directory.
-            const existingItem = this.itemFor(filePath);
-            if (!existingItem) {
-
-                //Saves the file and its contents.
-                await this._storage.save(filePath.substring(1), fileData);
-
-                //Creates the file item.
-                const newItem = {name: file.name, type: "file"};
-                const itemElement = this.newItem(newItem, this._uploadPath);
-
-                //Adds file element to the DOM.
-                const parentDirectory = this.itemFor(this._uploadPath);
-                const parentListing = parentDirectory.querySelector(":scope > ol");
-                parentListing.appendChild(itemElement);
-            }
-        }
-
-        //Closes modal upon successful completion.
-        await this.quitUpload();
     }
 
     /**
