@@ -14,6 +14,7 @@ class RegisterListing extends EventComponent {
 
         let element = root.querySelector(".register-file");
         this._element = element;
+        this.bindEvents();
     }
 
     /**
@@ -31,7 +32,7 @@ class RegisterListing extends EventComponent {
     clear() {
         Simulator.REGISTER_NAMES.forEach( (regName) => {
             var str = "0000000000000000";
-            this._element.querySelector("tr." + regName + " td.value").textContent = "0x" + str;
+            this._element.querySelector("tr." + regName + " td.value button").textContent = "0x" + str;
         });
     }
 
@@ -51,19 +52,59 @@ class RegisterListing extends EventComponent {
      * @param {BigUint64Array} regs The register values.
      */
     update(regs) {
-        regs.forEach( (reg, i) => {
-            var str = reg.toString(16);
-            str = "0000000000000000".slice(str.length) + str;
-            var regName = Simulator.REGISTER_NAMES[i];
+        regs.forEach( (reg, i) => { // for each register in the array
+            var str = reg.toString(16); // convert to a string represented as a hex value
+            str = "0000000000000000".slice(str.length) + str; // pad the string with zeroes
+            var regName = Simulator.REGISTER_NAMES[i]; // put the current register's name into regName
             var element = this._element.querySelector("tr." + regName + " td.value");
             if (element) {
-                var oldContent = element.textContent;
+                var oldContent = element.firstElementChild.textContent;
                 var newContent = "0x" + str;
                 if (oldContent != newContent) {
-                    element.textContent = newContent;
+                    element.firstElementChild.textContent = newContent;
                     element.parentNode.classList.add("updated");
                 }
             }
+        });
+    }
+
+    get registers() {
+        let ret = new BigUint64Array(32);
+        var tableCells = this._element.querySelectorAll("td.value");
+        tableCells.forEach( (td, i) => {
+            let registerName = td.previousElementSibling.textContent;
+            let realIndex = Simulator.REGISTER_NAMES.indexOf(registerName);
+            ret[realIndex] = BigInt(td.firstElementChild.textContent);
+        });
+        return ret;
+    }
+
+    bindEvents() {
+        var tableCells = this._element.querySelectorAll("td.value");
+        tableCells.forEach( (td) => {
+            td.firstElementChild.addEventListener("click", (event) => {
+                td.setAttribute('hidden', '');
+                td.nextElementSibling.removeAttribute('hidden');
+                let input = td.nextElementSibling.querySelector('input');
+                input.focus();
+                input.value = td.firstElementChild.textContent;
+            });
+        });
+        var inputCells = this._element.querySelectorAll("td.edit input");
+        inputCells.forEach( (input) => {
+            let doneEvent = (event) => {
+                let td = input.parentNode;
+                td.setAttribute('hidden', '');
+                td.previousElementSibling.removeAttribute('hidden');
+                td.previousElementSibling.firstElementChild.textContent = input.value;
+                this.trigger('change');
+            }
+            input.addEventListener("blur", doneEvent);
+            input.addEventListener("keydown", (keyEvent) => {
+                if(keyEvent.key === "Enter") {
+                    doneEvent(keyEvent);
+                }
+            });
         });
     }
 }

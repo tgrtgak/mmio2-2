@@ -34,7 +34,11 @@
             td.name
               = register_name
             td.value
-              = "0x0000000000000000"
+              button
+                = "0x0000000000000000"
+            td.edit hidden=true
+              input.input type=:text id="register-#{register_name}"
+
 .bottom
   ol.tabs
     li.tab.active

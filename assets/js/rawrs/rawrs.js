@@ -65,6 +65,14 @@ class RAWRS {
             }
         });
 
+        RAWRS.registerListing.on("change", (info) => {
+            let regs = RAWRS.registerListing.registers;
+            if (RAWRS.simulator) {
+                RAWRS.simulator.registers = regs;
+                RAWRS.registerListing.update(RAWRS.simulator.registers);
+            }
+        });
+        
         RAWRS.toolbar.on('click', (button) => {
             switch (button.getAttribute("id")) {
                 case "assemble":

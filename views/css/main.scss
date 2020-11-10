@@ -778,7 +778,7 @@ ol.tab-panels {
                         border-bottom: 1px solid #ddd;
                         padding: 0.2rem 0.4rem;
 
-                        &:last-child {
+                        &:not(:first-child) {
                             border-left: 1px solid #ddd;
                         }
 
@@ -786,6 +786,7 @@ ol.tab-panels {
                     }
 
                     &.updated {
+                        > .value > button,
                         > * {
                             color: #d243c6;
                             font-weight: bold;
@@ -798,6 +799,30 @@ ol.tab-panels {
 
                     .value {
                         width: 100%;
+
+                        button {
+                            border: none;
+                            background: white;
+                            font-family: monospace,courier,fixed,swiss,sans-serif;
+                            font-size: 15px;
+                            font-weight: normal;
+                            font-variant-ligatures: none;
+                            text-align: center;
+                        }
+                    }
+
+                    .edit {
+                        width: 100%;
+
+                        .input {
+                            border: none;
+                            background: white;
+                            font-family: monospace,courier,fixed,swiss,sans-serif;
+                            font-size: 15px;
+                            font-weight: normal;
+                            font-variant-ligatures: none;
+                            text-align: center;
+                        }
                     }
                 }
             }
