@@ -251,6 +251,7 @@ class Simulator extends EventComponent {
         this._vm_resume            = Module.cwrap('vm_resume', null, []);
         this._vm_step              = Module.cwrap('vm_step', null, []);
         this._cpu_get_regs         = Module.cwrap('cpu_get_regs', null, ["number"]);
+        this._cpu_set_regs         = Module.cwrap('cpu_set_regs', null, ["number"]);
         this._force_refresh        = Module.cwrap('force_refresh', null, []);
         this._cpu_set_breakpoint   = Module.cwrap('cpu_set_breakpoint', null, ["number"]);
         this._cpu_clear_breakpoint = Module.cwrap('cpu_clear_breakpoint', null, ["number"]);
@@ -356,7 +357,7 @@ class Simulator extends EventComponent {
 
         // The items are PC, followed by registers 1 through 32.
         // The 'zero' register is omitted, of course.
-        var buf_len = 32*8;
+        var buf_len = 32 * 8;
         var buf = this._module._malloc(buf_len);
 
         this._cpu_get_regs(buf);
@@ -389,6 +390,32 @@ class Simulator extends EventComponent {
         ret = new window.BigUint64Array(ret);
 
         return ret;
+    }
+    
+    /**
+     * Accepts an integer array for the values in the registers.
+     * Transfers this array to the TinyEmu simulator
+     *
+     * @param {BigUint64Array} buf An array of unsigned 64-bit numbers.
+     */
+    set registers(buf) {
+        // The items are PC, followed by registers 1 through 32.
+        // The 'zero' register is omitted, of course.
+        var buf_len = 32 * 8;
+        var cbuf = this._module._malloc(buf_len);
+ 
+        // Create a mask for dividing the 64-bit bigint to two half-words.
+        let mask = BigInt("0xffffffff");
+        
+        for (let i = 0; i < 32; i++) {
+            let lowInt = Number(BigInt.asIntN(32, buf[i] & mask));
+            let highInt = Number(BigInt.asIntN(32, (buf[i] >> BigInt(32)) & mask));
+            this._module.setValue(cbuf + (8 * i), lowInt, 'i32');
+            this._module.setValue(cbuf + (8 * i) + 4, highInt, 'i32');
+            console.log("register", i, lowInt, highInt);
+        }
+        
+        this._cpu_set_regs(cbuf);
     }
     
     /**
