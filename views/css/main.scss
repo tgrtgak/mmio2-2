@@ -801,6 +801,9 @@ ol.tab-panels {
                         width: 100%;
 
                         button {
+                            margin: 0;
+                            padding: 0;
+                            outline: none;
                             border: none;
                             background: white;
                             font-family: monospace,courier,fixed,swiss,sans-serif;
@@ -815,6 +818,9 @@ ol.tab-panels {
                         width: 100%;
 
                         .input {
+                            margin: 0;
+                            padding: 0;
+                            outline: none;
                             border: none;
                             background: white;
                             font-family: monospace,courier,fixed,swiss,sans-serif;

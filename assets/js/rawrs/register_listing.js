@@ -88,8 +88,10 @@ class RegisterListing extends EventComponent {
                 let input = td.nextElementSibling.querySelector('input');
                 input.focus();
                 input.value = td.firstElementChild.textContent;
+                input.select();
             });
         });
+
         var inputCells = this._element.querySelectorAll("td.edit input");
         inputCells.forEach( (input) => {
             let doneEvent = (event) => {
