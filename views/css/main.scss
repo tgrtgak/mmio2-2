@@ -1035,13 +1035,14 @@ iframe {
 }
 
 dialog#dialog-upload-files {
-    height: 315px;
-    width: 260px;
+    height: 35%;
+    width: 30%;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
     text-align: center;
     color: black;
     font-family: 'Lato', sans-serif;
+    margin: auto;
 
     button#button-complete-upload {
         background-color: #43ac43;
@@ -1049,6 +1050,7 @@ dialog#dialog-upload-files {
         font-family: 'Lato', sans-serif;
         border-width: 0;
         display: inline-block;
+        border-width: 2px;
         cursor: pointer;
     }
 
@@ -1058,7 +1060,8 @@ dialog#dialog-upload-files {
         font-family: 'Lato', sans-serif;
         border-width: 0;
         display: inline-block;
-        margin-right: 10px;
+        margin-right: 2%;
+        border-width: 2px;
         cursor: pointer;
     }
 
@@ -1072,24 +1075,27 @@ dialog#dialog-upload-files {
     }
 
     .upload-zone {
+        height: 90%;
+        width: 90%;
+        margin: auto;
 
         label.drop-area {
-            background-color: #d243c6;
             background-color: rgb(211,211,211);
             display: inline-block;
             border: 3px dotted black;
             cursor: pointer;
-            height: 250px;
-            width: 250px;
+            height: 90%;
+            width: 90%;
+            margin: auto;
 
             .drop-area-header {
-                font-size: 1.4em;
+                font-size: 2em;
                 font-weight: 700;
-                padding: 25px;
+                padding: 2%;
             }
 
             .drop-area-caption {
-                font-size: 1.05em;
+                font-size: 1.1em;
                 font-weight: 250;
             }
         }
@@ -1109,40 +1115,36 @@ dialog#dialog-upload-files {
 
         .drop-previews {
             display: none;
+            font-size: 1em;
 
             .drop-preview-header {
-                display: table-row;
-    
-                .drop-preview-header-file-name {
-                    display: table-cell;
-                    font-size: 1em;
-                    font-weight: 700;
+                font-weight: 700;
+                display: flex;
+                justify-content: space-between;
+
+                span.header-file-name {
+                    text-align: left;
                 }
-    
-                .drop-preview-header-file-size {
-                    display: table-cell;
-                    font-size: 1em;
-                    font-weight: 700;
+
+                span.header-file-size {
+                    text-align: right;
                 }
             }
 
             .drop-preview {
-                display: table-row;
+                display: flex;
+                justify-content: space-between;
+                cursor: pointer;
 
-                .drop-preview-file-name {
-                    span.file-name {
-                        display: table-cell;
-                        font-size: 1em;
-                        font-weight: 700;
-                    }
+                span.file-name {
+                    text-align: left;
+                    max-height: 1.2em;
+                    overflow-y: scroll;
                 }
+            
 
-                .drop-preview-file-size {
-                    span.file-size {
-                        display: table-cell;
-                        font-size: 1em;
-                        font-weight: 700;
-                    }
+                span.file-size {
+                    text-align: right;
                 }
 
                 .drop-preview-remove-file {
@@ -1151,6 +1153,10 @@ dialog#dialog-upload-files {
                     &:hover {
                         display: inline;
                     }
+                }
+
+                &:hover {
+                    background-color: #ffb6c1;
                 }
             }
         }

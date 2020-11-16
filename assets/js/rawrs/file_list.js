@@ -74,7 +74,7 @@ class FileList extends EventComponent {
         this._completeUploadButton = this._dialog.querySelector("button#button-complete-upload");
         this._completeUploadButton.addEventListener("click", this.completeUpload.bind(this));
 
-        this._dropPreviews = this._dialog.querySelector(".upload-zone > .drop-previews");
+        this._dropPreviews = this._dialog.querySelector(".drop-previews");
     }
 
     /**
@@ -86,11 +86,10 @@ class FileList extends EventComponent {
     displayBytes(bytes) {
         if (bytes === 0) return "0 Bytes";
 
-        // Realistically will not encounter terabytes or more being uploaded.
-        const units = ['Bytes', 'KB', 'MB', 'GB'];
-
         const power = Math.floor(Math.log(bytes) / Math.log(1024));
-        return parseFloat((bytes / Math.pow(1024, power)).toFixed(2)) + ' ' + units[power];
+
+        // Realistically will not encounter terabytes or more being uploaded.
+        return parseFloat((bytes / Math.pow(1024, power)).toFixed(2)) + ' ' + ['Bytes', 'KB', 'MB', 'GB'][power];
     }
 
     /**
@@ -104,7 +103,7 @@ class FileList extends EventComponent {
         filePreview.querySelector("span.file-name").textContent = file.name;
         filePreview.querySelector("span.file-size").textContent = this.displayBytes(file.size);
 
-        filePreview.querySelector(".drop-preview-remove-file").addEventListener("click", () => {
+        filePreview.addEventListener("click", () => {
             this._dropPreviews.removeChild(filePreview);
             let index = this._previewFiles.indexOf(file);
 
@@ -112,10 +111,10 @@ class FileList extends EventComponent {
                 this._previewFiles.splice(index, 1);
             }
 
-            if (this._previousFiles.size === 0) {
-                this._dialog.querySelector(".upload-zone > label.drop-area").style.display = "inline-block";
+            if (!this._previewFiles.length) {
+                this._dialog.querySelector("label.drop-area").style.display = "inline-block";
                 this._dropPreviews.style.display = "none";
-                this._dialog.querySelector(".upload-zone > label.drop-preview-message").style.display = "none";
+                this._dialog.querySelector("label.drop-preview-message").style.display = "none";
             }
         });
 
@@ -152,11 +151,16 @@ class FileList extends EventComponent {
         let dropArea = this._dialog.querySelector(".upload-zone > label.drop-area");
         if (dropArea.style.display !== 'none') {
             dropArea.style.display = "none";
-            this._dropPreviews.style.display = "table";
+            this._dropPreviews.style.display = "block";
             this._dialog.querySelector(".upload-zone > label.drop-preview-message").style.display = "block";
         }
     }
 
+    /**
+     * Enables custom behavior when files are dragged over the modal.
+     * 
+     * @param {Event} event The dragover event to be handled.
+     */
     dragoverFiles(event) {
         event.preventDefault();
     }
@@ -165,6 +169,8 @@ class FileList extends EventComponent {
      * Adds preview files on click.
      */
     addPreviewFiles() {
+
+        // Adds each file collected from the files object from input.
         let input = this._dialog.querySelector("input#input-choose-files");
         let files = input.files;
         for (let i = 0; i < files.length; ++i) {
@@ -173,10 +179,11 @@ class FileList extends EventComponent {
 
         input.value = null;
 
+        // Removes the file dropdown box, if still there, after file(s) added.
         let dropArea = this._dialog.querySelector(".upload-zone > label.drop-area");
         if (dropArea.style.display !== 'none') {
             dropArea.style.display = "none";
-            this._dropPreviews.style.display = "table";
+            this._dropPreviews.style.display = "block";
             this._dialog.querySelector(".upload-zone > label.drop-preview-message").style.display = "block";
         }
     }
@@ -217,7 +224,7 @@ class FileList extends EventComponent {
             }
         }
 
-        this._previewFiles = [];
+        this._dropPreviews.querySelectorAll(".drop-preview").forEach((preview) => preview.click());
 
         //Closes modal upon successful completion.
         await this.cancelUpload();

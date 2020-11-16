@@ -8,20 +8,16 @@ dialog#dialog-upload-files
         | Any files accepted. Click to browse.
     label.drop-preview-message for="input-choose-files" aria-label="Select to upload your files" role="button"
       span.preview-message
-        | Browse Files
+        | Browse Additional Files
     .drop-previews
       .drop-preview-header
-      .drop-preview-header-file-name
-        | Name
-      .drop-preview-header-file-size
-        | Size
+        span.header-file-name
+          | Name
+        span.header-file-size
+          | Size
       .drop-preview
-        .drop-preview-file-name
-          span.file-name
-        .drop-preview-file-size
-          span.file-size
-        .drop-preview-remove-file
-          | Remove
+        span.file-name
+        span.file-size
   button#button-complete-upload
     | Submit
   button#button-cancel-upload
