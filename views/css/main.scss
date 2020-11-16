@@ -1035,15 +1035,17 @@ iframe {
 }
 
 dialog#dialog-upload-files {
-    height: 40%;
-    width: 35;
-    overflow: scroll;
+    height: 315px;
+    width: 260px;
+    overflow-x: hidden;
+    overflow-y: scroll;
     text-align: center;
     color: black;
     font-family: 'Lato', sans-serif;
 
     button#button-complete-upload {
-        background-color: #46b1e4;
+        background-color: #43ac43;
+        color: white;
         font-family: 'Lato', sans-serif;
         border-width: 0;
         display: inline-block;
@@ -1051,7 +1053,8 @@ dialog#dialog-upload-files {
     }
 
     button#button-cancel-upload {
-        background-color: #d243c6;
+        background-color: rgb(148, 12, 12);
+        color: white;
         font-family: 'Lato', sans-serif;
         border-width: 0;
         display: inline-block;
@@ -1069,8 +1072,6 @@ dialog#dialog-upload-files {
     }
 
     .upload-zone {
-        height: 90%;
-        width: 90%;
 
         label.drop-area {
             background-color: #d243c6;
@@ -1078,8 +1079,8 @@ dialog#dialog-upload-files {
             display: inline-block;
             border: 3px dotted black;
             cursor: pointer;
-            height: 90%;
-            width: 90%;
+            height: 250px;
+            width: 250px;
 
             .drop-area-header {
                 font-size: 1.4em;
@@ -1093,22 +1094,44 @@ dialog#dialog-upload-files {
             }
         }
 
-        .drop-preview-header {
-            .drop-preview-header-file-name {
-                font-size: 1em;
-                font-weight: 700;
-            }
+        label.drop-preview-message {
+            cursor: pointer;
+            display: none;
 
-            .drop-preview-header-file-size {
-                font-size: 1em;
-                font-weight: 700;
+            span.preview-message {
+                color: blue;
+
+                &:hover {
+                    text-decoration: underline;
+                }
             }
         }
 
         .drop-previews {
+            display: none;
+
+            .drop-preview-header {
+                display: table-row;
+    
+                .drop-preview-header-file-name {
+                    display: table-cell;
+                    font-size: 1em;
+                    font-weight: 700;
+                }
+    
+                .drop-preview-header-file-size {
+                    display: table-cell;
+                    font-size: 1em;
+                    font-weight: 700;
+                }
+            }
+
             .drop-preview {
+                display: table-row;
+
                 .drop-preview-file-name {
                     span.file-name {
+                        display: table-cell;
                         font-size: 1em;
                         font-weight: 700;
                     }
@@ -1116,13 +1139,18 @@ dialog#dialog-upload-files {
 
                 .drop-preview-file-size {
                     span.file-size {
+                        display: table-cell;
                         font-size: 1em;
                         font-weight: 700;
                     }
                 }
 
                 .drop-preview-remove-file {
-                
+                    display: none;
+
+                    &:hover {
+                        display: inline;
+                    }
                 }
             }
         }

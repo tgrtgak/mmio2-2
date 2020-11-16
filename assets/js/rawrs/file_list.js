@@ -113,7 +113,9 @@ class FileList extends EventComponent {
             }
 
             if (this._previousFiles.size === 0) {
-                this._dialog.querySelector(".upload-zone > label.drop-area").style.visible = true;
+                this._dialog.querySelector(".upload-zone > label.drop-area").style.display = "inline-block";
+                this._dropPreviews.style.display = "none";
+                this._dialog.querySelector(".upload-zone > label.drop-preview-message").style.display = "none";
             }
         });
 
@@ -148,8 +150,10 @@ class FileList extends EventComponent {
         }
 
         let dropArea = this._dialog.querySelector(".upload-zone > label.drop-area");
-        if (dropArea.style.visible) {
-            dropArea.style.visible = false;
+        if (dropArea.style.display !== 'none') {
+            dropArea.style.display = "none";
+            this._dropPreviews.style.display = "table";
+            this._dialog.querySelector(".upload-zone > label.drop-preview-message").style.display = "block";
         }
     }
 
@@ -170,8 +174,10 @@ class FileList extends EventComponent {
         input.value = null;
 
         let dropArea = this._dialog.querySelector(".upload-zone > label.drop-area");
-        if (dropArea.style.visible) {
-            dropArea.style.visible = false;
+        if (dropArea.style.display !== 'none') {
+            dropArea.style.display = "none";
+            this._dropPreviews.style.display = "table";
+            this._dialog.querySelector(".upload-zone > label.drop-preview-message").style.display = "block";
         }
     }
     
