@@ -58,12 +58,13 @@ class FileList extends EventComponent {
             });
         }
 
-        //Bind events to the modal
+        // Stores each preview file queued during file uploading.
+        this._previewFiles = [];
+
+        // Bind events to the file upload modal.
         this._dialog = document.body.querySelector("dialog#dialog-upload-files");
         this._dialog.addEventListener("drop", this.addPreviewFilesOnDrop.bind(this));
         this._dialog.addEventListener("dragover", this.dragoverFiles.bind(this));
-
-        this._previewFiles = [];
 
         this._dropArea = this._dialog.querySelector("input#input-choose-files");
         this._dropArea.addEventListener("change", this.addPreviewFiles.bind(this));
@@ -98,11 +99,13 @@ class FileList extends EventComponent {
      * @param {File} file The file from the user.
      */
     addPreviewFile(file) {
+        // Creates the file preview as it is stored on host computer.
         let filePreview = this._dropPreviews.querySelector(".drop-preview").cloneNode(true);
 
         filePreview.querySelector("span.file-name").textContent = file.name;
         filePreview.querySelector("span.file-size").textContent = this.displayBytes(file.size);
 
+        // Removes the file preview if it is clicked.
         filePreview.addEventListener("click", () => {
             this._dropPreviews.removeChild(filePreview);
             let index = this._previewFiles.indexOf(file);
@@ -111,6 +114,7 @@ class FileList extends EventComponent {
                 this._previewFiles.splice(index, 1);
             }
 
+            // Display the drag & drop box if this is the last file being removed.
             if (!this._previewFiles.length) {
                 this._dialog.querySelector("label.drop-area").style.display = "inline-block";
                 this._dropPreviews.style.display = "none";
@@ -148,6 +152,7 @@ class FileList extends EventComponent {
             }
         }
 
+        // Removes the file dropdown box, if still there, after file(s) added.
         let dropArea = this._dialog.querySelector(".upload-zone > label.drop-area");
         if (dropArea.style.display !== 'none') {
             dropArea.style.display = "none";
@@ -224,6 +229,7 @@ class FileList extends EventComponent {
             }
         }
 
+        // Removes all of the file previews.
         this._dropPreviews.querySelectorAll(".drop-preview").forEach((preview) => preview.click());
 
         //Closes modal upon successful completion.
