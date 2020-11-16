@@ -44,9 +44,15 @@ class Toolbar extends EventComponent {
 
                 if (status === "disabled") {
                     buttonElement.setAttribute("disabled", "");
+                    if (button === "step") {
+                        buttonElement.setAttribute("title", buttonElement.getAttribute("data-i18n-pause"));
+                    }
                 }
                 else {
                     buttonElement.removeAttribute("disabled");
+                    if (button === "step") {
+                        buttonElement.setAttribute("title", buttonElement.getAttribute("data-i18n-step"));
+                    }
                 }
             }
             else {
