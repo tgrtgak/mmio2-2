@@ -21,6 +21,9 @@ class Dropdown extends EventComponent {
         this._dropdown = element.nextElementSibling;
 
         this._dropdown.addEventListener("blur", this.blurEvent.bind(this));
+        
+        this.fileRename = null;
+        this.fileNamePlace = null;
 
         this._dropdown.querySelectorAll("button").forEach( (button) => {
             button.addEventListener("click", (event) => {
@@ -30,6 +33,14 @@ class Dropdown extends EventComponent {
 
                 event.preventDefault();
                 event.stopPropagation();
+
+                if (button.getAttribute("data-action") === "rename") {
+                    this.fileNamePlace.style.display = "none";
+                    this.fileRename.style.display = "inline";
+
+                    this.fileRename.focus();
+                    this.fileRename.select();
+                }
             });
 
             button.addEventListener("keydown", (event) => {

@@ -312,7 +312,7 @@ class FileList extends EventComponent {
         }
 
         // Ensure the file exists in the listing
-        let index = base.indexOf('/', root.length + 1)
+        let index = base.indexOf('/', root.length + 1);
         if (index == -1) {
             return;
         }
@@ -340,7 +340,60 @@ class FileList extends EventComponent {
                 event.stopPropagation();
                 event.preventDefault();
             });
+
+            let fileNamePlace = item.querySelector("span.name");
+            let oldFileName = fileNamePlace.textContent;
+            let renameFileInput = item.querySelector(".info > input");
+            let dataPath = item.getAttribute('data-path');
+
+            if (renameFileInput) {
+                renameFileInput.addEventListener("blur", (event) => {
+                    renameFileInput.style.display = "none";
+                    fileNamePlace.style.display = "inline";
+                });
+
+                renameFileInput.addEventListener("keydown", async (event) => {
+                    if (event.key === "Escape") {
+                        renameFileInput.style.display = "none";
+                        fileNamePlace.style.display = "inline";
+                    }
+
+                    // Rename the file.
+                    else if (event.key === "Enter") {
+                        await this.revealPath(dataPath);
+                        const data = await this._storage.load(dataPath);
+
+                        // Removes file with old name.
+                        await this._storage.remove(dataPath);
+                        item.parentNode.removeChild(item);
+
+                        let newName = renameFileInput.value;
+
+                        if (!newName.includes(".")) {
+                            newName += ".s";
+                        }
+
+                        //TODO: check and sanitize renameFileInput.value
+
+                        // Saves the renamed file.
+                        let directoryPath = dataPath.substring(0, dataPath.length - oldFileName.length - 1);
+                        let newPath = directoryPath.substring(1) + "/" + newName;
+
+                        await this._storage.save(newPath, data);
+
+                        //Creates the renamed file item.
+                        const newItem = {name: newName, type: "file"};
+                        const itemElement = this.newItem(newItem, directoryPath);
+
+                        //Adds the renamed file element to the DOM.
+                        const parentDirectory = this.itemFor(directoryPath);
+                        const parentListing = parentDirectory.querySelector(":scope > ol");
+                        parentListing.appendChild(itemElement);
+                    }
+                });
+            }
         }
+
         else if (item.classList.contains("directory")) {
             item.addEventListener('click', (event) => {
                 if (this.isOpen(item)) {
@@ -675,7 +728,11 @@ class FileList extends EventComponent {
 
                     // "Rename" functionality
                     // Renames the path of the file element.
-                    case "rename": 
+                    case "rename":
+                        element.dropdown.fileRename = element.querySelector("span.info > input");
+                        element.dropdown.fileNamePlace = element.querySelector("span.name");
+                        element.dropdown.fileRename.value = item.name;
+                        
                         break;
                     
                     // "Upload Files" functionality
