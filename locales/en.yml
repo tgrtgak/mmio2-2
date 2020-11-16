@@ -62,3 +62,4 @@ en:
         assemble:       "Assemble"
         run:            "Run"
         pause:          "Pause"
+        step:           "Step"
