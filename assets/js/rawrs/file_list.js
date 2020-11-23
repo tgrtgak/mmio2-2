@@ -6,6 +6,7 @@ import Dropdown from './dropdown.js';
 import Util from './util.js';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
+import Editor from './editor';
 
 /**
  * This represents the file listing.
@@ -16,7 +17,7 @@ class FileList extends EventComponent {
      *
      * @param {HTMLElement} root The element to look for the file list within.
      */
-    constructor(root) {
+    constructor(root, editor) {
         super();
 
         this._element = root.querySelector(".project-pane");
@@ -260,10 +261,7 @@ class FileList extends EventComponent {
         }).then(function(response) {
             return response.text();
         }).then(function(text) {
-            // -1 moves the cursor to the start (without this,
-            // it will select the entire text... I dunno)
-            window.editor.setValue(text, -1);
-            window.editor.getSession().setUndoManager(new window.ace.UndoManager());
+            Editor.load(text);
         });
     }
 
@@ -338,11 +336,8 @@ class FileList extends EventComponent {
             let path = atob(item.getAttribute('data-path'));
             let text = await this._storage.load(path);
 
-            // -1 moves the cursor to the start (without this,
-            // it will select the entire text... I dunno)
-            window.editor.setValue(text, -1);
-            window.editor.getSession().setUndoManager(new window.ace.UndoManager());
-            window.editor.focus();
+            Editor.load(text);
+            Editor.focus();
 
             this.startupFile = path;
         }

@@ -1,7 +1,7 @@
 "use strict";
 
 class Editor {
-    static load() {
+    static initialize() {
         // Create an Ace Editor instance
         var editor = window.ace.edit("editor");
         window.editor = editor;
@@ -25,20 +25,16 @@ class Editor {
         Editor._instructionTable = {};
         Editor._instructionsList = [];
 
-        Editor._timedLabelUpdate = setInterval(function() {Editor.updateAllLabels(editor);}, 10000);  // Automatically updates the labels every 10 seconds
-        window.setTimeout(function() {Editor.updateAllLabels(editor);}, 2000);  // Does an initial check for the labels after 2 seconds. TODO: Determine if there is a more reliable way to do this because adding a call to updateAllLabels() without the delay caused it to not function properly.
-
-
         // We want to populate these with the known labels/globals
-        // TODO: keep track of or parse the labels in the current file.
         Editor._labelList = Editor.getAllLabels(editor);
 
-        Editor._lastCursorPosition = editor.getCursorPosition();  // Initializes this variable which is used for updating the list of labels
+        // Keeps track of the initial cursor position
+        Editor._lastCursorPosition = window.editor.getCursorPosition();
 
         // Loads the Instructions tab
         Editor.loadInstructionsTab().then( () => {
             // Get the instruction listing
-            Editor._instructionTable = document.getElementById("instruction-table-p").nextElementSibling;
+            Editor._instructionTable = document.getElementById("instruction-table");
 
             for (const row of Editor._instructionTable.rows) {
                 let dict = {};
@@ -62,14 +58,22 @@ class Editor {
                 // Get the first word on the line and assume it is an instruction
                 let instruction = linePrefix.split(" ")[0];
 
+                let commaCount = linePrefix.split(",").length - 1;
+
                 // Get the last character on the line before the current word
                 let lastCharacter = linePrefix[linePrefix.length - 1];
 
-                // Determine if it should be a label
-                let instructionsNoComma = ["j", "jal"];  // Instructions that would use labels
-                let instructionsWithComma = ["la", "bge"];  // Instructions that would use labels
+                // These hold the specific instructions that use labels
+                // Each are defined by where in the argument listing the label appears
+                let instructionsFirstArgument = ["j", "jal"];
+                let instructionsSecondArgument = ["la", "bgez", "beqz", "bltz", "blez", "bgtz", "bnez", "jal"];
+                let instructionsThirdArgument = ["beq", "bge", "bgeu", "bgt", "bgtu", "ble", "bleu", "blt", "bltu", "bne"];
 
-                let isLabel = ((instructionsNoComma.indexOf(instruction) >= 0) || (instructionsWithComma.indexOf(instruction) >= 0 && lastCharacter == ","));
+                // isLabel will be true when the cursor is typing at a place
+                // where a label would be expected
+                let isLabel = instructionsFirstArgument.indexOf(instruction) >= 0;
+                isLabel = isLabel || (instructionsSecondArgument.indexOf(instruction) >= 0 && lastCharacter == ",");
+                isLabel = isLabel || (instructionsThirdArgument.indexOf(instruction) >= 0 && commaCount > 1 && lastCharacter == ",");
 
                 if (isLabel) {
                     // Return a list of relevant labels
@@ -142,17 +146,46 @@ class Editor {
 
         // Inserts any new labels the user added when the cursor changes lines
         editor.session.selection.on('changeCursor', function(e) {
-            if (Editor._lastCursorPosition.row !== editor.getCursorPosition().row) {  // Checks if the user moved up or down
-                let previousLineText = editor.session.getLine(Editor._lastCursorPosition.row);  // Gets the text from the last line the user was on
+            // Checks if the cursor has changed lines
+            if (Editor._lastCursorPosition.row !== editor.getCursorPosition().row) {
+                // Gets the text from the last line the user was on
+                let previousLineText = editor.session.getLine(Editor._lastCursorPosition.row);
+
+                // Remove the existing label from this line (if any)
+                if (Editor._currentLineText) {
+                    Editor.removeLabelsFromString(Editor._currentLineText);
+                }
+
+                // Insert the label found on this line (if any)
                 Editor.insertLabelsFromString(previousLineText);
+
+                // Keep track of the current line
+                Editor._currentLineText = editor.session.getLine(editor.getCursorPosition().row);
             }
-            Editor._lastCursorPosition = editor.getCursorPosition(); 
+
+            Editor._lastCursorPosition = editor.getCursorPosition();
         });
+    }
+
+    static load(text) {
+        // -1 moves the cursor to the start (without this,
+        // it will select the entire text... I dunno)
+        window.editor.setValue(text, -1);
+        window.editor.getSession().setUndoManager(new window.ace.UndoManager());
+
+        // We want to re-populate with the known labels/globals in the given text
+        Editor._labelList = Editor.getAllLabels(editor);
+
+        // Keeps track of the initial cursor position
+        Editor._lastCursorPosition = window.editor.getCursorPosition();
+    }
+
+    static focus() {
+        window.editor.focus();
     }
 
     // Checks the entire document for labels and updates the global variable with this new list
     static updateAllLabels(editor) {
-        console.log("Updating all labels");
         let labelList = Editor.getAllLabels(editor);
 
         Editor._labelList = labelList;
@@ -163,8 +196,20 @@ class Editor {
         let newLabels = Editor.getLabelsFromText(textInput);
 
         for (let i = 0; i < newLabels.length; i++) {
-            if (!Editor._labelList.includes(newLabels[i])) {  // Checks for duplicates. Since this is expected to be used in cases where there is only one label, it should be efficient enough
+            // Checks for duplicates, and if it is new, adds it to the global list
+            if (!Editor._labelList.includes(newLabels[i])) {
                 Editor._labelList.push(newLabels[i]);
+            }
+        }
+    }
+
+    static removeLabelsFromString(textInput) {
+        let labels = Editor.getLabelsFromText(textInput);
+
+        for (let i = 0; i < labels.length; i++) {
+            if (Editor._labelList.includes(labels[i])) {
+                // Removes the label from the global list
+                Editor._labelList.splice(Editor._labelList.indexOf(labels[i]), 1);
             }
         }
     }
@@ -178,7 +223,10 @@ class Editor {
 
     // Returns a list of all labels found in textInput
     static getLabelsFromText(textInput) {
-        let labelNames = textInput.match(/([a-z\d_-]+):/gi);  // Gets an array of all labels in the text (TODO: Check to see whether or not something is in the data section (maybe split the string that getValue() returns by ".data"))
+        // Gets an array of all labels in the text 
+        // TODO: Check to see whether or not something is in the data section
+        // (maybe split the string that getValue() returns by ".data")
+        let labelNames = textInput.match(/^\s*([a-zA-Z\d_]+):/gm);
 
         if (labelNames == null) {  // Prevents an error when labelNames is null
             labelNames = [];
@@ -187,7 +235,7 @@ class Editor {
         let labelList = [];  // Contains the list of all labels with the ':' removed
 
         for (var i = 0; i < labelNames.length; i++) {
-            let currentName = labelNames[i].replace(":", "");  // Removes the colon in the string
+            let currentName = labelNames[i].replace(":", "").trim();  // Removes the colon in the string
 
             labelList.push(currentName);
         }
@@ -247,14 +295,20 @@ class Editor {
      * Gets the definition of an instruction and instruction name.
      */
     static getDefinitionFromTable(instruction) {
-        var myXPath = ".//td[text()='" + instruction + "']";  // Builds the XPath
-        var leftCell = document.evaluate(myXPath, Editor._instructionTable, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;  // Gets the cell containing the instruction
+        let summary = Editor._instructionTable.querySelector('td.summary[data-instruction="' + instruction + '"]');
 
-        if (leftCell === null) {
+        if (!summary) {
             return null;
         }
 
-        return leftCell.nextElementSibling.innerText;  // Returns the string version of the description
+        let name = Editor._instructionTable.querySelector('td.name[data-instruction="' + instruction + '"]');
+
+        if (!name) {
+            return null;
+        }
+
+        // Returns the string version of the description
+        return name.innerText + "<br>" + summary.innerText;
     }
 
     static hideTooltip() {

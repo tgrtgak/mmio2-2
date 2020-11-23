@@ -22,7 +22,7 @@ class RAWRS {
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
 
         Tabs.load();
-        Editor.load();
+        Editor.initialize();
         RAWRS.toolbar  = new Toolbar(document.body);
         RAWRS.fileList = new FileList(document.body);
 
