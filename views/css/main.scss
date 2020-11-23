@@ -1023,6 +1023,8 @@ iframe {
 .ace_tooltip {
   font-family: 'Lato', sans-serif;
   font-weight: normal;
+  white-space: pre-wrap;
+  max-width: 25 rem;
 
   code {
     color: #9260c3;

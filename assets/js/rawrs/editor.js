@@ -25,9 +25,15 @@ class Editor {
         Editor._instructionTable = {};
         Editor._instructionsList = [];
 
+        Editor._timedLabelUpdate = setInterval(function() {Editor.updateAllLabels(editor);}, 10000);  // Automatically updates the labels every 10 seconds
+        window.setTimeout(function() {Editor.updateAllLabels(editor);}, 2000);  // Does an initial check for the labels after 2 seconds. TODO: Determine if there is a more reliable way to do this because adding a call to updateAllLabels() without the delay caused it to not function properly.
+
+
         // We want to populate these with the known labels/globals
         // TODO: keep track of or parse the labels in the current file.
-        Editor._labelList = ["_testLabel", "_fooLabel"];
+        Editor._labelList = Editor.getAllLabels(editor);
+
+        Editor._lastCursorPosition = editor.getCursorPosition();  // Initializes this variable which is used for updating the list of labels
 
         // Loads the Instructions tab
         Editor.loadInstructionsTab().then( () => {
@@ -60,8 +66,10 @@ class Editor {
                 let lastCharacter = linePrefix[linePrefix.length - 1];
 
                 // Determine if it should be a label
-                let instructions = ["la", "bge"];
-                let isLabel = (instructions.indexOf(instruction) >= 0 && lastCharacter == ",");
+                let instructionsNoComma = ["j", "jal"];  // Instructions that would use labels
+                let instructionsWithComma = ["la", "bge"];  // Instructions that would use labels
+
+                let isLabel = ((instructionsNoComma.indexOf(instruction) >= 0) || (instructionsWithComma.indexOf(instruction) >= 0 && lastCharacter == ","));
 
                 if (isLabel) {
                     // Return a list of relevant labels
@@ -131,6 +139,60 @@ class Editor {
                 Editor.hideTooltip();
             }
         });
+
+        // Inserts any new labels the user added when the cursor changes lines
+        editor.session.selection.on('changeCursor', function(e) {
+            if (Editor._lastCursorPosition.row !== editor.getCursorPosition().row) {  // Checks if the user moved up or down
+                let previousLineText = editor.session.getLine(Editor._lastCursorPosition.row);  // Gets the text from the last line the user was on
+                Editor.insertLabelsFromString(previousLineText);
+            }
+            Editor._lastCursorPosition = editor.getCursorPosition(); 
+        });
+    }
+
+    // Checks the entire document for labels and updates the global variable with this new list
+    static updateAllLabels(editor) {
+        console.log("Updating all labels");
+        let labelList = Editor.getAllLabels(editor);
+
+        Editor._labelList = labelList;
+    }
+
+    // Takes a string, parses it to create a list of labels, then inserts them
+    static insertLabelsFromString(textInput) {
+        let newLabels = Editor.getLabelsFromText(textInput);
+
+        for (let i = 0; i < newLabels.length; i++) {
+            if (!Editor._labelList.includes(newLabels[i])) {  // Checks for duplicates. Since this is expected to be used in cases where there is only one label, it should be efficient enough
+                Editor._labelList.push(newLabels[i]);
+            }
+        }
+    }
+
+    // Returns an array of all labels
+    static getAllLabels(editor) {
+        let labelList = Editor.getLabelsFromText(editor.getValue());
+
+        return labelList;
+    }
+
+    // Returns a list of all labels found in textInput
+    static getLabelsFromText(textInput) {
+        let labelNames = textInput.match(/([a-z\d_-]+):/gi);  // Gets an array of all labels in the text (TODO: Check to see whether or not something is in the data section (maybe split the string that getValue() returns by ".data"))
+
+        if (labelNames == null) {  // Prevents an error when labelNames is null
+            labelNames = [];
+        }
+
+        let labelList = [];  // Contains the list of all labels with the ':' removed
+
+        for (var i = 0; i < labelNames.length; i++) {
+            let currentName = labelNames[i].replace(":", "");  // Removes the colon in the string
+
+            labelList.push(currentName);
+        }
+
+        return labelList;
     }
 
     /**
