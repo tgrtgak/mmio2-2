@@ -1,0 +1,343 @@
+add:
+  examples:
+    - "    add     t2, t0, t1"
+
+addi:
+  examples:
+    - "    addi    t2, t0, 42"
+    - "    add     t2, t0, 42"
+
+and:
+  examples:
+    - "    and     t2, t0, t1"
+
+andi:
+  examples:
+    - "    andi    t2, t0, 0x18"
+    - "    and     t2, t0, 0x18"
+
+auipc:
+
+beq:
+  examples:
+    - |
+      _loop:
+          beq     t0, t1, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+beqz:
+  examples:
+    - |
+      _loop:
+          beqz    t0, _exit_loop
+          addi    t0, t0, -1
+          j       _loop
+      _exit_loop:
+
+bge:
+  examples:
+    - |
+      _loop:
+          bge     t0, t1, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+bgeu:
+  examples:
+    - |
+      _loop:
+          bgeu    t0, t1, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+bgez:
+  examples:
+    - |
+      _loop:
+          bgez    t0, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+bgt:
+  examples:
+    - |
+      _loop:
+          bgt     t0, t1, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+bgtu:
+  examples:
+    - |
+      _loop:
+          bgtu    t0, t1, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+bgtz:
+  examples:
+    - |
+      _loop:
+          bgtz    t0, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+ble:
+  examples:
+    - |
+      _loop:
+          ble     t0, t1, _exit_loop
+          addi    t0, t0, -1
+          j       _loop
+      _exit_loop:
+
+bleu:
+  examples:
+    - |
+      _loop:
+          bleu    t0, t1, _exit_loop
+          addi    t0, t0, -1
+          j       _loop
+      _exit_loop:
+
+blez:
+  examples:
+    - |
+      _loop:
+          blez    t0, _exit_loop
+          addi    t0, t0, -1
+          j       _loop
+      _exit_loop:
+
+blt:
+  examples:
+    - |
+      _loop:
+          blt     t0, t1, _exit_loop
+          addi    t0, t0, -1
+          j       _loop
+      _exit_loop:
+
+bltu:
+  examples:
+    - |
+      _loop:
+          bltu    t0, t1, _exit_loop
+          addi    t0, t0, -1
+          j       _loop
+      _exit_loop:
+
+bltz:
+  examples:
+    - |
+      _loop:
+          bltz    t0, _exit_loop
+          addi    t0, t0, -1
+          j       _loop
+      _exit_loop:
+
+bne:
+  examples:
+    - |
+      _loop:
+          bne     t0, t1, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+bnez:
+  examples:
+    - |
+      _loop:
+          bnez    t0, _exit_loop
+          addi    t0, t0, 1
+          j       _loop
+      _exit_loop:
+
+div:
+
+divu:
+
+ebreak:
+
+ecall:
+
+j:
+  examples:
+    - |
+      func:
+          j       _func_skip
+          addi    t0, t0, 1
+          li      t1, 2
+          mul     t0, t0, t1
+      _func_skip:
+          li      t1, -1
+          sub     t0, t0, t1
+
+jal:
+  examples:
+    - |
+      main:
+          # call func(42)
+          li      a0, 42
+          jal     func
+
+          # exit
+          li      a7, 10
+          ecall
+
+      func:
+          # print integer in a0
+          li      a7, 1
+          ecall
+
+          # return
+          jr      ra
+    - |
+      main:
+          jal     t0, _main_getpc
+      _main_getpc:
+
+          # print integer in t0
+          li      a7, 1
+          move    a0, t0
+          ecall
+
+          # exit
+          li      a7, 10
+          ecall
+
+jalr:
+  examples:
+    - |
+      main:
+          # call func(42) indirectly
+          li      a0, 42
+          la      t0, func
+          jalr    t0
+
+          # exit
+          li      a7, 10
+          ecall
+
+      func:
+          # print integer in a0
+          li      a7, 1
+          ecall
+
+          # return
+          jr      ra
+
+jr:
+  examples:
+    - |
+      main:
+          # call func(42)
+          li      a0, 42
+          jal     func
+
+          # exit
+          li      a7, 10
+          ecall
+
+      func:
+          # print integer in a0
+          li      a7, 1
+          ecall
+
+          # return
+          jr      ra
+
+la:
+
+lb:
+
+lbu:
+
+ld:
+
+lh:
+
+lhu:
+
+li:
+
+lui:
+
+lw:
+
+lwu:
+
+mul:
+
+mulh:
+
+mulhsu:
+
+mulhu:
+
+mv:
+
+neg:
+
+nop:
+
+not:
+
+or:
+
+ori:
+
+rem:
+
+remu:
+
+sb:
+
+sd:
+
+seqz:
+
+sgtz:
+
+sh:
+
+sll:
+
+slli:
+
+slt:
+
+slti:
+
+sltiu:
+
+sltu:
+
+sltz:
+
+snez:
+
+sra:
+
+srai:
+
+srl:
+
+srli:
+
+sub:
+
+sw:
+
+xor:
+
+xori:

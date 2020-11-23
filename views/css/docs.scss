@@ -106,6 +106,10 @@ body.documentation     {
     &.highlight .c1 {
       color: #a8c8d8; //#bb91b8;
     }
+
+    &.highlight .nl {
+      color: #a6e22e;
+    }
   }
 
   code.instruction {
@@ -150,24 +154,19 @@ body.documentation     {
 
   table {
     border-collapse: collapse;
-
     padding-left: 0;
     padding-right: 0;
     padding-bottom: 0.2rem;
-
     margin: 0 2rem;
     margin-top: 1rem;
     margin-bottom: 0.3rem;
 
     th {
-      text-align: center;
+      text-align: left;
       font: bold 1rem Lato, serif;
       border-bottom: 2px solid #d6d6d6;
       position: relative;
-
-      &:last-child {
-        text-align: left;
-      }
+      padding-right: 0.5rem;
 
       &:after {
         content: '';
@@ -186,14 +185,17 @@ body.documentation     {
 
     td {
       font: 400 1rem Lato, serif;
-
       white-space: nowrap;
-
       padding: 0.4rem;
 
       &:last-child {
         width: 100%;
         white-space: normal;
+      }
+
+      p {
+        margin: 0.125rem;
+        padding: 0;
       }
     }
 
@@ -206,12 +208,6 @@ body.documentation     {
 
   .syscalls-table {
     & ~ table {
-      th:nth-of-type(3) ,
-      th:nth-of-type(4) ,
-      th:nth-of-type(5) {
-        text-align: left;
-      }
-
       td:nth-of-type(2) {
         font-weight: bold;
       }

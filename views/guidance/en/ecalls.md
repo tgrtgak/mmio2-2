@@ -77,7 +77,7 @@ Prints the given string whose address is within `{.register}a0`.
 
 .data
 
-  str: .string "Hello!"
+str: .string "Hello!"
 ```
 
 ### read integer
@@ -124,6 +124,6 @@ Waits for something to be typed in (ends with an 'enter' press) and writes it to
 
 .data
 
-  buff: .fill 100, 1, 0 # Fills 100 bytes with 0s
-  str:  .string "\nYou typed in: "
+buff: .fill 100, 1, 0 # Fills 100 bytes with 0s
+str:  .string "\nYou typed in: "
 ```

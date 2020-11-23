@@ -21,6 +21,9 @@ require_relative './lib/rouge/lexers/riscv.rb'
 
 require 'rouge/plugins/redcarpet'
 
+require 'base64'
+require 'yaml'
+
 class HTML < Redcarpet::Render::HTML
     include Rouge::Plugins::Redcarpet # yep, that's it. (Thanks Jeanine!!)
 
@@ -58,7 +61,7 @@ class RAWRS < Sinatra::Base
                  :fenced_code_blocks => true
 
   # I18n
-  I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'locales', '*.yml')]
+  I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'locales', '**', '*.yml')]
   I18n.load_path += Dir[File.join(Gem::Specification.find_by_name('rails-i18n').gem_dir, 'rails', 'locale', '*.yml')]
 
   # Ensure wasm is seen with the correct mime type
@@ -121,6 +124,11 @@ class RAWRS < Sinatra::Base
       ret.gsub!("<p><img", "<p class=\"image\"><img")
       ret
     end
+
+    def render_instructions
+      lang = :en
+      render(:slim, :"guidance/instructions", :layout => :"guidance/layout")
+    end
   end
 
   # Routes
@@ -133,7 +141,12 @@ class RAWRS < Sinatra::Base
   # guidance page index
   get '/guidance/*' do |splat|
     page = "#{File.expand_path(splat, "/")}"
-    render_guidance(page)
+
+    if page == "/instructions"
+      render_instructions
+    else
+      render_guidance(page)
+    end
   end
 
   # stylesheets

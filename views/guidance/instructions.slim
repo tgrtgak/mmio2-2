@@ -1,0 +1,64 @@
+h1
+  | Instructions
+
+== render(:markdown, "![An Elasmosaurus](../images/dynamic/hex/ae8bab/dinosaurs/elasmosaurus.svg)", :layout => false)
+
+h2
+  | Overview
+
+- instructions = [:add, :addi, :and, :andi, :auipc,
+   :beq, :beqz, :bge, :bgeu, :bgez, :bgt, :bgtu, :bgtz, :ble, :bleu, :blez, :blt, :bltz, :bne, :bnez, 
+   :div, :divu,
+   :ebreak, :ecall,
+   :j, :jal, :jalr, :jr,
+   :la, :lb, :lbu, :ld, :lh, :lhu, :li, :lui, :lw, :lwu,
+   :move, :mul, :mulh, :mulhsu, :mulhu, :mv,
+   :neg, :nop, :not,
+   :or, :ori,
+   :rem, :remu,
+   :sb, :sd, :seqz, :sgtz, :sh, :sll, :slli, :slt, :slti, :sltiu, :sltu, :sltz, :snez, :sra, :srai, :srl, :srli, :sub, :sw,
+   :xor, :xori]
+
+table#instruction-table
+  thead
+    tr
+      th
+        | Instruction
+      th
+        | Full Name
+      th
+        | Summary
+  tbody
+    - instructions.each do |instruction|
+      - aliased = instruction
+      - if instruction == :move
+        - aliased = :mv
+      tr.instruction
+        td.token
+          a href="#instruction-table-#{aliased}"
+            code
+              = instruction
+        td.name data-instruction=instruction
+          = I18n.t("instructions.#{aliased}.name")
+        td.summary data-instruction=instruction
+          == render(:markdown, I18n.t("instructions.#{aliased}.summary"), :layout => false)
+
+- instructions.each do |instruction|
+  - if instruction == :move
+    - next
+  h2.instruction id="instruction-table-#{instruction}"
+    code
+      = instruction
+    = " - "
+    = I18n.t("instructions.#{instruction}.name")
+
+  == render(:markdown, I18n.t("instructions.#{instruction}.summary"), :layout => false)
+
+  / Look for an examples listing
+  - examples = File.join(File.dirname(__FILE__), "instructions.yml")
+  - if File.exist?(examples)
+    - examples = YAML.load(File.read(examples))
+    - ((examples[instruction.to_s] || {})["examples"] || []).each_with_index do |example, i|
+      - markdown = example.rstrip
+      == render(:markdown, "```riscv\n#{markdown}\n```", :layout => false)
+      == render(:markdown, I18n.t("instructions.#{instruction}.example-#{i}", :default => ""), :layout => false)

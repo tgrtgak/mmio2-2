@@ -1,0 +1,344 @@
+en:
+  instructions:
+    add:
+      name: "Add"
+      summary: "Adds two registers and places the result in the destination."
+      example-0: |
+        This adds `{.register}t0` and `{.register}t1` and places the resulting sum in `{.register}t2`.
+
+    addi:
+      name: "Add (Immediate)"
+      summary: "Adds a register and an immediate and places the result in the destination."
+      example-0: |
+        This adds the value `42` to the `{.register}t0` register and places the resulting sum in `{.register}t2`.
+      example-1: |
+        This performs the same operation as the previous example. The `{.instruction}add`, here, is a convenient alias for `{.instruction}addi` when an immediate value is written.
+
+    and:
+      name: "Logical AND"
+      summary: "Applies the logical AND operation to the given registers and places the result in the destination."
+      example-0: |
+        This applies the logical AND to `{.register}t0` and `{.register}t1` and places the resulting value in `{.register}t2`.
+
+    andi:
+      name: "And (Immediate)"
+      summary: "Applies the logical AND operation to the given register and immediate and places the result in the destination."
+      example-0: |
+        This applies the logical AND operation to the hexadecimal value `0x18` and the `{.register}t0` register and places the resulting sum in `{.register}t2`.
+      example-1: |
+        This performs the same operation as the previous example. The `{.instruction}and`, here, is a convenient alias for `{.instruction}andi` when an immediate value is written.
+
+    auipc:
+      name: "Add Upper Immediate to Program Counter"
+      summary: "Adds the current PC to the given immediate after shifting the immediate value left 12 bits and sign-extending to the register width."
+
+    beq:
+      name: "Branch If Equal"
+      summary: "Jumps to the given label if the two registers are equal."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t1` register is equal to the value in the `{.register}t0` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+
+    beqz:
+      name: "Branch If Equal to Zero"
+      summary: "Pseudo-instruction that jumps to the given label if the given register is equal to zero."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t0` register is equal to zero. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bge:
+      name: "Branch If Greater Than or Equal"
+      summary: "Jumps to the given label if the first given register is greater than or equal to the second when interpreted as signed integers."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t0` register is greater than or equal to the value in the `{.register}t1` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bgeu:
+      name: "Branch If Greater Than or Equal (Unsigned)"
+      summary: "Jumps to the given label if the first given register is greater than or equal to the second when interpreted as unsigned integers."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the unsigned value in the `{.register}t0` register is greater than or equal to the unsigned value in the `{.register}t1` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bgez:
+      name: "Branch If Greater Than or Equal to Zero"
+      summary: "Pseudo-instruction that jumps to the given label if the given register is positive or zero when interpreted as a signed integer."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t0` register is greater than or equal to zero. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bgt:
+      name: "Branch If Greater Than"
+      summary: "Pseudo-instruction that jumps to the given label if the first given register is greater than the other when interpreted as a signed integer."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t0` register is strictly greater than the value in the `{.register}t1` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bgtu:
+      name: "Branch If Greater Than (Unsigned)"
+      summary: "Pseudo-instruction that jumps to the given label if the first given register is greater than the other when interpreted as an unsigned integer."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the unsigned value in the `{.register}t0` register is strictly greater than the unsigned value in the `{.register}t1` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bgtz:
+      name: "Branch If Greater Than Zero"
+      summary: "Pseudo-instruction that jumps to the given label if the given register is positive when interpreted as a signed integer."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t0` register is strictly greater than zero. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    ble:
+      name: "Branch If Less Than or Equal"
+      summary: "Pseudo-instruction that jumps to the given label if the first given register is less than the other when interpreted as a signed integer."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t0` register is less than or equal to the value in the `{.register}t1` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bleu:
+      name: "Branch If Less Than or Equal (Unsigned)"
+      summary: "Pseudo-instruction that jumps to the given label if the first given register is less than the other when interpreted as an unsigned integer. (Also the cheesiest instruction)"
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the unsigned value in the `{.register}t0` register is less than or equal to the unsigned value in the `{.register}t1` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    blez:
+      name: "Branch If Less Than or Equal to Zero"
+      summary: "Pseudo-instruction that jumps to the given label if the given register is negative or zero when interpreted as a signed integer."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the unsigned value in the `{.register}t0` register is less than or equal to zero. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    blt:
+      name: "Branch If Less Than"
+      summary: "Jumps to the given label if the first given register is less than the second when interpreted as signed integers."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t0` register is strictly less than the value in the `{.register}t1` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bltu:
+      name: "Branch If Less Than (Unsigned)"
+      summary: "Jumps to the given label if the first given register is less than the second when interpreted as unsigned integers."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the unsigned value in the `{.register}t0` register is strictly less than the unsigned value in the `{.register}t1` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bltz:
+      name: "Branch If Less Than Zero"
+      summary: "Pseudo-instruction that jumps to the given label if the given register is negative when interpreted as a signed integer."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the unsigned value in the `{.register}t0` register is strictly less than zero. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bne:
+      name: "Branch If Not Equal"
+      summary: "Jumps to the given label if the two registers are not equal."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t1` register is not equal to the value in the `{.register}t0` register. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    bnez:
+      name: "Branch If Not Equal to Zero"
+      summary: "Pseudo-instruction that jumps to the given label if the given register is not equal to zero."
+      example-0: |
+        This sets the program counter to `_exit_loop` if and only if the value in the `{.register}t0` register is not equal to zero. Otherwise, it continues to the `{.instruction}addi` instruction that follows.
+
+    div:
+      name: "Integer Divide"
+      summary: "Divides the two given registers and places the resulting quotient in the destination register, interpreting every value as a signed integer."
+
+    divu:
+      name: "Integer Divide (Unsigned)"
+      summary: "Divides the two given registers and places the resulting quotient in the destination register, interpreting every value as an unsigned integer."
+
+    ebreak:
+      name: "Environment Break"
+      summary: "Pauses execution and yields to the debugger."
+
+    ecall:
+      name: "Environment Call"
+      summary: "Performs a call into the operating system."
+
+    j:
+      name: "Jump"
+      summary: "Jumps to the given label, unconditionally."
+      example-0: |
+        This jumps to the label `_func_skip` and will not execute the `{.instruction}addi`, `{.instruction}li`, nor `{.instruction}mul` instructions. Instead, it will go on to perform the `{.instruction}li` pseudo-instruction and then the `{.instruction}sub` that are written after that label.
+
+    jal:
+      name: "Jump and Link"
+      summary: "Jumps to the given label, unconditionally, and sets the destination register (the `{.register}ra` register by default) to the address of the instruction following this one."
+      example-0: |
+        This contains a function called `func` defined by the label of that same name. The `{.instruction}jal` instruction will assign the `{.register}ra` register to the address of the instruction following the `{.instruction}jal`, which is the `{.instruction}li` assigning `10` to `{.register}a7`. Afterward, the `{.instruction}jal` instruction will jump to the label and start executing the instructions following the label. In this case, it will perform an `{.instruction}ecall` that will print the argument provided to the function in `{.register}a0` that was assigned prior to the `{.instruction}jal`. You will notice that the `{.instruction}jal` instruction does not, itself, enforce the calling conventions of the function (argument and return value placement) aside from the assignment of the `{.register}ra` register, which is then used by the `{.instruction}jr` instruction to return to the calling `main` function.
+      example-1: |
+        This example specifies the destination register for the return address. We can use this to essentially move the value of the `{.register}pc` register into any general-purpose register, such as `{.register}t0` in this case.
+
+    jalr:
+      name: "Jump and Link to Register"
+      summary: "Jumps to the given register, unconditionally, and sets the destination register (the `{.register}ra` register by default) to the address of the instruction following this one."
+      example-0: |
+        This contains a function called `func` defined by the label of that same name. The `{.instruction}jalr` instruction will assign the `{.register}ra` register to the address of the instruction following the `{.instruction}jalr`, which is the `{.instruction}li` assigning `10` to `{.register}a7`. Afterward, the `{.instruction}jalr` instruction will jump to the address given by the value of the specified register. In this case, it is the value assigned to the `{.register}t0` register, which was assigned to the address of `func` by the preceeding `{.instruction}la` instruction. It will then start executing the instructions at that address starting with the `{.instruction}li` instruction following the `func` label. In this case, it will perform an `{.instruction}ecall` that will print the argument provided to the function in `{.register}a0` that was assigned prior to the `{.instruction}jalr`. You will notice that the `{.instruction}jalr` instruction does not, itself, enforce the calling conventions of the function (argument and return value placement) aside from the assignment of the `{.register}ra` register, which is then used by the `{.instruction}jr` instruction to return to the calling `main` function.
+
+    jr:
+      name: "Jump to Register"
+      summary: "Interprets the given register as a memory address and jumps to that address unconditionally."
+      example-0: |
+        The typical use of the `{.instruction}jr` instruction is to jump to the `{.register}ra` register after calling a function using the `{.instruction}jal` or `{.instruction}jalr` instructions. In this case, the function defined at the label `func` is called via the `{.instruction}jal` instruction in `main`, which performs the jump and assigns the address of the following `{.instruction}li` instruction in `main` to `{.register}ra`. The purpose of the `{.instruction}jr` at the end of `func` will be to assign that instruction address to `{.register}pc` and, thus, jump to the instruction that immediately follows the `{.instruction}jal`.
+
+    la:
+      name: "Load Address"
+      summary: "Moves the address represented by the given label to the given register."
+
+    lb:
+      name: "Load Byte"
+      summary: "Interprets the register value as a memory address and loads one byte at that address, interpreting it as a signed 8-bit integer, into the given register."
+
+    lbu:
+      name: "Load Byte (Unsigned)"
+      summary: "Interprets the register value as a memory address and loads one byte at that address, interpreting it as an unsigned 8-bit integer, into the given register."
+
+    ld:
+      name: "Load Double-word"
+      summary: "Interprets the register value as a memory address and loads one double-word at that address, interpreting it as a signed 64-bit integer, into the given register."
+
+    lh:
+      name: "Load Half-word"
+      summary: "Interprets the register value as a memory address and loads one half-word at that address, interpreting it as a signed 16-bit integer, into the given register."
+
+    lhu:
+      name: "Load Half-word (Unsigned)"
+      summary: "Interprets the register value as a memory address and loads one half-word at that address, interpreting it as an unsigned 16-bit integer, into the given register."
+
+    li:
+      name: "Load Immediate"
+      summary: "Pseudo-instruction that simply loads the given immediate value into the given register."
+
+    lui:
+      name: "Load Upper Immediate"
+      summary: "Loads the given immediate into bits 31 to 12 of the given register after shifting the immediate value left 12 bits and sign extending to the register width."
+
+    lw:
+      name: "Load Word"
+      summary: "Interprets the register value as a memory address and loads one word at that address, interpreting it as a signed 32-bit integer, into the given register."
+
+    lwu:
+      name: "Load Word (Unsigned)"
+      summary: "Interprets the register value as a memory address and loads one word at that address, interpreting it as an unsigned 32-bit integer, into the given register."
+
+    mul:
+      name: "Multiply"
+      summary: "Multiplies the two given registers and places the lower word of the resulting product in the destination register, interpreting every value as a signed integer."
+
+    mulh:
+      name: "Multiply and return High"
+      summary: "Multiplies the two given registers and places the higher word of the resulting product in the destination register, interpreting every value as a signed integer."
+
+    mulhsu:
+      name: "Multiply and return High (Signed x Unsigned)"
+      summary: "Multiplies the two given registers and places the higher word of the resulting product in the destination register, interpreting the first value as a signed integer and the second as an unsigned integer."
+
+    mulhu:
+      name: "Multiply and return High (Unsigned)"
+      summary: "Multiplies the two given registers and places the higher word of the resulting product in the destination register, interpreting every value as an unsigned integer."
+
+    mv:
+      name: "Move"
+      summary: "Pseudo-instruction that copies the value from the source register into the destination register."
+
+    neg:
+      name: "Negate"
+      summary: "Pseudo-instruction that negates the source register, interpreted as a signed 2's-complement integer, and places the result in the destination."
+
+    nop:
+      name: "No Operation"
+      summary: "Pseudo-instruction that does nothing."
+
+    not:
+      name: "Not"
+      summary: "Applies the logical NOT operation (1's-complement negation) to the given register and places the result in the destination."
+
+    or:
+      name: "Logical OR"
+      summary: "Applies the logical OR operation to the given registers and places the result in the destination."
+
+    ori:
+      name: "Logical OR (Immediate)"
+      summary: "Applies the logical OR operation to the given register and immediate and places the result in the destination."
+
+    rem:
+      name: "Integer Remainder"
+      summary: "Divides the two given registers and places the resulting remainder in the destination register, interpreting every value as a signed integer."
+
+    remu:
+      name: "Integer Remainder (Unsigned)"
+      summary: "Divides the two given registers and places the resulting remainder in the destination register, interpreting every value as an unsigned integer."
+
+    sb:
+      name: "Store Byte"
+      summary: "Interprets the register value as a memory address and stores the given value to the 8-bit byte at that address."
+
+    sd:
+      name: "Store Double-word"
+      summary: "Interprets the register value as a memory address and stores the given value to the 64-bit region beginning at that address."
+
+    seqz:
+      name: "Set If Equal to Zero"
+      summary: "Pseudo-instruction that assigns 1 to the destination register if the given register is equal to zero; 0 otherwise."
+
+    sgtz:
+      name: "Set If Greater Than Zero"
+      summary: "Pseudo-instruction that assigns 1 to the destination register if the given register is positive when interpreted as a signed integer; 0 otherwise."
+
+    sh:
+      name: "Store Half-word"
+      summary: "Interprets the register value as a memory address and stores the given value to the 16-bit region beginning at that address."
+
+    sll:
+      name: "Shift Left Logical"
+      summary: "Shifts a 0 into the right-hand side of the given register the number of times provided by the second register."
+
+    slli:
+      name: "Shift Left Logical (Immediate)"
+      summary: "Shifts a 0 into the right-hand side of the given register the number of times provided by the immediate value."
+
+    slt:
+      name: "Set Less Than"
+      summary: "Assigns 1 to the destination register if the first register, interpreted as a signed integer, is less than the second register; 0 otherwise."
+
+    slti:
+      name: "Set Less Than (Immediate)"
+      summary: "Assigns 1 to the destination register if the first register, interpreted as a signed integer, is less than the given immediate; 0 otherwise."
+
+    sltiu:
+      name: "Set Less Than (Immediate) (Unsigned)"
+      summary: "Assigns 1 to the destination register if the first register, interpreted as an unsigned integer, is less than the given immediate; 0 otherwise."
+
+    sltu:
+      name: "Set Less Than (Unsigned)"
+      summary: "Assigns 1 to the destination register if the first register, interpreted as an unsigned integer, is less than the given immediate; 0 otherwise."
+
+    sltz:
+      name: "Set If Less Than Zero"
+      summary: "Pseudo-instruction that assigns 1 to the destination register if the given register is negative when interpreted as a signed integer; 0 otherwise."
+
+    snez:
+      name: "Set If Not Equal to Zero"
+      summary: "Pseudo-instruction that assigns 1 to the destination register if the given register is not equal to zero; 0 otherwise."
+
+    sra:
+      name: "Shift Right Arithmetic"
+      summary: "Copies the most-significant bit into the left-hand side of the given register the number of times provided by the second register."
+
+    srai:
+      name: "Shift Right Arithmetic (Immediate)"
+      summary: "Copies the most-significant bit into the left-hand side of the given register the number of times provided by the immediate."
+
+    srl:
+      name: "Shift Right Logical"
+      summary: "Shifts a 0 into the left-hand side of the given register the number of times provided by the second register."
+
+    srli:
+      name: "Shift Right Logical (Immediate)"
+      summary: "Shifts a 0 into the left-hand side of the given register the number of times provided by the immediate."
+
+    sub:
+      name: "Subtract"
+      summary: "Subtracts the second register from the first given register and places the signed result into the destination register." 
+
+    sw:
+      name: "Store Word"
+      summary: "Interprets the register value as a memory address and stores the given value to the 32-bit region beginning at that address."
+
+    xor:
+      name: "Logical XOR"
+      summary: "Applies the logical XOR operation to the given registers and places the result in the destination."
+
+    xori:
+      name: "Logical XOR (Immediate)"
+      summary: "Applies the logical XOR operation to the given register and immediate and places the result in the destination."
