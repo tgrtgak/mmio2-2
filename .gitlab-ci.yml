@@ -10,8 +10,8 @@ pages:
     - apt update
     - apt install npm -y
     - touch lib/mode-assembly_riscv.js
-    - sh install.sh
-    - sh build.sh
+    - /bin/bash install.sh
+    - /bin/bash build.sh
     - npm install
     - npx webpack
     - gem install bundler
