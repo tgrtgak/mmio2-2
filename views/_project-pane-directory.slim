@@ -3,7 +3,7 @@
 
 - Dir["#{path}/#{filter}"].each do |f|
   - if File.directory?(f)
-    li.directory.built-in data-path=File.join(root, File.basename(f))[("files/".length)...]
+    li.directory.built-in data-path=Base64.encode64(File.join(root, File.basename(f))[("files/".length)...]).strip
       span.info
         img        src="images/dynamic/hex/aaaaaa/group.svg"
         img.active src="images/dynamic/hex/ffffff/group.svg"

@@ -140,7 +140,7 @@ class FileList extends EventComponent {
         let directory = base.substring(0, index);
 
         // Open that item
-        let item = this._element.querySelector("li.directory[data-path=\"" + directory + "\"]");
+        let item = this._element.querySelector("li.directory[data-path=\"" + btoa(directory) + "\"]");
         if (item) {
             await this.open(item);
 
@@ -283,7 +283,7 @@ class FileList extends EventComponent {
         if (item.hasAttribute('data-path')) {
             // Read the contents, if we need to do so.
             let itemRoot = item.querySelector('ol');
-            let path = item.getAttribute('data-path');
+            let path = atob(item.getAttribute('data-path'));
 
             if (itemRoot.children.length == 0) {
                 let listing = await this._storage.list(path);
@@ -335,7 +335,7 @@ class FileList extends EventComponent {
 
         // Load the file
         if (item.hasAttribute('data-path')) {
-            let path = item.getAttribute('data-path');
+            let path = atob(item.getAttribute('data-path'));
             let text = await this._storage.load(path);
 
             // -1 moves the cursor to the start (without this,
@@ -383,10 +383,10 @@ class FileList extends EventComponent {
         actionDropdown.setAttribute("id", dropdownID);
 
         // Updates path itself.
-        element.setAttribute('data-path', path + '/' + item.name);
+        element.setAttribute('data-path', btoa(path + '/' + item.name));
         
         let buttons = actionDropdown.querySelectorAll('button.action')
-        let dataPath = element.getAttribute('data-path');
+        let dataPath = atob(element.getAttribute('data-path'));
 
         // Attaches event handlers to each dropdown button
         for (let i = 0; buttons && i < buttons.length; ++i) {
@@ -480,9 +480,9 @@ class FileList extends EventComponent {
      */
     itemFor(path) {
         if (path[0] == '/') {
-            return this._element.querySelector("li[data-path=\"" + path + "\"]");
+            return this._element.querySelector("li[data-path=\"" + btoa(path) + "\"]");
         }
-        return this._element.querySelector("li[data-url=\"" + path + "\"]");
+        return this._element.querySelector("li[data-url=\"" + btoa(path) + "\"]");
     }
 
     /**

@@ -60,7 +60,7 @@ ol
           img.hover  src="images/dynamic/hex/46b1e4/group.svg"
           input type=:text value="my-project"
   == partial(:"project-pane-directory", :locals => { :path => "assets/files", :root => "files" })
-  li.directory.built-in data-path="kernel"
+  li.directory.built-in data-path=Base64.encode64("kernel").strip
     span.info
       img        src="images/dynamic/hex/aaaaaa/group.svg"
       img.active src="images/dynamic/hex/ffffff/group.svg"
