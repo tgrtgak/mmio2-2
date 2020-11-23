@@ -7,6 +7,8 @@ pages:
   image: ruby:2.4
   stage: deploy
   script:
+    - apt update
+    - apt install npm -y
     - sh install.sh
     - sh build.sh
     - npm install
