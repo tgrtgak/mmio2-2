@@ -9,6 +9,7 @@ pages:
   script:
     - apt update
     - apt install npm -y
+    - touch lib/mode-assembly_riscv.js
     - sh install.sh
     - sh build.sh
     - npm install
