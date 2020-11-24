@@ -272,6 +272,10 @@ class Editor {
                                     return response.text();
                                 }).then(function(text) {
                                     // Push text to dummy node
+                                    let rootpath = document.body.getAttribute('data-rootpath');
+                                    let basepath = document.body.getAttribute('data-basepath');
+                                    text = text.replaceAll("\"../", "\"" + rootpath + basepath);
+
                                     var dummy = document.createElement("div");
                                     dummy.setAttribute('hidden', '');
                                     dummy.innerHTML = text;
