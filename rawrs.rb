@@ -56,7 +56,7 @@ class RAWRS < Sinatra::Base
   Tilt.prefer   Tilt::RedcarpetTemplate
   set :markdown, :renderer => HTML,
                  :layout_engine => :slim,
-                 :layout        => :"guidance/layout",
+                 :layout => :"guidance/layout",
                  :tables => true,
                  :fenced_code_blocks => true
 
@@ -117,17 +117,19 @@ class RAWRS < Sinatra::Base
         filename = :"guidance/en/#{page}"
       end
 
-      data = File.read("views/#{filename}.md")
-      data.gsub!("{% binutils_authors %}", @@binutils_authors)
-      ret = render(:markdown, data, :layout => layout)
-      ret.gsub!(" href=\"http", " target=\"_blank\" href=\"http")
-      ret.gsub!("<p><img", "<p class=\"image\"><img")
+      if layout.nil?
+        ret = render(:slim, :index, :locals => {
+          :tab => :guidance,
+          :guidance => page
+        })
+      else
+        data = File.read("views/#{filename}.md")
+        data.gsub!("{% binutils_authors %}", @@binutils_authors)
+        ret = render(:markdown, data, :layout => layout)
+        ret.gsub!(" href=\"http", " target=\"_blank\" href=\"http")
+        ret.gsub!("<p><img", "<p class=\"image\"><img")
+      end
       ret
-    end
-
-    def render_instructions
-      lang = :en
-      render(:slim, :"guidance/instructions", :layout => :"guidance/layout")
     end
   end
 
@@ -135,17 +137,38 @@ class RAWRS < Sinatra::Base
 
   # index page
   get '/' do
+    @basepath = ""
     render(:slim, :index)
   end
 
-  # guidance page index
-  get '/guidance/*' do |splat|
-    page = "#{File.expand_path(splat, "/")}"
+  # edit page
+  get '/edit' do
+    @basepath = ""
+    render(:slim, :index, :locals => {
+      :tab => :edit
+    })
+  end
 
-    if page == "/instructions"
-      render_instructions
+  # run page
+  get '/run' do
+    @basepath = ""
+    render(:slim, :index, :locals => {
+      :tab => :run
+    })
+  end
+
+  # guidance page index
+  get '/guidance/:page' do
+    @basepath = "../"
+    if params[:page].end_with?('_ajax')
+      params[:page] = params[:page][0...-5]
+      if params[:page] == "instructions"
+        render(:slim, :"guidance/_instructions", :layout => :"guidance/layout")
+      else
+        render_guidance(params[:page])
+      end
     else
-      render_guidance(page)
+      render_guidance(params[:page], nil)
     end
   end
 

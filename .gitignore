@@ -13,3 +13,4 @@ kernel/kernel.bin
 kernel/kernel.elf
 test/karma-result.json
 coverage/
+static/

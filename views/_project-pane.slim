@@ -2,14 +2,14 @@ ol
   template.directory
     li.directory
       span.info
-        img        src="images/dynamic/hex/46b1e4/group.svg"
-        img.active src="images/dynamic/hex/ffffff/group.svg"
-        img.hover  src="images/dynamic/hex/46b1e4/group.svg"
+        img        src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
+        img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
+        img.hover  src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
         span.name
         button.actions
-          img        src="images/dynamic/hex/ffffff/actions.svg"
-          img.active src="images/dynamic/hex/ffffff/actions.svg"
-          img.hover  src="images/dynamic/hex/aaaaaa/actions.svg"
+          img        src="#{@basepath}images/dynamic/hex/ffffff/actions.svg"
+          img.active src="#{@basepath}images/dynamic/hex/ffffff/actions.svg"
+          img.hover  src="#{@basepath}images/dynamic/hex/aaaaaa/actions.svg"
         ul.dropdown-menu role=:menu aria-hidden="true" hidden=true
           li.dropdown-menu-option
             button.action data-action=:delete role=:menuitem
@@ -21,14 +21,14 @@ ol
   template.file
     li.file
       span.info
-        img        src="images/dynamic/hex/46b1e4/text.svg"
-        img.active src="images/dynamic/hex/ffffff/text.svg"
-        img.hover  src="images/dynamic/hex/46b1e4/text.svg"
+        img        src="#{@basepath}images/dynamic/hex/46b1e4/text.svg"
+        img.active src="#{@basepath}images/dynamic/hex/ffffff/text.svg"
+        img.hover  src="#{@basepath}images/dynamic/hex/46b1e4/text.svg"
         span.name
         button.actions
-          img        src="images/dynamic/hex/ffffff/actions.svg"
-          img.active src="images/dynamic/hex/ffffff/actions.svg"
-          img.hover  src="images/dynamic/hex/aaaaaa/actions.svg"
+          img        src="#{@basepath}images/dynamic/hex/ffffff/actions.svg"
+          img.active src="#{@basepath}images/dynamic/hex/ffffff/actions.svg"
+          img.hover  src="#{@basepath}images/dynamic/hex/aaaaaa/actions.svg"
         ul.dropdown-menu role=:menu aria-hidden="true" hidden=true
           li.dropdown-menu-option
             button.action data-action=:rename role=:menuitem
@@ -42,9 +42,9 @@ ol
   -# Render all files in assets/files
   li.directory.root
     span.info
-      img        src="images/dynamic/hex/46b1e4/group.svg"
-      img.active src="images/dynamic/hex/ffffff/group.svg"
-      img.hover  src="images/dynamic/hex/46b1e4/group.svg"
+      img        src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
+      img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
+      img.hover  src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
       span.name
         | My Projects
     ol
@@ -55,16 +55,16 @@ ol
               | New Project
       li.directory.new hidden=true
         span.info
-          img        src="images/dynamic/hex/46b1e4/group.svg"
-          img.active src="images/dynamic/hex/ffffff/group.svg"
-          img.hover  src="images/dynamic/hex/46b1e4/group.svg"
+          img        src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
+          img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
+          img.hover  src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
           input type=:text value="my-project"
   == partial(:"project-pane-directory", :locals => { :path => "assets/files", :root => "files" })
   li.directory.built-in data-path=Base64.encode64("kernel").strip
     span.info
-      img        src="images/dynamic/hex/aaaaaa/group.svg"
-      img.active src="images/dynamic/hex/ffffff/group.svg"
-      img.hover  src="images/dynamic/hex/aaaaaa/group.svg"
+      img        src="#{@basepath}images/dynamic/hex/aaaaaa/group.svg"
+      img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
+      img.hover  src="#{@basepath}images/dynamic/hex/aaaaaa/group.svg"
       span.name
         | kernel
     ol

@@ -4,23 +4,30 @@ html lang="en-US"
     == partial(:head)
     title
       | RAWRS
-  body
+  body data-basepath=@basepath
+    - if !defined?(tab)
+      - tab = :edit
     ol.tabs
-      li.tab.active
+      li.tab class=(tab == :edit ? "active" : false)
+        a href="#{@basepath}edit" hidden=true aria-hidden="true"
         button aria-controls=:"assemble-panel"
           = I18n.t(:"edit.tab")
-      li.tab
+      li.tab class=(tab == :run ? "active" : false)
+        a href="#{@basepath}run" hidden=true aria-hidden="true"
         button aria-controls=:"run-panel"
           = I18n.t(:"run.tab")
-      li.tab
+      li.tab class=(tab == :guidance ? "active" : false)
+        a href="#{@basepath}guidance/about" hidden=true aria-hidden="true"
         button aria-controls=:"guidance-panel"
           = I18n.t(:"guidance.tab")
     ol.tab-panels
-      li.tab-panel.active id=:"assemble-panel"
+      li.tab-panel id=:"assemble-panel" class=(tab == :edit ? "active" : false)
         == partial(:"assemble-panel")
-      li.tab-panel        id=:"run-panel"
+      li.tab-panel id=:"run-panel" class=(tab == :run ? "active" : false)
         == partial(:"run-panel")
-      li.tab-panel        id=:"guidance-panel"
-        == partial(:"guidance-panel")
+      li.tab-panel id=:"guidance-panel" class=(tab == :guidance ? "active" : false)
+        - if !defined?(guidance)
+          - guidance = "about"
+        == partial(:"guidance-panel", :locals => {:guidance => guidance})
     == partial(:toolbar)
     == partial(:scripts)

@@ -8,7 +8,8 @@ class Assembler extends EventComponent {
     }
 
     assemble(filename, source, terminal, callback) {
-        var worker = new Worker("js/riscv64-unknown-elf-as.js");
+        let basepath = document.body.getAttribute('data-basepath');
+        var worker = new Worker(basepath + "js/riscv64-unknown-elf-as.js");
         terminal.clear();
         terminal.writeHeader("Assembling");
 

@@ -256,7 +256,8 @@ class FileList extends EventComponent {
      * @param {string} url The URL of the file to load.
      */
     async load(url) {
-        fetch(url, {
+        let basepath = document.body.getAttribute('data-basepath');
+        fetch(basepath + url, {
             credentials: 'include'
         }).then(function(response) {
             return response.text();

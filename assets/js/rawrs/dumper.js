@@ -8,7 +8,8 @@ class Dumper extends EventComponent {
     }
 
     dump(binary, section, terminal, callback) {
-        var worker = new Worker("js/riscv64-unknown-elf-readelf.js");
+        let basepath = document.body.getAttribute('data-basepath');
+        var worker = new Worker(basepath + "js/riscv64-unknown-elf-readelf.js");
 
         var blobs = [];
         var files = [binary];

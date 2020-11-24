@@ -5,6 +5,7 @@ class Tabs {
         document.querySelectorAll(".tabs").forEach( (tabStrip) => {
             tabStrip.querySelectorAll(".tab > a, .tab > button").forEach( (tabButton) => {
                 tabButton.addEventListener("click", (event) => {
+                    // Update location
                     tabStrip.querySelectorAll(".tab").forEach( (tab) => {
                         tab.classList.remove("active");
                     });
@@ -19,13 +20,28 @@ class Tabs {
 
                     var tabPanel = document.querySelector(".tab-panel#" + tabButton.getAttribute('aria-controls'));
                     if (tabPanel) {
+                        let rootpath = document.body.getAttribute('data-rootpath');
                         tabPanel.classList.add("active");
+                        let url = tabButton.getAttribute('href');
+                        if (tabButton.previousElementSibling) {
+                            url = tabButton.previousElementSibling.getAttribute('href');
+                        }
+                        if (tabPanel.querySelector("li.tab.active > a:not(.ajax)")) {
+                            url = tabPanel.querySelector("li.tab.active > a:not(.ajax)").getAttribute('href');
+                        }
+                        url = rootpath + url;
+
+                        window.history.replaceState(window.history.start, "", url);
 
                         // Check if the tabPanel is PJAX loaded
                         if (!tabPanel.classList.contains("pjax-loaded")) {
                             var pjaxURL = tabPanel.getAttribute('data-pjax');
+                            if (tabButton.parentNode.querySelector("a.ajax")) {
+                                pjaxURL = tabButton.parentNode.querySelector("a.ajax").getAttribute('href');
+                            }
                             if (pjaxURL) {
-                                // Fetch HTML page and get content at "body.documentation"
+                                pjaxURL = rootpath + pjaxURL;
+                                // Fetch HTML page and get content at "body"
                                 tabPanel.classList.add("pjax-loaded");
                                 fetch(pjaxURL, {
                                     credentials: 'include'
@@ -41,6 +57,13 @@ class Tabs {
                                     tabPanel.innerHTML = "";
                                     tabPanel.appendChild(innerElement);
                                     dummy.remove();
+
+                                    window.history.replaceState(window.history.start, "", url);
+
+                                    if (tabPanel.querySelector("li.tab.active > a")) {
+                                        url = tabPanel.querySelector("li.tab.active > a").getAttribute('href');
+                                    }
+                                    window.history.replaceState(window.history.start, "", url);
                                 });
                             }
                         }

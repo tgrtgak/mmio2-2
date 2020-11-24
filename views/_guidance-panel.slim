@@ -3,8 +3,9 @@
 ol.tabs
   - tabCount = 0
   - topics.each_with_index do |topic, i|
-    li.tab class=(i == 0 ? "active" : "")
-      a href="guidance/#{topic}" hidden=true aria-hidden="true"
+    li.tab class=(topic == guidance.to_s ? "active" : "")
+      a.ajax href="#{@basepath}guidance/#{topic}_ajax" hidden=true aria-hidden="true"
+      a href="#{@basepath}guidance/#{topic}" hidden=true aria-hidden="true"
       button aria-controls="guidance-panel-#{i}"
         = I18n.t(:"guidance.#{topic}.tab")
     - tabCount += 1
@@ -12,8 +13,11 @@ ol.tabs
 ol.tab-panels
   - tabCount = 0
   - topics.each_with_index do |topic, i|
-    li.tab-panel class=(i == 0 ? "active" : "") id="guidance-panel-#{i}" data-pjax=(i == 0 ? false : "guidance/#{topic}")
-      - if i == 0
+    li.tab-panel class=(topic == guidance.to_s ? "active" : "") id="guidance-panel-#{i}" data-pjax=(topic == guidance.to_s ? false : "#{@basepath}guidance/#{topic}_ajax")
+      - if topic == guidance.to_s
         .content.documentation
-          == render_guidance(:about, false)
+          - if topic == "instructions"
+            == partial(:"guidance/instructions")
+          - else
+            == render_guidance(topic.intern, false)
     - tabCount += 1

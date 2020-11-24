@@ -256,33 +256,33 @@ class Editor {
             document.querySelectorAll(".tabs").forEach( (tabStrip) => {
                 tabStrip.querySelectorAll(".tab > a, .tab > button").forEach( (tabButton) => {
                     var instructionsTabPanel = document.querySelector(".tab-panel#" + tabButton.getAttribute('aria-controls'));
-                    if (instructionsTabPanel != null && instructionsTabPanel.getAttribute("data-pjax") === "guidance/instructions") {
-                        if (instructionsTabPanel) {
+                    if (instructionsTabPanel !== null && ((instructionsTabPanel.getAttribute("data-pjax") || "").indexOf("instructions") > 0)) {
+                        // Check if the instructionsTab is PJAX loaded
+                        if (!instructionsTabPanel.classList.contains("pjax-loaded")) {
+                            var pjaxURL = instructionsTabPanel.getAttribute('data-pjax');
+                            if (tabButton.parentNode.querySelector("a.ajax")) {
+                                pjaxURL = tabButton.parentNode.querySelector("a.ajax").getAttribute('href');
+                            }
+                            if (pjaxURL) {
+                                // Fetch HTML page and get content at "body.documentation"
+                                instructionsTabPanel.classList.add("pjax-loaded");
+                                fetch(pjaxURL, {
+                                    credentials: 'include'
+                                }).then(function(response) {
+                                    return response.text();
+                                }).then(function(text) {
+                                    // Push text to dummy node
+                                    var dummy = document.createElement("div");
+                                    dummy.setAttribute('hidden', '');
+                                    dummy.innerHTML = text;
+                                    document.body.appendChild(dummy);
+                                    var innerElement = dummy.querySelector(".content.documentation");
+                                    instructionsTabPanel.innerHTML = "";
+                                    instructionsTabPanel.appendChild(innerElement);
+                                    dummy.remove();
 
-                            // Check if the instructionsTab is PJAX loaded
-                            if (!instructionsTabPanel.classList.contains("pjax-loaded")) {
-                                var pjaxURL = instructionsTabPanel.getAttribute('data-pjax');
-                                if (pjaxURL) {
-                                    // Fetch HTML page and get content at "body.documentation"
-                                    instructionsTabPanel.classList.add("pjax-loaded");
-                                    fetch(pjaxURL, {
-                                        credentials: 'include'
-                                    }).then(function(response) {
-                                        return response.text();
-                                    }).then(function(text) {
-                                        // Push text to dummy node
-                                        var dummy = document.createElement("div");
-                                        dummy.setAttribute('hidden', '');
-                                        dummy.innerHTML = text;
-                                        document.body.appendChild(dummy);
-                                        var innerElement = dummy.querySelector(".content.documentation");
-                                        instructionsTabPanel.innerHTML = "";
-                                        instructionsTabPanel.appendChild(innerElement);
-                                        dummy.remove();
-
-                                        resolve();
-                                    });
-                                }
+                                    resolve();
+                                });
                             }
                         }
                     }
@@ -295,6 +295,10 @@ class Editor {
      * Gets the definition of an instruction and instruction name.
      */
     static getDefinitionFromTable(instruction) {
+        if (!Editor._instructionTable) {
+            return null;
+        }
+
         let summary = Editor._instructionTable.querySelector('td.summary[data-instruction="' + instruction + '"]');
 
         if (!summary) {

@@ -18,6 +18,27 @@ import RegisterListing from './register_listing';
 
 class RAWRS {
     static load() {
+        // Determine the rootpath for any relative ajax calls later on
+        let path = window.location.pathname;
+        if (path.endsWith(".html")) {
+            path = path.split("/");
+            path = path.slice(0, path.length - 1);
+            path = path.join("/");
+        }
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        let rootpath = window.location.origin + path + "/";
+        document.body.setAttribute('data-rootpath', rootpath);
+
+        // Ensure we go to the indicated anchor
+        if (window.location.hash) {
+            let item = document.querySelector(window.location.hash);
+            if (item) {
+                item.scrollIntoView();
+            }
+        }
+
         this._console = new Console(30, 80, 15);
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
 
@@ -136,7 +157,8 @@ class RAWRS {
                 bp = RAWRS.simulator.breakpoints;
             }
 
-            let sim = new Simulator(32, "basic-riscv64.cfg", "kernel/kernel.bin", this._binary, this._console, this._video, bp);
+            let basepath = document.body.getAttribute('data-basepath');
+            let sim = new Simulator(32, "basic-riscv64.cfg", basepath + "kernel/kernel.bin", this._binary, this._console, this._video, bp);
             console.log(sim, this._binary);
 
             sim.on("quit", () => {

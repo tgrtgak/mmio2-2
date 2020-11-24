@@ -82,7 +82,8 @@ class Simulator extends EventComponent {
     _initialize() {
         var Module = this._module;
 
-        Module.locateFile = function(url) { return 'js/tinyemu/' + url; };
+        let basepath = document.body.getAttribute('data-basepath');
+        Module.locateFile = function(url) { return basepath + 'js/tinyemu/' + url; };
 
         var alloc_size = this.memorySize;
         /* frame buffer memory */

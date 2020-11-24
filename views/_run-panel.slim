@@ -4,12 +4,12 @@
       ol.tabs.side
         li.tab.active
           button aria-controls=:"console"
-            img src="images/dynamic/hex/1e151e/toolbar/console.svg"
+            img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/console.svg"
             span.caption
               = I18n.t(:"run.devices.console")
         li.tab
           button aria-controls=:"video"
-            img src="images/dynamic/hex/1e151e/toolbar/video.svg"
+            img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/video.svg"
             span.caption
               = I18n.t(:"run.devices.video")
       ol.tab-panels
@@ -65,7 +65,7 @@
             = I18n.t(:"run.machine-code.headers.source")
         tbody
 
-      img.waiting src="images/dynamic/hex/dbccda/dinosaurs/velociraptor.svg"
+      img.waiting src="#{@basepath}images/dynamic/hex/dbccda/dinosaurs/velociraptor.svg"
     li.tab-panel#memory-panel
       table.memory.empty
         thead
@@ -91,4 +91,4 @@
             = I18n.t(:"run.memory.headers.printed")
         tbody
 
-      img.waiting src="images/dynamic/hex/dbccda/dinosaurs/tyrannosaurus.svg"
+      img.waiting src="#{@basepath}images/dynamic/hex/dbccda/dinosaurs/tyrannosaurus.svg"
