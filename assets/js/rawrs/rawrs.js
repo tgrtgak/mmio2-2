@@ -28,7 +28,13 @@ class RAWRS {
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
-        let rootpath = window.location.origin + path + "/";
+        if (!path.endsWith("/")) {
+            path = path + "/";
+        }
+        if (path === "/") {
+            path = "";
+        }
+        let rootpath = window.location.origin + path;
         document.body.setAttribute('data-rootpath', rootpath);
 
         // Ensure we go to the indicated anchor
