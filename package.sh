@@ -1,3 +1,4 @@
+mkdir -p static
 rm -rf static/public
 rackula generate -p assets -o static/public
 
