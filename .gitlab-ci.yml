@@ -16,7 +16,8 @@ pages:
     - npx webpack
     - gem install bundler
     - bundle install
-    - rackula generate -o public -p assets
+    - /bin/bash package.sh
+    - mv static/public public
   artifacts:
     paths:
       - public
