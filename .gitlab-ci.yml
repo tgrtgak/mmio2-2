@@ -8,7 +8,7 @@ pages:
   stage: deploy
   script:
     - apt update
-    - apt install npm -y
+    - apt install npm texinfo -y
     - touch lib/mode-assembly_riscv.js
     - gem install bundler
     - bundle install
