@@ -20,19 +20,17 @@ class RAWRS {
     static load() {
         // Determine the rootpath for any relative ajax calls later on
         let path = window.location.pathname;
-        if (path.endsWith(".html")) {
-            path = path.split("/");
-            path = path.slice(0, path.length - 1);
-            path = path.join("/");
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length - 1);
         }
+        path = path.split("/");
+        path = path.slice(0, path.length - 1);
+        path = path.join("/");
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
         if (!path.endsWith("/")) {
             path = path + "/";
-        }
-        if (path === "/") {
-            path = "";
         }
         let rootpath = window.location.origin + path;
         document.body.setAttribute('data-rootpath', rootpath);
@@ -60,6 +58,7 @@ class RAWRS {
             }
 
             saveTimer = window.setTimeout( () => {
+                console.log("save?");
                 var data = window.editor.getValue();
                 RAWRS.fileList.save(data);
             }, 500);

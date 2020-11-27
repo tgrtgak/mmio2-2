@@ -12,6 +12,7 @@
 # The MPRV (Modify-PRiVilege) when clear will not perform address translation.
 .set MSTATUS_MPRV,        (1 << 17)
 
+.set MSTATUS_FS_OFFSET,   13
 .set MSTATUS_SUM_OFFSET,  18
 .set MSTATUS_MPP_OFFSET,  11
 .set MSTATUS_MPP_CLEAR,   ~(0b11 <<  MSTATUS_MPP_OFFSET)

@@ -33,6 +33,8 @@ Refer to the table below for more information.
 | a7 | Name            | Sets (if any) | Arguments | Description                                                  |
 |:--:|:---------------:|---------------|-----------|--------------------------------------------------------------|
 | 1  | print integer   |               | `{.register}a0`: integer to print | Prints the integer given in `{.register}a1`. It does not print a newline. |
+| 2  | print float     |               | `{.register}fa0`: 32-bit float to print | Prints the 32-bit floating point value given in `{.register}fa0`. It does not print a newline. |
+| 3  | print double    |               | `{.register}fa0`: 64-bit double to print | Prints the 64-bit floating point value given in `{.register}fa0`. It does not print a newline. |
 | 4  | print string    |               | `{.register}a0`: address of string | Prints the null-terminated string given in `{.register}a0`. It does not print a newline.  |
 | 5  | read integer    | `{.register}a0`: integer read |           | |
 | 8  | read string     | `{.register}a0`: characters read | `{.register}a0`: address of buffer<br>`{.register}a1`: maximum number of characters to read. | |

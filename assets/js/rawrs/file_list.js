@@ -239,6 +239,9 @@ class FileList extends EventComponent {
             return;
         }
 
+        // Decode
+        path = atob(path);
+
         if (path[0] !== "/") {
             // Cannot save
             return;
@@ -246,7 +249,6 @@ class FileList extends EventComponent {
 
         path = path.substring(1);
 
-        console.log("saving file", path);
         this._storage.save(path, data);
     }
 

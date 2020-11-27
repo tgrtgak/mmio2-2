@@ -16,11 +16,19 @@
 # The stuff in start.s happened first, but this is truly the runtime
 # initialization of the kernel proper.
 kmain:
-  # establish a stack
+  # Establish a stack
   jal   stack_init
 
-  # establish traps
+  # Establish traps
   jal   trap_init
+
+  # Enable floating point
+  # Set FS in SSTATUS
+  csrr  t0, sstatus
+  li    t1, 1
+  sll   t1, t1, MSTATUS_FS_OFFSET
+  or    t0, t0, t1
+  csrw  sstatus, t0
 
   li s9, 0
 

@@ -39,6 +39,8 @@ start:
   li    t1, 1
   sll   t1, t1, MSTATUS_SUM_OFFSET
   or    t0, t0, t1
+
+  # Write the MSTATUS register
   csrw  mstatus, t0
 
   # All traps happen in 'supervisor' mode and not machine mode
