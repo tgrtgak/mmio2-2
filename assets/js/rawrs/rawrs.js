@@ -20,9 +20,6 @@ class RAWRS {
     static load() {
         // Determine the rootpath for any relative ajax calls later on
         let path = window.location.pathname;
-        if (path.endsWith("/")) {
-            path = path.substring(0, path.length - 1);
-        }
         path = path.split("/");
         path = path.slice(0, path.length - 1);
         path = path.join("/");
