@@ -58,7 +58,6 @@ class RAWRS {
             }
 
             saveTimer = window.setTimeout( () => {
-                console.log("save?");
                 var data = window.editor.getValue();
                 RAWRS.fileList.save(data);
             }, 500);

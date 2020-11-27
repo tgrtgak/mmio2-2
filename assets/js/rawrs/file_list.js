@@ -345,7 +345,7 @@ class FileList extends EventComponent {
             this.startupFile = path;
         }
         else {
-            var url = item.getAttribute('data-url');
+            var url = atob(item.getAttribute('data-url'));
             this.load(url);
 
             this.startupFile = url;

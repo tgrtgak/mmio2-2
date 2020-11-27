@@ -22,7 +22,7 @@
       ol
         == partial(:"project-pane-directory", :locals => { :path => f, :root => File.join(root, File.basename(f)) })
   - else
-    li.file.built-in data-url=File.join(root, File.basename(f))
+    li.file.built-in data-url=Base64.encode64(File.join(root, File.basename(f))).strip
       span.info
         img        src="#{@basepath}images/dynamic/hex/46b1e4/text.svg"
         img.active src="#{@basepath}images/dynamic/hex/ffffff/text.svg"
