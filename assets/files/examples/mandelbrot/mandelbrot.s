@@ -16,14 +16,14 @@
 .text
 
 main:
-    # Draw the mandlebrot fractal
-    jal     mandlebrot
+    # Draw the mandelbrot fractal
+    jal     mandelbrot
     
     # exit() system call
     li      a7, 10
     ecall
 
-mandlebrot:
+mandelbrot:
     # Preserve conventional registers s0, s1, s2, and s3
     add   sp, sp, -8
     sd    ra, 0(sp)
@@ -80,9 +80,9 @@ mandlebrot:
     
     # for (y = 0; y < 480; y++) {
     li      s1, 0
-_mandlebrot_y_loop:
+_mandelbrot_y_loop:
     li      t0, DISPLAY_HEIGHT
-    bge     s1, t0, _mandlebrot_y_loop_exit
+    bge     s1, t0, _mandelbrot_y_loop_exit
     
     # cy = cyMin + (y * pixelHeight)
     fcvt.d.l ft0, s1
@@ -95,17 +95,17 @@ _mandlebrot_y_loop:
     fabs.d  ft1, fs7
     flt.d   t0, ft1, ft0
     # if (fabs(cy) < pixelHeight/2) {
-    beqz    t0, _mandlebrot_y_loop_continue
+    beqz    t0, _mandelbrot_y_loop_continue
     #   cy = 0.0
     fmv.d.x fs7, zero
-_mandlebrot_y_loop_continue:
+_mandelbrot_y_loop_continue:
     # }
     
     # for (x = 0; x < DISPLAY_WIDTH; x++) {
     li      s0, 0
-_mandlebrot_x_loop:
+_mandelbrot_x_loop:
     li      t0, DISPLAY_WIDTH
-    bge     s0, t0, _mandlebrot_x_loop_exit
+    bge     s0, t0, _mandelbrot_x_loop_exit
     
     # cx = cxMin + (x * pixelWidth)
     fcvt.d.l ft0, s0
@@ -124,16 +124,16 @@ _mandlebrot_x_loop:
     # ER2 = 4.0
     # for (iteration = 0; iteration < iterationMax && ((zx2 + zy2) < ER2); iteration++) {
     li      s2, 0
-_mandlebrot_iteration_loop:
+_mandelbrot_iteration_loop:
     # check loop conditions
     li      t0, ITERATION_MAX
-    bge     s2, t0, _mandlebrot_iteration_loop_exit
+    bge     s2, t0, _mandelbrot_iteration_loop_exit
     
     fadd.d  ft0, fs10, fs11
     li      t0, 4
     fcvt.d.l ft1, t0
     flt.d   t0, ft0, ft1
-    beqz    t0, _mandlebrot_iteration_loop_exit
+    beqz    t0, _mandelbrot_iteration_loop_exit
     
     # zy = (2 * zx * zy) + cy
     li      t0, 2
@@ -154,8 +154,8 @@ _mandlebrot_iteration_loop:
     
     # go to next iteration
     addi    s2, s2, 1
-    j       _mandlebrot_iteration_loop
-_mandlebrot_iteration_loop_exit:
+    j       _mandelbrot_iteration_loop
+_mandelbrot_iteration_loop_exit:
     # }
     
     # hue = 170 * iteration / iterationMax
@@ -185,13 +185,13 @@ _mandlebrot_iteration_loop_exit:
     addi    s3, s3, 4
 
     addi    s0, s0, 1
-    j       _mandlebrot_x_loop
-_mandlebrot_x_loop_exit:
+    j       _mandelbrot_x_loop
+_mandelbrot_x_loop_exit:
     # }
     
     addi    s1, s1, 1
-    j       _mandlebrot_y_loop
-_mandlebrot_y_loop_exit:
+    j       _mandelbrot_y_loop
+_mandelbrot_y_loop_exit:
     # }
     
     # Clean up stack and return
