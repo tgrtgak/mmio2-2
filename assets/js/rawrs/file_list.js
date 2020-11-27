@@ -344,7 +344,7 @@ class FileList extends EventComponent {
             let fileNamePlace = item.querySelector("span.name");
             let oldFileName = fileNamePlace.textContent;
             let renameFileInput = item.querySelector(".info > input");
-            let dataPath = item.getAttribute('data-path');
+            let dataPath = atob(item.getAttribute('data-path'));
 
             if (renameFileInput) {
                 renameFileInput.addEventListener("blur", (event) => {
@@ -373,19 +373,17 @@ class FileList extends EventComponent {
                             newName += ".s";
                         }
 
-                        //TODO: check and sanitize renameFileInput.value
-
                         // Saves the renamed file.
                         let directoryPath = dataPath.substring(0, dataPath.length - oldFileName.length - 1);
                         let newPath = directoryPath.substring(1) + "/" + newName;
 
                         await this._storage.save(newPath, data);
 
-                        //Creates the renamed file item.
+                        // Creates the renamed file item.
                         const newItem = {name: newName, type: "file"};
                         const itemElement = this.newItem(newItem, directoryPath);
 
-                        //Adds the renamed file element to the DOM.
+                        // Adds the renamed file element to the DOM.
                         const parentDirectory = this.itemFor(directoryPath);
                         const parentListing = parentDirectory.querySelector(":scope > ol");
                         parentListing.appendChild(itemElement);
