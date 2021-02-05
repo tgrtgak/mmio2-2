@@ -1,0 +1,138 @@
+From c20c685462bd26b7df3fed806c23a40bbe00f3a4 Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Fri, 5 Feb 2021 06:21:55 -0500
+Subject: [PATCH 1/1] Fixes issues related to emscripten compilation.
+
+---
+ gdb/Makefile.in             |  2 +-
+ gnulib/import/getcwd.c      |  2 +-
+ gnulib/import/getrandom.c   |  1 +
+ readline/readline/signals.c | 20 ++++++++++----------
+ 4 files changed, 13 insertions(+), 12 deletions(-)
+
+diff --git a/gdb/Makefile.in b/gdb/Makefile.in
+index 4808357e65..e800be04cd 100644
+--- a/gdb/Makefile.in
++++ b/gdb/Makefile.in
+@@ -1864,7 +1864,7 @@ libgdb.a: $(LIBGDB_OBS)
+ # Removing the old gdb first works better if it is running, at least on SunOS.
+ gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(CDEPS) $(TDEPLIBS)
+ 	$(SILENCE) rm -f gdb$(EXEEXT)
+-	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
++	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) -s ERROR_ON_UNDEFINED_SYMBOLS=0 $(WIN32LDAPP) \
+ 		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
+ 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+ ifneq ($(CODESIGN_CERT),)
+diff --git a/gnulib/import/getcwd.c b/gnulib/import/getcwd.c
+index 1a42ef1bfa..992ed8d486 100644
+--- a/gnulib/import/getcwd.c
++++ b/gnulib/import/getcwd.c
+@@ -474,5 +474,5 @@ __getcwd (char *buf, size_t size)
+ }
+ 
+ #ifdef weak_alias
+-weak_alias (__getcwd, getcwd)
++//weak_alias (__getcwd, getcwd)
+ #endif
+diff --git a/gnulib/import/getrandom.c b/gnulib/import/getrandom.c
+index 030a78bb08..7b243505e4 100644
+--- a/gnulib/import/getrandom.c
++++ b/gnulib/import/getrandom.c
+@@ -19,6 +19,7 @@
+ 
+ #include <config.h>
+ 
++#include <stddef.h>
+ #include <sys/random.h>
+ 
+ #include <errno.h>
+diff --git a/readline/readline/signals.c b/readline/readline/signals.c
+index 76c5c47330..74376be1aa 100644
+--- a/readline/readline/signals.c
++++ b/readline/readline/signals.c
+@@ -70,7 +70,7 @@ typedef RETSIGTYPE SigHandler ();
+ typedef struct sigaction sighandler_cxt;
+ #  define rl_sigaction(s, nh, oh)	sigaction(s, nh, oh)
+ #else
+-typedef struct { SigHandler *sa_handler; int sa_mask, sa_flags; } sighandler_cxt;
++typedef struct { SigHandler *sa__handler; int sa_mask, sa_flags; } sighandler_cxt;
+ #  define sigemptyset(m)
+ #endif /* !HAVE_POSIX_SIGNALS */
+ 
+@@ -310,7 +310,7 @@ rl_sigwinch_handler (int sig)
+   _rl_caught_signal = sig;
+ 
+   /* If another sigwinch handler has been installed, call it. */
+-  oh = (SigHandler *)old_winch.sa_handler;
++  oh = (SigHandler *)old_winch.sa__handler;
+   if (oh &&  oh != (SigHandler *)SIG_IGN && oh != (SigHandler *)SIG_DFL)
+     (*oh) (sig);
+ 
+@@ -325,7 +325,7 @@ rl_sigwinch_handler (int sig)
+ static int
+ rl_sigaction (int sig, sighandler_cxt *nh, sighandler_cxt *oh)
+ {
+-  oh->sa_handler = signal (sig, nh->sa_handler);
++  oh->sa__handler = signal (sig, nh->sa__handler);
+   return 0;
+ }
+ #endif /* !HAVE_POSIX_SIGNALS */
+@@ -340,7 +340,7 @@ rl_set_sighandler (int sig, SigHandler *handler, sighandler_cxt *ohandler)
+ #if defined (HAVE_POSIX_SIGNALS)
+   struct sigaction act;
+ 
+-  act.sa_handler = handler;
++  act.sa__handler = handler;
+ #  if defined (SIGWINCH)
+   act.sa_flags = (sig == SIGWINCH) ? SA_RESTART : 0;
+ #  else
+@@ -350,16 +350,16 @@ rl_set_sighandler (int sig, SigHandler *handler, sighandler_cxt *ohandler)
+   sigemptyset (&ohandler->sa_mask);
+   sigaction (sig, &act, &old_handler);
+ #else
+-  old_handler.sa_handler = (SigHandler *)signal (sig, handler);
++  old_handler.sa__handler = (SigHandler *)signal (sig, handler);
+ #endif /* !HAVE_POSIX_SIGNALS */
+ 
+   /* XXX -- assume we have memcpy */
+   /* If rl_set_signals is called twice in a row, don't set the old handler to
+      rl_signal_handler, because that would cause infinite recursion. */
+-  if (handler != rl_signal_handler || old_handler.sa_handler != rl_signal_handler)
++  if (handler != rl_signal_handler || old_handler.sa__handler != rl_signal_handler)
+     memcpy (ohandler, &old_handler, sizeof (sighandler_cxt));
+ 
+-  return (ohandler->sa_handler);
++  return (ohandler->sa__handler);
+ }
+ 
+ /* Set disposition of SIG to HANDLER, returning old state in OHANDLER.  Don't
+@@ -377,7 +377,7 @@ rl_maybe_set_sighandler (int sig, SigHandler *handler, sighandler_cxt *ohandler)
+     rl_sigaction (sig, ohandler, &dummy);
+ }
+ 
+-/* Set the disposition of SIG to HANDLER, if HANDLER->sa_handler indicates the
++/* Set the disposition of SIG to HANDLER, if HANDLER->sa__handler indicates the
+    signal was not being ignored.  MUST only be called for signals whose
+    disposition was changed using rl_maybe_set_sighandler or for which the
+    SIG_IGN check was performed inline (e.g., SIGALRM below). */
+@@ -388,7 +388,7 @@ rl_maybe_restore_sighandler (int sig, sighandler_cxt *handler)
+ 
+   sigemptyset (&dummy.sa_mask);
+   dummy.sa_flags = 0;
+-  if (handler->sa_handler != SIG_IGN)
++  if (handler->sa__handler != SIG_IGN)
+     rl_sigaction (sig, handler, &dummy);
+ }
+ 
+@@ -507,7 +507,7 @@ rl_clear_signals (void)
+     {
+       /* Since rl_maybe_set_sighandler doesn't override a SIG_IGN handler,
+ 	 we should in theory not have to restore a handler where
+-	 old_xxx.sa_handler == SIG_IGN.  That's what rl_maybe_restore_sighandler
++	 old_xxx.sa__handler == SIG_IGN.  That's what rl_maybe_restore_sighandler
+ 	 does.  Fewer system calls should reduce readline's per-line
+ 	 overhead */
+       rl_maybe_restore_sighandler (SIGINT, &old_int);
+-- 
+2.27.0
+

@@ -43,6 +43,7 @@ if [ ! -d riscv-gnu-toolchain ]; then
   cd riscv-gnu-toolchain
   git submodule init
   git submodule update riscv-binutils
+  git submodule update riscv-gdb
   cd ..
 else
   echo "riscv-gnu-toolchain already exists. delete the riscv-gnu-toolchain directory to reinstall"
