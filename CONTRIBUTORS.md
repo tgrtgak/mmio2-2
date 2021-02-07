@@ -5,6 +5,7 @@
 * jason
 * Austin Oldham
 * Nate Stump
+* Danny Phan
 
 ## Documentation
 
