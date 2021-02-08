@@ -6,6 +6,7 @@
 * Austin Oldham
 * Nate Stump
 * Danny Phan
+* Patrick Stoyer
 
 ## Documentation
 
