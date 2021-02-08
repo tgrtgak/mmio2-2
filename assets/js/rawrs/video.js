@@ -1,6 +1,7 @@
 "use strict";
 
 import EventComponent from './event_component';
+import Tabs from './tabs';
 
 /**
  * This represents the video device.
@@ -12,22 +13,39 @@ export class Video extends EventComponent {
         this._canvas = canvas;
         this._width = width;
         this._height = height;
+        this._active = false;
+        this._visible = false;
 
         // Get context
         this._context = this._canvas.getContext('2d');
 
+        // Create an image to hold the frame
+        this._image = this.context.createImageData(width, height);
+
+        // Get the tabs so we know when it switches to the video screen
+        this._tabs = Tabs.load(document.querySelector('.tabs.side'));
+        this._tabs.on('change', (button) => {
+            if (button.getAttribute('id') === 'video-select') {
+                this._visible = true;
+                this.animate();
+            }
+            else {
+                this._visible = false;
+            }
+        });
+
         // Clear screen
         this.clear();
 
-        let image = this.context.createImageData(width, height);
-
         // TinyEMU looks for this:
-        window.graphic_display = {
-            image: image,
-            width: width,
-            height: height,
-            ctx: this.context
-        };
+        window.rawrsVideo = this;
+    }
+
+    /**
+     * Returns whether or not the device has been written to.
+     */
+    get active() {
+        return this._active;
     }
 
     /**
@@ -58,9 +76,58 @@ export class Video extends EventComponent {
         return this._context;
     }
 
+    blit(imageData, destX, destY, srcX, srcY, width, height) {
+        this._active = true;
+        this.context.putImageData(imageData, destX, destY, srcX, srcY, width, height);
+    }
+
     clear() {
-        this.context.fillStyle = "#000";
-        this.context.fillRect(0, 0, this.width, this.height);
+        if (this.active) {
+            // Clear to black
+            this.context.fillStyle = "#000";
+            this.context.fillRect(0, 0, this.width, this.height);
+        }
+        else {
+            // Clear to static
+            let buffer = new Uint32Array(this._image.data.buffer);
+            let step = 4; // The size of the pixel
+            let pixels = step * step;
+
+            for (let y = 0; y < this.height; y += step) {
+                for (let x = 0; x < this.width; x += step) {
+                    let pos = (y * this.width) + x;
+                    let value = 0x888888 | ((255 * Math.random()) << 24);
+
+                    for (let j = 0; j < pixels; j++) {
+                        buffer[pos + (j % step) + (this.width * Math.floor(j / step))] = value;
+                    }
+                }
+            }
+
+            this.context.putImageData(this._image, 0, 0);
+        }
+    }
+
+    animate() {
+        // If not written to, show the static
+        let time = 0;
+        let step = (when) => {
+            if (!time) {
+                time = when;
+            }
+
+            let elapsed = when - time;
+            if (elapsed > 50) {
+                time = when;
+                this.clear();
+            }
+
+            if (this._visible && !this._active) {
+                window.requestAnimationFrame(step);
+            }
+        };
+
+        window.requestAnimationFrame(step);
     }
 }
 

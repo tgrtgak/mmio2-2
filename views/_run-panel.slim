@@ -3,12 +3,12 @@
     div.output
       ol.tabs.side
         li.tab.active
-          button aria-controls=:"console"
+          button#console-select aria-controls=:"console"
             img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/console.svg"
             span.caption
               = I18n.t(:"run.devices.console")
         li.tab
-          button aria-controls=:"video"
+          button#video-select aria-controls=:"video"
             img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/video.svg"
             span.caption
               = I18n.t(:"run.devices.video")
