@@ -326,6 +326,7 @@ class RAWRS {
         });
 
         this._console.clear();
+        this._video.reset();
         assembler.assemble("foo.s", text, terminal, (object) => {
             linker.link(linkerScript, object, terminal, (binary) => {
                 RAWRS.toolbar.setStatus("assemble", "success");

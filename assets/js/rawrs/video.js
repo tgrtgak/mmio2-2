@@ -81,6 +81,17 @@ export class Video extends EventComponent {
         this.context.putImageData(imageData, destX, destY, srcX, srcY, width, height);
     }
 
+    show() {
+        // TODO: tell the tabstrip to activate this tab
+        this._visible = true;
+    }
+
+    reset() {
+        this._active = false;
+        this.clear();
+        this.animate();
+    }
+
     clear() {
         if (this.active) {
             // Clear to black
