@@ -3,8 +3,11 @@
 import EventComponent from './event_component';
 
 class Console extends EventComponent {
-    constructor(rows, cols, fontSize) {
+    constructor(selector, rows, cols, fontSize) {
         super();
+
+        this._rows = rows;
+        this._columns = cols;
 
         this._term = new window.XTerm({
           cols: cols,
@@ -16,7 +19,7 @@ class Console extends EventComponent {
           convertEol:       true,     // Turn any '\n' into '\r\n'
         });
 
-        this._term.open(document.getElementById("term_container"));
+        this._term.open(document.querySelector(selector));
         this._term.resize(cols, rows);
 
         this._term.onKey( (event) => {
@@ -25,21 +28,31 @@ class Console extends EventComponent {
             this.trigger('keydown', event.domEvent);
         });
 
-        // TinyEMU looks for this:
-        window.term = {
-            write: (x) => {
-                this._term.write(x);
-            },
-            getSize: (x) => {
-                return [cols, rows];
-            }
-        };
+        this._term.onData( (bytes) => {
+            this.trigger('data', bytes);
+        });
 
         this.clear();
     }
 
+    get rows() {
+        return this._rows;
+    }
+
+    get columns() {
+        return this._columns;
+    }
+
     clear() {
         this._term.write("\x1b[0;40;37m\x1b[2J\x1b[0;0H");
+    }
+
+    write(data) {
+        this._term.write(data);
+    }
+
+    writeln(data) {
+        this._term.write(data + "\n");
     }
 }
 

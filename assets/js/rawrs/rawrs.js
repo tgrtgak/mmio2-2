@@ -9,6 +9,7 @@ import Simulator       from './simulator';
 import Assembler       from './assembler';
 import Linker          from './linker';
 import Disassembler    from './disassembler';
+import Debugger        from './debugger';
 import Dumper          from './dumper';
 import Terminal        from './terminal';
 import FileList        from './file_list';
@@ -41,8 +42,18 @@ class RAWRS {
             }
         }
 
-        this._console = new Console(30, 71, 15);
+        this._console = new Console("#term_container", 28, 71, 15);
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
+
+        // TinyEMU looks for this:
+        window.term = {
+            write: (x) => {
+                this._console.write(x);
+            },
+            getSize: (x) => {
+                return [this._console.columns, this._console.rows];
+            }
+        };
 
         Tabs.load();
         Editor.initialize();
@@ -151,6 +162,7 @@ class RAWRS {
                     break;
             }
         });
+        var gdb = new Debugger();
     }
 
     /**
@@ -354,8 +366,8 @@ class RAWRS {
             RAWRS.codeListing.add(instruction);
         });
 
-        var data_dumper = new Dumper();
-        data_dumper.on('update', (row) => {
+        var dumper = new Dumper();
+        dumper.on('update', (row) => {
             RAWRS.memoryListing.update(row.address, row.data);
         });
 

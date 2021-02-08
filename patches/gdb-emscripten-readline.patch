@@ -1,0 +1,280 @@
+From b25aa15301a3f80c84b453e2e313d83cebdddfcb Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Sun, 7 Feb 2021 18:43:42 -0500
+Subject: [PATCH] Updates to allow stdin to step for emscripten and readline.
+
+This gives us the readline enabled prompt and basic command-line
+interface to gdb working.
+---
+ gdb/Makefile.in               |  2 +-
+ gdb/event-top.c               | 21 +++++----------
+ gdb/exceptions.c              |  3 +++
+ gdb/main.c                    | 51 ++++++++++++++++++++++-------------
+ gdb/main.h                    |  8 ++++++
+ readline/readline/input.c     | 19 +++++++++++++
+ readline/readline/rlconf.h    |  2 +-
+ readline/readline/rlprivate.h |  4 ++-
+ 8 files changed, 74 insertions(+), 36 deletions(-)
+
+diff --git a/gdb/Makefile.in b/gdb/Makefile.in
+index 4808357e65..e800be04cd 100644
+--- a/gdb/Makefile.in
++++ b/gdb/Makefile.in
+@@ -1864,7 +1864,7 @@ libgdb.a: $(LIBGDB_OBS)
+ # Removing the old gdb first works better if it is running, at least on SunOS.
+ gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(CDEPS) $(TDEPLIBS)
+ 	$(SILENCE) rm -f gdb$(EXEEXT)
+-	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
++	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) -s ERROR_ON_UNDEFINED_SYMBOLS=0 $(WIN32LDAPP) \
+ 		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
+ 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+ ifneq ($(CODESIGN_CERT),)
+diff --git a/gdb/event-top.c b/gdb/event-top.c
+index ac0f370101..6b1ff98dc7 100644
+--- a/gdb/event-top.c
++++ b/gdb/event-top.c
+@@ -172,17 +172,16 @@ gdb_rl_callback_read_char_wrapper_noexcept () noexcept
+      it is built with -fexceptions, but it won't by default on many
+      ABIs).  So we instead wrap the readline call with a sjlj-based
+      TRY/CATCH, and rethrow the GDB exception once back in GDB.  */
+-  TRY_SJLJ
++  try
+     {
+       rl_callback_read_char ();
+       if (after_char_processing_hook)
+ 	(*after_char_processing_hook) ();
+     }
+-  CATCH_SJLJ (ex, RETURN_MASK_ALL)
++  catch (gdb_exception &ex)
+     {
+       gdb_expt = std::move (ex);
+     }
+-  END_CATCH_SJLJ
+ 
+   return gdb_expt;
+ }
+@@ -220,18 +219,10 @@ gdb_rl_callback_handler (char *rl) noexcept
+     }
+   catch (gdb_exception &ex)
+     {
+-      gdb_rl_expt = std::move (ex);
++      if (ex.reason < 0) {
++        exception_print (gdb_stderr, ex);
++      }
+     }
+-
+-  /* If we caught a GDB exception, longjmp out of the readline
+-     callback.  There's no other way for the callback to signal to
+-     readline that an error happened.  A normal return would have
+-     readline potentially continue processing further input, redisplay
+-     the prompt, etc.  (This is what GDB historically did when it was
+-     a C program.)  Note that since we're long jumping, local variable
+-     dtors are NOT run automatically.  */
+-  if (gdb_rl_expt.reason < 0)
+-    throw_exception_sjlj (gdb_rl_expt);
+ }
+ 
+ /* Change the function to be invoked every time there is a character
+@@ -1233,7 +1224,7 @@ gdb_setup_readline (int editing)
+   /* If the input stream is connected to a terminal, turn on editing.
+      However, that is only allowed on the main UI, as we can only have
+      one instance of readline.  */
+-  if (ISATTY (ui->instream) && editing && ui == main_ui)
++  if (1)
+     {
+       /* Tell gdb that we will be using the readline library.  This
+ 	 could be overwritten by a command in .gdbinit like 'set
+diff --git a/gdb/exceptions.c b/gdb/exceptions.c
+index 7e15551e01..b6ba3030be 100644
+--- a/gdb/exceptions.c
++++ b/gdb/exceptions.c
+@@ -32,6 +32,9 @@
+ static void
+ print_flush (void)
+ {
++  // For emscripten, we avoid all flushes (not necessary)
++  return;
++
+   struct ui *ui = current_ui;
+   struct serial *gdb_stdout_serial;
+ 
+diff --git a/gdb/main.c b/gdb/main.c
+index 19bbb92388..0d798502c8 100644
+--- a/gdb/main.c
++++ b/gdb/main.c
+@@ -55,6 +55,32 @@
+ #include "gdbsupport/alt-stack.h"
+ #include "observable.h"
+ 
++/* Emscripten entrypoint to start gdb */
++int
++jsmain (int argc, char *argv)
++{
++  int i;
++  char** newargv = (char**)malloc(argc * sizeof(char*));
++  for (i = 0; i < argc; i++) {
++    newargv[i] = argv;
++    argv += strlen(argv) + 1;
++  }
++
++  struct captured_main_args args;
++
++  memset (&args, 0, sizeof args);
++  args.argc = argc;
++  args.argv = newargv;
++  args.interpreter_p = INTERP_CONSOLE;
++  return gdb_main (&args);
++}
++
++/* Emscripten entrypoint to perform one data read from stdin */
++void
++jsstep() {
++  gdb_do_one_event();
++}
++
+ /* The selected interpreter.  This will be used as a set command
+    variable, so it should always be malloc'ed - since
+    do_setshow_command will free it.  */
+@@ -412,6 +438,9 @@ captured_command_loop ()
+   if (ui->prompt_state != PROMPT_BLOCKED)
+     interp_pre_command_loop (top_level_interpreter ());
+ 
++  // For Emscripten, we do not loop
++  return;
++
+   /* Now it's time to start the event loop.  */
+   start_event_loop ();
+ 
+@@ -1200,8 +1229,9 @@ captured_main_1 (struct captured_main_args *context)
+      We wait until now because it is common to add to the source search
+      path in local_gdbinit.  */
+   global_auto_load = save_auto_load;
+-  for (objfile *objfile : current_program_space->objfiles ())
+-    load_auto_scripts_for_objfile (objfile);
++  // Do not parse the object file listing
++  /*for (objfile *objfile : current_program_space->objfiles ())
++    load_auto_scripts_for_objfile (objfile);*/
+ 
+   /* Process '-x' and '-ex' options.  */
+   for (i = 0; i < cmdarg_vec.size (); i++)
+@@ -1242,22 +1272,7 @@ captured_main (void *data)
+ 
+   captured_main_1 (context);
+ 
+-  /* NOTE: cagney/1999-11-07: There is probably no reason for not
+-     moving this loop and the code found in captured_command_loop()
+-     into the command_loop() proper.  The main thing holding back that
+-     change - SET_TOP_LEVEL() - has been eliminated.  */
+-  while (1)
+-    {
+-      try
+-	{
+-	  captured_command_loop ();
+-	}
+-      catch (const gdb_exception &ex)
+-	{
+-	  exception_print (gdb_stderr, ex);
+-	}
+-    }
+-  /* No exit -- exit is through quit_command.  */
++  captured_command_loop ();
+ }
+ 
+ int
+diff --git a/gdb/main.h b/gdb/main.h
+index 78be7c5c4e..3ad503b765 100644
+--- a/gdb/main.h
++++ b/gdb/main.h
+@@ -27,6 +27,14 @@ struct captured_main_args
+   const char *interpreter_p;
+ };
+ 
++extern "C" {
++  int jsmain(int argc, char* argv);
++}
++
++extern "C" {
++  void jsstep();
++}
++
+ extern int gdb_main (struct captured_main_args *);
+ 
+ /* From main.c.  */
+diff --git a/readline/readline/input.c b/readline/readline/input.c
+index 95ace842ba..c5dc05aaf9 100644
+--- a/readline/readline/input.c
++++ b/readline/readline/input.c
+@@ -319,6 +319,14 @@ rl_set_keyboard_input_timeout (int u)
+   return (o);
+ }
+ 
++#include <emscripten.h>
++EM_JS(int, api_stdin_length, (), {
++  if (Module.stdinLength) {
++    return Module.stdinLength();
++  }
++  return 0;
++});
++
+ /* Is there input available to be read on the readline input file
+    descriptor?  Only works if the system has select(2) or FIONREAD.
+    Uses the value of _keyboard_input_timeout as the timeout; if another
+@@ -328,6 +336,10 @@ rl_set_keyboard_input_timeout (int u)
+ int
+ _rl_input_available (void)
+ {
++  // Ask the JS environment if stdin is ready
++  return api_stdin_length() > 0;
++
++  // Does not continue...
+ #if defined(HAVE_SELECT)
+   fd_set readfds, exceptfds;
+   struct timeval timeout;
+@@ -506,6 +518,13 @@ rl_getc (FILE *stream)
+ {
+   int result;
+   unsigned char c;
++
++  // Just read the character (guaranteed to be there) for JS cases
++	result = read (fileno (stream), &c, sizeof (unsigned char));
++  return c;
++
++  // Does not continue...
++
+ #if defined (HAVE_PSELECT)
+   sigset_t empty_set;
+   fd_set readfds;
+diff --git a/readline/readline/rlconf.h b/readline/readline/rlconf.h
+index b6d6a2f128..7a376a26f6 100644
+--- a/readline/readline/rlconf.h
++++ b/readline/readline/rlconf.h
+@@ -34,7 +34,7 @@
+ 
+ /* This definition is needed by readline.c, rltty.c, and signals.c. */
+ /* If on, then readline handles signals in a way that doesn't suck. */
+-#define HANDLE_SIGNALS
++//#define HANDLE_SIGNALS
+ 
+ /* Ugly but working hack for binding prefix meta. */
+ #define PREFIX_META_HACK
+diff --git a/readline/readline/rlprivate.h b/readline/readline/rlprivate.h
+index e85e4d8124..490aed6d61 100644
+--- a/readline/readline/rlprivate.h
++++ b/readline/readline/rlprivate.h
+@@ -38,10 +38,12 @@
+ #define VI_COMMAND_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap)
+ #define VI_INSERT_MODE()	(rl_editing_mode == vi_mode && _rl_keymap == vi_insertion_keymap)
+ 
+-#define RL_CHECK_SIGNALS() \
++#define RL_CHECK_SIGNALS() do {} while(0)
++  /*
+ 	do { \
+ 	  if (_rl_caught_signal) _rl_signal_handler (_rl_caught_signal); \
+ 	} while (0)
++  */
+ 
+ #define RL_SIG_RECEIVED() (_rl_caught_signal != 0)
+ #define RL_SIGINT_RECEIVED() (_rl_caught_signal == SIGINT)
+-- 
+2.30.0
+

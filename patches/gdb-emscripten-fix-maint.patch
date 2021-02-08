@@ -1,0 +1,53 @@
+From 3822cfb7b01c2d2bc4272de0b3286fd1a5429f13 Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Sun, 7 Feb 2021 19:42:30 -0500
+Subject: [PATCH] Disables the testing commands that crash the JS build.
+
+---
+ gdb/maint-test-options.c  | 2 ++
+ gdb/maint-test-settings.c | 2 ++
+ gdb/maint.c               | 2 ++
+ 3 files changed, 6 insertions(+)
+
+diff --git a/gdb/maint-test-options.c b/gdb/maint-test-options.c
+index df75e37361..a8002a3bb8 100644
+--- a/gdb/maint-test-options.c
++++ b/gdb/maint-test-options.c
+@@ -416,6 +416,8 @@ void _initialize_maint_test_options ();
+ void
+ _initialize_maint_test_options ()
+ {
++  // Do not do this! It crashes the JS build.
++  return;
+   cmd_list_element *cmd;
+ 
+   add_basic_prefix_cmd ("test-options", no_class,
+diff --git a/gdb/maint-test-settings.c b/gdb/maint-test-settings.c
+index 48333e55c5..9fc2fc6738 100644
+--- a/gdb/maint-test-settings.c
++++ b/gdb/maint-test-settings.c
+@@ -83,6 +83,8 @@ void _initialize_maint_test_settings ();
+ void
+ _initialize_maint_test_settings ()
+ {
++  // Do not do this! It crashes the JS build.
++  return;
+   maintenance_test_settings_filename = xstrdup ("/foo/bar");
+ 
+   add_basic_prefix_cmd ("test-settings", class_maintenance,
+diff --git a/gdb/maint.c b/gdb/maint.c
+index 46dd99f6cc..56bf30b80d 100644
+--- a/gdb/maint.c
++++ b/gdb/maint.c
+@@ -1047,6 +1047,8 @@ void _initialize_maint_cmds ();
+ void
+ _initialize_maint_cmds ()
+ {
++  // Do not do this! It crashes the JS build.
++  return;
+   struct cmd_list_element *cmd;
+ 
+   add_basic_prefix_cmd ("maintenance", class_maintenance, _("\
+-- 
+2.30.0
+
