@@ -1,0 +1,26 @@
+From 27edc09cd55d80cadda50e7e9f186c7da96a8c9d Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Mon, 22 Feb 2021 02:51:24 -0500
+Subject: [PATCH] Ensures a prompt is displayed after jsinvoke.
+
+---
+ gdb/main.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/gdb/main.c b/gdb/main.c
+index cbfc71ed70..de43bb73f1 100644
+--- a/gdb/main.c
++++ b/gdb/main.c
+@@ -85,6 +85,9 @@ jsstep() {
+ void
+ jsinvoke(const char *cmd, int from_tty) {
+   execute_command(cmd, from_tty);
++  struct ui *ui = current_ui;
++  ui->prompt_state = PROMPT_NEEDED;
++  display_gdb_prompt(NULL);
+ }
+ 
+ /* The selected interpreter.  This will be used as a set command
+-- 
+2.30.0
+
