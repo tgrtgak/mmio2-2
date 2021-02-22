@@ -2,6 +2,7 @@
 
 import EventComponent from './event_component';
 import Console from './console';
+import Util from './util.js';
 
 class Debugger extends EventComponent {
     constructor() {
@@ -106,6 +107,9 @@ class Debugger extends EventComponent {
             var FS = this._module.FS;
             FS.createDevice("/dev", "serial", this._module['serialIn'], this._module['serialOut']);
 
+            // Create '/input' for source files
+            FS.mkdir("/input");
+
             // Call jsmain() and initialize
             this._start();
         });
@@ -138,6 +142,19 @@ class Debugger extends EventComponent {
         if (this._jsinvoke) {
             this._jsinvoke(command, 0);
         }
+    }
+
+    /**
+     * Mounts the given files into the system within the /input directory.
+     */
+    mount(listing) {
+        var FS = this._module.FS;
+        listing.forEach( (info) => {
+            var fd = FS.open(info.name, "w+");
+            var data = Util.toU8(info.data);
+            FS.write(fd, data, 0, data.length);
+            FS.close(fd);
+        });
     }
 
     /**

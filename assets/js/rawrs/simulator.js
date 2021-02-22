@@ -1,6 +1,7 @@
 "use strict";
 
 import EventComponent from './event_component';
+import Util from './util.js';
 
 class Simulator extends EventComponent {
     /**
@@ -206,7 +207,7 @@ class Simulator extends EventComponent {
                     throw new Error("Bad file name");
                 }
                 var fd = FS.open(mount.file.name, "w+");
-                var data = this.__utils_toU8(mount.file.data);
+                var data = Util.toU8(mount.file.data);
                 FS.write(fd, data, 0, data.length);
                 FS.close(fd);
             }
@@ -296,28 +297,6 @@ class Simulator extends EventComponent {
         this.forceRefresh();
         this.dump();
         this.trigger("quit");
-    }
-
-    /*
-     * Internal function to convert various JS arrays into a Uint8Array.
-     */
-    __utils_toU8(data) {
-        if (typeof data === 'string' || data instanceof String) {
-            data = data.split("").map( (c) => c.charCodeAt(0) );
-        }
-
-        if (Array.isArray(data) || data instanceof ArrayBuffer) {
-            data = new Uint8Array(data);
-        }
-        else if (!data) {
-            // `null` for empty files.
-            data = new Uint8Array(0);
-        }
-        else if (!(data instanceof Uint8Array)) {
-            // Avoid unnecessary copying.
-            data = new Uint8Array(data.buffer);
-        }
-        return data;
     }
 
     /**

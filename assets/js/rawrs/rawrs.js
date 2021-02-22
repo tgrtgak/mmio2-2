@@ -405,8 +405,16 @@ class RAWRS {
             window.editor.getSession().setAnnotations(annotations);
         });
 
+        // Reset the console and video
         this._console.clear();
         this._video.reset();
+
+        // Pass the files to the debugger
+        this._gdb.mount([{
+            name: "/input/foo.s",
+            data: text
+        }]);
+
         assembler.assemble("foo.s", text, terminal, (object) => {
             linker.link(linkerScript, object, terminal, (binary) => {
                 
