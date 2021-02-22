@@ -7,6 +7,7 @@
 * Nate Stump
 * Danny Phan
 * Patrick Stoyer
+* Tyler Lendon
 
 ## Documentation
 
