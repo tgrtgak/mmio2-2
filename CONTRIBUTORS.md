@@ -8,6 +8,7 @@
 * Danny Phan
 * Patrick Stoyer
 * Tyler Lendon
+* Joel Valentino
 
 ## Documentation
 
