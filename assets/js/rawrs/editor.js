@@ -114,28 +114,38 @@ class Editor {
             var word = editor.session.getTextRange(wordRange);
 
             // Get word screen position (relative to top-left of editor)
-            var point = editor.renderer.$cursorLayer.getPixelPosition(
+            var startPoint = editor.renderer.$cursorLayer.getPixelPosition(
                 wordRange.start, false // Ace does not seem to use this boolean.
             );                         // We will keep it false just in case.
+            var endPoint = editor.renderer.$cursorLayer.getPixelPosition(
+                wordRange.end, false
+            );
 
             // Get editor position
             let editorNode = document.querySelector("pre.ace_editor");
             let editorBounds = editorNode.getBoundingClientRect();
-            let left = point.left + editorBounds.x;
-            let top = point.top + editorBounds.y;
+            let left = startPoint.left + editorBounds.x;
+            let top = startPoint.top + editorBounds.y;
+            let end = endPoint.left + editorBounds.x;
 
             // We need to account for the gutter
             left += editor.renderer.gutterWidth;
+            end += editor.renderer.gutterWidth;
 
             // We need to account for the editor scroll
             top -= editor.renderer.scrollTop;
+
+
+            // We need to account for instructions that appear at the end of the line (like ecall)
+            // which will popover as long as the mouse moves over the same row
 
             // If the word is an instruction (and not within a comment) then
             // popover the help text.
             // TODO: Add a check before this to determine if this is within a comment.
             let docHTML = Editor.getDefinitionFromTable(word);
 
-            if (docHTML !== null) {
+            // If there is an instruction and the mouse is to the left of the instruction's end
+            if (docHTML !== null && end >= event.x) {
                 docHTML = "<code>" + word + "</code>: " + docHTML;  // Adjusts the formatting of the output
                 Editor.showTooltip(docHTML, left, top);
             }
