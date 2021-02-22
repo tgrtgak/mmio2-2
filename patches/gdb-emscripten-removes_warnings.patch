@@ -1,0 +1,58 @@
+From 2cba6911d51507a3421fc5ec47b6afbb83c64d1d Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Mon, 22 Feb 2021 01:26:28 -0500
+Subject: [PATCH] Removes the verbose warnings/prints from our codepath.
+
+---
+ gdb/psymtab.c | 3 +++
+ gdb/remote.c  | 3 +++
+ gdb/symfile.c | 5 +++--
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/gdb/psymtab.c b/gdb/psymtab.c
+index 59db469e55..a1bcb3fbd2 100644
+--- a/gdb/psymtab.c
++++ b/gdb/psymtab.c
+@@ -90,6 +90,9 @@ psymtab_storage::install_psymtab (partial_symtab *pst)
+ psymtab_storage::partial_symtab_range
+ require_partial_symbols (struct objfile *objfile, bool verbose)
+ {
++  // Emscripten: Let's just ignore verbosity here, for the sake of it.
++  verbose = 0;
++
+   if ((objfile->flags & OBJF_PSYMTABS_READ) == 0)
+     {
+       objfile->flags |= OBJF_PSYMTABS_READ;
+diff --git a/gdb/remote.c b/gdb/remote.c
+index 59075cb09f..7066fa4b4b 100644
+--- a/gdb/remote.c
++++ b/gdb/remote.c
+@@ -11999,6 +11999,9 @@ remote_target::remote_hostio_open (inferior *inf, const char *filename,
+   char *p = rs->buf.data ();
+   int left = get_remote_packet_size () - 1;
+ 
++  // Emscripten: disable this print and warning.
++  warn_if_slow = 0;
++
+   if (warn_if_slow)
+     {
+       static int warning_issued = 0;
+diff --git a/gdb/symfile.c b/gdb/symfile.c
+index 2c38ce4431..8f27f7008c 100644
+--- a/gdb/symfile.c
++++ b/gdb/symfile.c
+@@ -2458,8 +2458,9 @@ reread_symbols (void)
+       if (res != 0)
+ 	{
+ 	  /* FIXME, should use print_sys_errmsg but it's not filtered.  */
+-	  printf_filtered (_("`%s' has disappeared; keeping its symbols.\n"),
+-			   objfile_name (objfile));
++    // Emscripten: Well... we will just disable the print since it is confusing.
++	  //printf_filtered (_("`%s' has disappeared; keeping its symbols.\n"),
++		//	   objfile_name (objfile));
+ 	  continue;
+ 	}
+       new_modtime = new_statbuf.st_mtime;
+-- 
+2.30.0
+
