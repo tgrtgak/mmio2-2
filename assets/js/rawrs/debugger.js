@@ -503,7 +503,42 @@ class Debugger extends EventComponent {
     G(packet) {
         packet = packet.slice(1);
 
+        // Ignore the $zero register value
+        packet = packet.slice(16);
+
         // Unpack register values
+
+        // The registers are a set of hexadecimal, little-endian 64-bit values
+        // sent as strings. There are 32 of them. The 31 general-purpose
+        // registers are first (no $zero), followed by the $pc register.
+        let regs = new BigUint64Array(32);
+        regs.forEach( (v, i) => {
+            // Prepare a byte array for the register value
+            let bytes = new Uint8Array(8);
+            let view = new DataView(bytes.buffer);
+
+            // For each byte hex pair, decode the byte value
+            bytes.forEach( (b, i) => {
+                bytes[i] = parseInt(packet.slice(i * 2, (i * 2) + 2), 16);
+            });
+            packet = packet.slice(16);
+
+            // Get the 'little-endian' value in the native endian by pulling it
+            // from the view.
+            let value = view.getBigInt64(0, true);
+
+            // the $pc is first in the emulator but last in gdb, so map 33 -> 0,
+            // but increment every other index
+            let index = (i + 1) % 32;
+            regs[index] = value;
+        });
+
+        // Set the register values
+        if (this.simulator) {
+            this.simulator.registers = regs;
+        }
+
+        // Return "" to simply ACK the message
         return "";
     }
 

@@ -420,10 +420,10 @@ class Simulator extends EventComponent {
             let highInt = Number(BigInt.asIntN(32, (buf[i] >> BigInt(32)) & mask));
             this._module.setValue(cbuf + (8 * i), lowInt, 'i32');
             this._module.setValue(cbuf + (8 * i) + 4, highInt, 'i32');
-            console.log("register", i, lowInt, highInt);
         }
         
         this._cpu_set_regs(cbuf);
+        this.trigger('registers-change');
     }
 
     /**

@@ -283,6 +283,10 @@ class RAWRS {
                 }
             });
 
+            sim.on("registers-change", () => {
+                RAWRS.registerListing.update(sim.registers);
+            });
+
             let framebufferRefresh = 0;
             sim.on("framebuffer-refresh", () => {
                 // On the first refresh, switch to video
