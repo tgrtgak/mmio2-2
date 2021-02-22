@@ -1,0 +1,37 @@
+From 990ce9516f3f46c3f0bf0fc718b82f9c20d6dcbc Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Mon, 22 Feb 2021 00:25:49 -0500
+Subject: [PATCH] Removes warnings based on get_tty_state by not implementing
+ them.
+
+---
+ gdb/ser-unix.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/gdb/ser-unix.c b/gdb/ser-unix.c
+index 2d8cdaa38e..0ffc5f7274 100644
+--- a/gdb/ser-unix.c
++++ b/gdb/ser-unix.c
+@@ -85,6 +85,9 @@ hardwire_open (struct serial *scb, const char *name)
+ static int
+ get_tty_state (struct serial *scb, struct hardwire_ttystate *state)
+ {
++  // For emscripten builds, we want to just return 0
++  return 0;
++
+   if (tcgetattr (scb->fd, &state->termios) < 0)
+     return -1;
+ 
+@@ -94,6 +97,9 @@ get_tty_state (struct serial *scb, struct hardwire_ttystate *state)
+ static int
+ set_tty_state (struct serial *scb, struct hardwire_ttystate *state)
+ {
++  // For emscripten builds, we want to just return 0
++  return 0;
++
+   if (tcsetattr (scb->fd, TCSANOW, &state->termios) < 0)
+     return -1;
+ 
+-- 
+2.30.0
+
