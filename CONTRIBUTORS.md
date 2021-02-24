@@ -9,6 +9,7 @@
 * Patrick Stoyer
 * Tyler Lendon
 * Joel Valentino
+* Adam Buchinsky
 
 ## Documentation
 
