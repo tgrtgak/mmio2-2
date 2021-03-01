@@ -1,0 +1,8 @@
+{
+  "name": "RAWRS",
+  "version": "1.0.0",
+  "description": "A RISC-V Teaching Environment",
+  "main": "main.js",
+  "author": "wilkie",
+  "license": "MIT"
+}

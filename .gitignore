@@ -14,3 +14,7 @@ kernel/kernel.elf
 test/karma-result.json
 coverage/
 static/
+electron/releases
+electron/builds
+electron/*.zip
+electron/*.tar
