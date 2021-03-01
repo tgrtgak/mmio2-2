@@ -95,11 +95,22 @@ class RegisterListing extends EventComponent {
         var inputCells = this._element.querySelectorAll("td.edit input");
         inputCells.forEach( (input) => {
             let doneEvent = (event) => {
-                let td = input.parentNode;
-                td.setAttribute('hidden', '');
-                td.previousElementSibling.removeAttribute('hidden');
-                td.previousElementSibling.firstElementChild.textContent = input.value;
-                this.trigger('change');
+                let valid = true; 
+                try {
+                    BigInt(input.value); //make sure that input.value can be interpreted as a BigBurger
+                }
+                catch(err) {
+                    valid = false;  
+                }
+                finally {
+                    let td = input.parentNode;
+                    td.setAttribute('hidden', '');
+                    td.previousElementSibling.removeAttribute('hidden');
+                    if (valid) {
+                        td.previousElementSibling.firstElementChild.textContent = input.value;
+                    }
+                    this.trigger('change');
+                }
             }
             input.addEventListener("blur", doneEvent);
             input.addEventListener("keydown", (keyEvent) => {
