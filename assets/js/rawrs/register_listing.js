@@ -97,18 +97,19 @@ class RegisterListing extends EventComponent {
             let doneEvent = (event) => {
                 let valid = true; 
                 try {
-                  BigInt(input.value); //make sure that input.value can be interpreted as a BigBurger
+                    BigInt(input.value); //make sure that input.value can be interpreted as a BigBurger
                 }
-                catch(err){
-                  valid = false;  
+                catch(err) {
+                    valid = false;  
                 }
                 finally {
-                  let td = input.parentNode;
-                  td.setAttribute('hidden', '');
-                  td.previousElementSibling.removeAttribute('hidden');
-                  if (valid)
-                    td.previousElementSibling.firstElementChild.textContent = input.value;
-                  this.trigger('change');
+                    let td = input.parentNode;
+                    td.setAttribute('hidden', '');
+                    td.previousElementSibling.removeAttribute('hidden');
+                    if (valid) {
+                        td.previousElementSibling.firstElementChild.textContent = input.value;
+                    }
+                    this.trigger('change');
                 }
             }
             input.addEventListener("blur", doneEvent);
