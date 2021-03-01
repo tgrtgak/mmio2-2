@@ -53,7 +53,7 @@ _syscall_table:
   j syscall_read_float      # a7: 6
   j syscall_read_double     # a7: 7
   j syscall_read_string     # a7: 8
-  jr ra                     # a7: 9
+  j syscall_sbrk            # a7: 9
   j syscall_exit            # a7: 10
   jr ra                     # a7: 11
   jr ra                     # a7: 12
@@ -89,6 +89,13 @@ _syscall_table:
 
 # syscall_dump_regs(): Prints out CPU information
 syscall_dump_regs:
+  jr    ra
+
+# syscall_sbrk(): Increases the size of heap by value in a0
+syscall_sbrk:
+  push  ra
+
+  pop   ra
   jr    ra
 
 # syscall_print_integer(): Prints the integer in a0
