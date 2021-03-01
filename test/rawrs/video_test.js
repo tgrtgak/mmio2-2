@@ -6,48 +6,22 @@ import { Video } from '../../assets/js/rawrs/video.js';
 
 describe('Video', () => {
     beforeEach(function() {
+        // We need there to be some tabs on the page
+        this.tabsElement = document.createElement("ol");
+        this.tabsElement.classList.add('tabs');
+        this.tabsElement.classList.add('side');
+        document.body.appendChild(this.tabsElement);
+
+        // Create a canvas for the framebuffer
         this.canvas = document.createElement("canvas");
-
-        // Mock out the canvas draw context
-        this.context = jasmine.createSpyObj('context', [
-            'fillRect', 'createImageData'
-        ], {
-            'fillStyle': '#fff'
-        });
-
-        // Return the draw context from the canvas
-        spyOn(this.canvas, 'getContext').and.returnValue(this.context);
     });
 
     describe('.constructor', () => {
-        it('should set the graphic_display global width property', function() {
+        it('should set the rawrsVideo global', function() {
             let width = Helper.randomInteger(1, 1000);
             let height = Helper.randomInteger(1, 1000);
             let video = new Video(width, height, this.canvas);
-            expect(window.graphic_display.width).toEqual(width);
-        });
-
-        it('should set the graphic_display global height property', function() {
-            let width = Helper.randomInteger(1, 1000);
-            let height = Helper.randomInteger(1, 1000);
-            let video = new Video(width, height, this.canvas);
-            expect(window.graphic_display.height).toEqual(height);
-        });
-
-        it('should set the graphic_display global ctx property', function() {
-            let width = Helper.randomInteger(1, 1000);
-            let height = Helper.randomInteger(1, 1000);
-            let video = new Video(width, height, this.canvas);
-            expect(window.graphic_display.ctx).toEqual(this.context);
-        });
-
-        it('should set the graphic_display global image property', function() {
-            let width = Helper.randomInteger(1, 1000);
-            let height = Helper.randomInteger(1, 1000);
-            let imageData = {};
-            this.context.createImageData.and.returnValue(imageData);
-            let video = new Video(width, height, this.canvas);
-            expect(window.graphic_display.image).toEqual(imageData);
+            expect(window.rawrsVideo).toEqual(video);
         });
 
         it('should clear the canvas', function() {
@@ -90,22 +64,35 @@ describe('Video', () => {
         it('should return the appropriate canvas context', function() {
             let width = Helper.randomInteger(1, 1000);
             let height = Helper.randomInteger(1, 1000);
+
+            // Mock out the canvas draw context
+            this.context = jasmine.createSpyObj('context', ['fillRect', 'createImageData']);
+
+            // Return the draw context from the canvas
+            spyOn(this.canvas, 'getContext').and.returnValue(this.context);
+            spyOn(Video.prototype, 'clear').and.returnValue();
+
             let video = new Video(width, height, this.canvas);
+
             expect(video.context).toEqual(this.context);
         });
     });
 
     describe('#clear', () => {
-        it('should paint the canvas black', function() {
+        it('should paint the canvas black when active', function() {
             let width = Helper.randomInteger(1, 1000);
             let height = Helper.randomInteger(1, 1000);
             let video = new Video(width, height, this.canvas);
 
+            spyOn(video.context, 'fillRect').and.returnValue();
+            spyOnProperty(video.context, 'fillStyle', 'set').and.callThrough();
+            video._active = true;
             video.clear();
-            expect(this.context.fillRect)
+
+            expect(video.context.fillRect)
                 .toHaveBeenCalledWith(0, 0, width, height);
             expect(
-                Object.getOwnPropertyDescriptor(this.context, "fillStyle").set)
+                Object.getOwnPropertyDescriptor(video.context, "fillStyle").set)
                 .toHaveBeenCalledWith('#000');
         });
     });
