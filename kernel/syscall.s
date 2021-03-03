@@ -35,7 +35,9 @@ syscall:
   j     _syscall_exit
 
 _syscall_error:
-  j     _syscall_exit
+  li    t0, 0x2     #Set scause to 2, which denotes illegal instructions 
+  csrw  scause, t0 
+  j     trap
 
 _syscall_exit:
   pop   ra
@@ -55,35 +57,35 @@ _syscall_table:
   j syscall_read_string     # a7: 8
   j syscall_sbrk            # a7: 9
   j syscall_exit            # a7: 10
-  jr ra                     # a7: 11
-  jr ra                     # a7: 12
-  jr ra                     # a7: 13
-  jr ra                     # a7: 14
-  jr ra                     # a7: 15
-  jr ra                     # a7: 16
-  jr ra                     # a7: 17
-  jr ra                     # a7: 18
-  jr ra                     # a7: 19
-  jr ra                     # a7: 20
-  jr ra                     # a7: 21
-  jr ra                     # a7: 22
-  jr ra                     # a7: 23
-  jr ra                     # a7: 24
-  jr ra                     # a7: 25
-  jr ra                     # a7: 26
-  jr ra                     # a7: 27
-  jr ra                     # a7: 28
-  jr ra                     # a7: 29
+  j _syscall_error          # a7: 11
+  j _syscall_error          # a7: 12
+  j _syscall_error          # a7: 13
+  j _syscall_error          # a7: 14
+  j _syscall_error          # a7: 15
+  j _syscall_error          # a7: 16
+  j _syscall_error          # a7: 17
+  j _syscall_error          # a7: 18
+  j _syscall_error          # a7: 19
+  j _syscall_error          # a7: 20
+  j _syscall_error          # a7: 21
+  j _syscall_error          # a7: 22
+  j _syscall_error          # a7: 23
+  j _syscall_error          # a7: 24
+  j _syscall_error          # a7: 25
+  j _syscall_error          # a7: 26
+  j _syscall_error          # a7: 27
+  j _syscall_error          # a7: 28
+  j _syscall_error          # a7: 29
   j syscall_get_system_time # a7: 30
-  jr ra                     # a7: 31
-  jr ra                     # a7: 32
-  jr ra                     # a7: 33
-  jr ra                     # a7: 34
-  jr ra                     # a7: 35
-  jr ra                     # a7: 36
-  jr ra                     # a7: 37
-  jr ra                     # a7: 38
-  jr ra                     # a7: 39
+  j _syscall_error          # a7: 31
+  j _syscall_error          # a7: 32
+  j _syscall_error          # a7: 33
+  j _syscall_error          # a7: 34
+  j _syscall_error          # a7: 35
+  j _syscall_error          # a7: 36
+  j _syscall_error          # a7: 37
+  j _syscall_error          # a7: 38
+  j _syscall_error          # a7: 39
   j syscall_srand           # a7: 40
   j syscall_rand            # a7: 41
 
