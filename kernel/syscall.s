@@ -24,20 +24,23 @@ syscall:
   # Vector the system call to various things
   # We don't have a stack right now, so we might want one of those
   li    t0, SYSCALL_COUNT
-  bgt   a7, t0, _syscall_error
+  bgt   a7, t0, _syscall_error_no_shift
+  bltz  a7, _syscall_error_no_shift
 
   # Call the appropriate system call
   la    t0, _syscall_table
   sll   a7, a7, 2   # multiply by 4 (the size of the j instruction)
   add   t0, a7, t0  # add this offset to our table's base address
   jalr  t0          # just to that particular 'j' instruction below
-
+  
+  move  a0, zero
   j     _syscall_exit
 
 _syscall_error:
-  li    t0, 0x2     #Set scause to 2, which denotes illegal instructions 
-  csrw  scause, t0 
-  j     trap
+  srl   a7, a7, 2
+_syscall_error_no_shift:
+  li    a0, -1
+  j     _syscall_exit
 
 _syscall_exit:
   pop   ra
