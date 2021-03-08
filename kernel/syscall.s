@@ -33,13 +33,13 @@ syscall:
   add   t0, a7, t0  # add this offset to our table's base address
   jalr  t0          # just to that particular 'j' instruction below
   
-  move  a0, zero
+  move  a0, zero    #return 0 in a0 to represent valid ecall.
   j     _syscall_exit
 
-_syscall_error:
-  srl   a7, a7, 2
+_syscall_error:     #invalid syscalls numbered between 0 and SYSCALL_COUNT
+  srl   a7, a7, 2   #were multiplied by 4, so divide by 4 to get original value
 _syscall_error_no_shift:
-  li    a0, -1
+  li    a0, -1      #return -1 in a0 to represent invalid ecall no.
   j     _syscall_exit
 
 _syscall_exit:
