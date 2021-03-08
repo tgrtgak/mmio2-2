@@ -9,9 +9,59 @@
 .global paging_install
 .global paging_get_root
 .global paging_vaddr_to_paddr
+.global paging_expand_heap
 
 .text
+# expand_heap(int n): Expands the heap by n bytes
+# 
+# Arguments: 
+#   a0: size by which to expand heap
+#
+# Return:
+#   a0: pointer to start of new heap space, or -1 if failed
+paging_expand_heap:
+  push ra
+  push s0
+  push s1
+  push s2
 
+  bltz a0,_expand_heap_failure  #if n < 0, return (should we cause trap?)
+  lw   s0, heap_address         #retain original heap address to return later
+  move s1, a0                   #number of bytes to expand by
+
+  li   t0, 0x10040000 
+  lw   t1, heap_address 
+  bne  t0, t1, _expand_heap_not_first_page 
+
+  jal memory_alloc_page
+  j _expand_heap_continue
+  
+ 
+_expand_heap_not_first_page:
+  move a0, s0
+  jal paging_vaddr_to_paddr
+_expand_heap_continue:
+  move s2, a0
+  
+  jal paging_get_root   #returns root page table address in a0
+  move a1, s2           #physical address to start at (return of paging_v_to_p or memory_alloc_page) 
+  lw   a2, heap_address #virtual address to map to 
+  move a3, s1           #number of bytes to add
+  li   a4, PTE_USER | PTE_READ | PTE_WRITE | PTE_EXECUTE    #flags
+  jal paging_map_range
+  lw   t0, heap_address #increment heap_address by n
+  add  t0, t0, s1
+
+  move a0, s0           #move original heap address to a0 to return
+  j _expand_heap_exit
+_expand_heap_failure:
+  li a0, -1
+_expand_heap_exit:
+  pop s2
+  pop s1
+  pop s0
+  pop ra
+  jr ra
 # paging_init(): Instantiates virtual memory for the system.
 paging_init:
   push ra
@@ -657,3 +707,4 @@ str_paging_alloc_3: .string "alloc 3\n"
 str_paging_alloc_2: .string "alloc 2\n"
 str_paging_alloc_1: .string "alloc 1\n"
 str_paging_mapped:  .string "mapped page\n"
+heap_address:       .word   0x10040000  #initial VA of the heap

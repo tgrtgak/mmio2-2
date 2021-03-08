@@ -99,7 +99,7 @@ syscall_dump_regs:
 # syscall_sbrk(): Increases the size of heap by value in a0
 syscall_sbrk:
   push  ra
-
+  jal   paging_expand_heap
   pop   ra
   jr    ra
 
