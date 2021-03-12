@@ -33,15 +33,13 @@ syscall:
   add   t0, a7, t0  # add this offset to our table's base address
   jalr  t0          # just to that particular 'j' instruction below
   
-  move  a0, zero    #return 0 in a0 to represent valid ecall.
   j     _syscall_exit
 
 _syscall_error:     #invalid syscalls numbered between 0 and SYSCALL_COUNT
   srl   a7, a7, 2   #were multiplied by 4, so divide by 4 to get original value
 _syscall_error_no_shift:
-  li    a0, -1      #return -1 in a0 to represent invalid ecall no.
-  j     _syscall_exit
-
+  jal   syscall_invalid
+  jal   abort
 _syscall_exit:
   pop   ra
   jr    ra
@@ -83,8 +81,8 @@ _syscall_table:
   j _syscall_error          # a7: 31
   j _syscall_error          # a7: 32
   j _syscall_error          # a7: 33
-  j _syscall_error          # a7: 34
-  j _syscall_error          # a7: 35
+  j syscall_print_hex       # a7: 34
+  j syscall_print_bin       # a7: 35
   j _syscall_error          # a7: 36
   j _syscall_error          # a7: 37
   j _syscall_error          # a7: 38
@@ -110,7 +108,23 @@ syscall_print_integer:
   jal   print_int
   pop   ra
   jr    ra
+ 
+# syscall_print_hex(): Prints the integer in a0 in hexadecimal 
+syscall_print_hex:
+  push  ra
+  li    a1, 16
+  jal   print_int_padded 
+  pop   ra
+  jr    ra
 
+# syscall_print_bin(): Prints the integer in a0 in binary 
+syscall_print_bin:
+  push  ra
+  li    a1, 2
+  jal   print_int_padded 
+  pop   ra
+  jr    ra
+  
 # syscall_print_float(): Prints the float in fa0
 syscall_print_float:
   push  ra
@@ -569,6 +583,25 @@ syscall_rand:
   pop   ra
   jr    ra
 
+syscall_invalid:
+  push  ra
+  move  s0, a7     
+  la    a0, syscall_invalid_str
+  jal   print
+
+  move  a0, s0
+  li    a1, 10
+  jal   print_int 
+
+  la    a0, syscall_invalid_address_str
+  jal   print
+ 
+  csrr  s0, sepc
+  print_hex s0
+
+  pop   ra
+  jr    ra
+
 .data
 
   syscall_line_buffer: .fill SYSCALL_LINE_BUFFER_MAX + 1, 1, 0
@@ -577,3 +610,5 @@ syscall_rand:
   syscall_print_float_sign: .asciz "-"
   syscall_print_float_delim: .asciz "."
   syscall_print_floating_point_buffer: .fill SYSCALL_PRINT_FLOATING_POINT_PRECISION + 1, 1, 0
+  syscall_invalid_str: .string "\n\nInvalid ecall "
+  syscall_invalid_address_str: .string " at address "

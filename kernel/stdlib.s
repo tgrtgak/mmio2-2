@@ -11,6 +11,7 @@
 .global println
 .global print_int
 .global parse_int
+.global print_int_padded
 
 # Copies one buffer to another.
 #
@@ -380,6 +381,104 @@ _parse_int_exit:
 
   pop   s1
   pop   s0
+  jr    ra
+# Prints an integer in binary/hexadecimal, padding the value with zeros to 32 or 64 bits
+#
+# Arguments
+#   a0: The integer to print
+#   a1: Radix--only valid for 2 or 16
+print_int_padded:
+  push  ra
+  push  s0
+  # Create a string (on the stack)
+  add   sp, sp, -128
+
+  # We will build our string from the right to the left.
+  # (we will leave 1 byte a zero, to terminate the string, when the loop starts)
+  add   t1, sp, 127
+  sb    zero, 0(t1)
+
+_print_int_padded_render_character:
+  # Go to the next character in our string
+  # Remember: we are moving left!
+  add   t1, t1, -1
+
+  # Determine the next digit (mod by radix)
+  remu  t2, a0, a1
+
+  # Lookup the character
+  la    t3, str_print_int_lookup
+  add   t3, t3, t2
+  lbu   t4, 0(t3)
+  
+  # Write the character
+  sb    t4, 0(t1)
+
+  # Get the rest of the number (divide by radix)
+  divu  a0, a0, a1
+
+  # If our number is not 0, well, keep printing characters!
+  bnez  a0, _print_int_padded_render_character
+
+_print_int_padded_zeros:
+  sub   t0, t1, sp          #t1 - sp was initially 127   
+  li    t2, 127             #as we added characters, t1 decremented by 1, so their difference decremented by 1
+  sub   t0, t2, t0          #so total number of chars is 127 - (t1's current value - sp) 
+  li    t2, 16
+  bne   a1, t2, _print_int_padded_set_mod_bin
+_print_int_padded_set_mod_hex:
+  li    t2, 8
+  j     _print_int_padded_cont
+_print_int_padded_set_mod_bin:
+  li    t2, 32
+_print_int_padded_cont:
+  remu  t0, t0, t2           
+  sub   t0, t2, t0
+  beq   t0, t2, _print_int_padded_finalize_string
+_print_int_padded_zeros_loop:
+  beqz  t0, _print_int_padded_finalize_string
+  add   t1, t1, -1
+  li    t2, '0'
+  sb    t2, 0(t1)
+
+  add   t0, t0, -1
+  j     _print_int_padded_zeros_loop
+_print_int_padded_finalize_string:
+  li    t2, 16
+  bne   a1, t2, _print_int_padded_finalize_binary_string
+
+  add   t1, t1, -1
+  li    t2, 'x'
+  sb    t2, 0(t1)
+
+  add   t1, t1, -1
+  li    t2, '0'
+  sb    t2, 0(t1)
+
+  j     _print_int_padded_write_string
+
+_print_int_padded_finalize_binary_string:
+  li    t2, 2
+  bne   a1, t2, _print_int_padded_write_string
+
+  add   t1, t1, -1
+  li    t2, 'b'
+  sb    t2, 0(t1)
+
+  add   t1, t1, -1
+  li    t2, '0'
+  sb    t2, 0(t1)
+
+  # Print our string
+_print_int_padded_write_string:
+  move  a0, t1
+  jal   console_writez
+
+  # Deallocate our string
+  add   sp, sp, 128
+
+  pop   s0
+  pop   ra
   jr    ra
 
 # print(str)

@@ -138,7 +138,6 @@ trap:
 
   # Perform the system call
   jal   syscall
-  bltz  a0, _invalid_syscall
 
   # We need to write our return values to the stack
   # This is tricky. The current contents of the stack is:
@@ -208,29 +207,10 @@ _trap_interrupt:
 
   j     _trap_exit
 
-_invalid_syscall:
-  move  s0, a7     
-  la    a0, str_invalid_syscall
-  jal   print
-
-  move  a0, s0
-  li    a1, 10
-  jal   print_int 
-
-  la    a0, str_invalid_syscall_pc
-  jal   print
- 
-  csrr  s0, sepc
-  print_hex s0
-
-  j     _print_trap_info
-
 _trap_unknown:
   # Unexpected trap; abort()
   la    a0, str_trap_unknown
   jal   print
-
-_print_trap_info:
 
   la    a0, str_trap_unknown_cause
   jal   print
@@ -273,5 +253,3 @@ str_trap_unknown_cause:  .string "\nCause: "
 str_trap_unknown_addr:   .string "\nAddress: "
 str_trap_unknown_pc:     .string "\nSEPC: "
 str_trap_unknown_status: .string "\nSSTATUS: "
-str_invalid_syscall:     .string "\n\nInvalid ecall "
-str_invalid_syscall_pc:  .string " at address "
