@@ -126,7 +126,7 @@ syscall_print_bin:
   jr    ra
   
 # syscall_print_char(): Prints the char in a0 
-syscall_print_bin:
+syscall_print_char:
   push  ra
   push  s0
   push  s1
@@ -139,13 +139,16 @@ syscall_print_bin:
   add   sp, sp, -2 
   
   # Set string equal to char + '\0'
-  li    t0, '\0'
+  li    t0, 0
   sb    t0, 1(sp)
   sb    s0, 0(sp)
 
   # Call console_writez() to print
   move  a0, sp
   jal   console_writez 
+
+  # Deallocate string 
+  add   sp, sp, 2
 
   # Set a0 and a1 to original values
   move  a0, s0
