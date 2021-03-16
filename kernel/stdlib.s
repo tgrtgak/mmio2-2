@@ -390,6 +390,13 @@ _parse_int_exit:
 print_int_padded:
   push  ra
   push  s0
+  push  s1
+  push  s2
+
+  # Store a0 and a1 so that we have no side effects
+  move  s1, a0
+  move  s2, a1
+
   # Create a string (on the stack)
   add   sp, sp, -128
 
@@ -477,6 +484,11 @@ _print_int_padded_write_string:
   # Deallocate our string
   add   sp, sp, 128
 
+  move  a0, s1
+  move  a1, s2
+
+  pop   s2
+  pop   s1
   pop   s0
   pop   ra
   jr    ra
