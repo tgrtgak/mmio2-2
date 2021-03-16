@@ -135,12 +135,11 @@ syscall_print_char:
   move  s0, a0
   move  s1, a1
 
-  # Create string of length 2 on stak 
-  add   sp, sp, -2 
+  # Create string of length 2 on stack 
+  add   sp, sp, -2
   
   # Set string equal to char + '\0'
-  li    t0, 0
-  sb    t0, 1(sp)
+  sb    zero, 1(sp)
   sb    s0, 0(sp)
 
   # Call console_writez() to print
@@ -153,6 +152,8 @@ syscall_print_char:
   # Set a0 and a1 to original values
   move  a0, s0
   move  a1, s1
+
+  pop   s1
   pop   s0
   pop   ra
   jr    ra
