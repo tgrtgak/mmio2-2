@@ -58,7 +58,7 @@ _syscall_table:
   j syscall_read_string     # a7: 8
   j syscall_sbrk            # a7: 9
   j syscall_exit            # a7: 10
-  j _syscall_error          # a7: 11
+  j syscall_print_char      # a7: 11
   j _syscall_error          # a7: 12
   j _syscall_error          # a7: 13
   j _syscall_error          # a7: 14
@@ -125,6 +125,35 @@ syscall_print_bin:
   pop   ra
   jr    ra
   
+# syscall_print_char(): Prints the char in a0 
+syscall_print_bin:
+  push  ra
+  push  s0
+  push  s1
+
+  # Retain value of a0 and a1 to avoid side-effects
+  move  s0, a0
+  move  s1, a1
+
+  # Create string of length 2 on stak 
+  add   sp, sp, -2 
+  
+  # Set string equal to char + '\0'
+  li    t0, '\0'
+  sb    t0, 1(sp)
+  sb    s0, 0(sp)
+
+  # Call console_writez() to print
+  move  a0, sp
+  jal   console_writez 
+
+  # Set a0 and a1 to original values
+  move  a0, s0
+  move  a1, s1
+  pop   s0
+  pop   ra
+  jr    ra
+
 # syscall_print_float(): Prints the float in fa0
 syscall_print_float:
   push  ra
