@@ -428,11 +428,11 @@ class Simulator extends EventComponent {
      */
     readMemory(address, size = 32) {
         let ptr = this._cpu_get_mem(address);
-        
         let mem = new Uint8Array(size);
         for (let i = 0; i < size; i++) {
             mem[i] = this._module.getValue(ptr + i, 'i8');
         }
+
         return mem;
     }
 
