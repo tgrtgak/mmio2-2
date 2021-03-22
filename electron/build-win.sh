@@ -30,4 +30,4 @@ echo "========="
 
 mkdir -p releases
 cd builds/windows
-zip -r ../../releases/rawrs-win32-x64.zip *
+zip -yr ../../releases/rawrs-win32-x64.zip *
