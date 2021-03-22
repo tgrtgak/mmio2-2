@@ -60,6 +60,8 @@ class RAWRS {
         RAWRS.toolbar  = new Toolbar(document.body);
         RAWRS.fileList = new FileList(document.body);
 
+        this._gdb = new Debugger();
+
         var saveTimer = null;
         window.editor.getSession().on('change', () => {
             if (saveTimer) {
@@ -162,7 +164,6 @@ class RAWRS {
                     break;
             }
         });
-        var gdb = new Debugger();
     }
 
     /**
@@ -211,6 +212,9 @@ class RAWRS {
                     RAWRS.memoryListing.update(addresses[i], data);
                 }
 
+                // Tell debugger to stop
+                RAWRS._gdb.invoke("target remote /dev/serial");
+
                 if (RAWRS._clearBreakpoint) {
                     sim.breakpointClear(RAWRS._clearBreakpoint);
                     RAWRS._clearBreakpoint = false;
@@ -234,6 +238,9 @@ class RAWRS {
                     let data = sim.readMemory(parseInt(addresses[i], 16), 32);
                     RAWRS.memoryListing.update(addresses[i], data);
                 }
+
+                // Tell debugger to stop
+                RAWRS._gdb.invoke("target remote /dev/serial");
 
                 // Highlight code line and scroll to it
                 RAWRS.codeListing.highlight(sim.pc.toString(16));
@@ -260,6 +267,9 @@ class RAWRS {
                     let data = sim.readMemory(parseInt(addresses[i], 16), 32);
                     RAWRS.memoryListing.update(addresses[i], data);
                 }
+
+                // Tell debugger to stop
+                RAWRS._gdb.invoke("target remote /dev/serial");
 
                 // Highlight code line and scroll to it
                 RAWRS.codeListing.highlight(sim.pc.toString(16));
@@ -298,6 +308,7 @@ class RAWRS {
             });
 
             RAWRS._simulator = sim;
+            RAWRS._gdb.simulator = sim;
             RAWRS.simulator.run();
         }
     }

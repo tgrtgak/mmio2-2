@@ -7,6 +7,7 @@ class Debugger extends EventComponent {
     constructor() {
         super();
 
+        console.log("loading gdb");
         this._stdin = new Uint8Array([]);
         this._serialin = new Uint8Array([]);
 
@@ -46,7 +47,6 @@ class Debugger extends EventComponent {
             serialIn: () => {
                 let data = this._serialin[0] || 0;
                 this._serialin = this._serialin.slice(1);
-                console.log("serialin; returning", data);
                 return data;
             },
             serialInLength: () => {
@@ -55,8 +55,9 @@ class Debugger extends EventComponent {
             serialOut: (ch, exit) => {
                 this._packet += String.fromCharCode(ch);
                 if (this._packet.length > 3 && this._packet[this._packet.length - 3] == '#') {
-                    this.parse(this._packet);
+                    let packet = this._packet;
                     this._packet = "";
+                    this.parse(packet);
                 }
             },
             quit: (status, ex) => {
@@ -76,11 +77,27 @@ class Debugger extends EventComponent {
         this._load();
     }
 
+    /**
+     * Sets the current simulator.
+     */
+    set simulator(value) {
+        this._simulator = value;
+        this.invoke("target remote /dev/serial");
+    }
+
+    /**
+     * Returns the attached Simulator.
+     */
+    get simulator() {
+        return this._simulator;
+    }
+
     _load() {
         // TODO: throw up a loading graphic in the debugger pane
         window.GDB(this._module).then( (Module) => {
             // TODO: remove loading graphic as the app loads
             console.log("GDB LOADED");
+            this._console.clear();
             this._running = true;
             this._loaded = true;
             this._module = Module;
@@ -99,6 +116,7 @@ class Debugger extends EventComponent {
         var Module = this._module;
         this._jsmain = Module.cwrap('jsmain', null, ['number', 'string']);
         this._jsstep = Module.cwrap('jsstep', null, []);
+        this._jsinvoke = Module.cwrap('jsinvoke', null, ['string', 'number']);
 
         // Call jsmain with the given command-line arguments
 
@@ -108,8 +126,18 @@ class Debugger extends EventComponent {
         // This is to avoid building such a list in gdb's memory space ourselves
         // and just let emscripten do its thing. We build argv out of this
         // longer string in the jsmain implementation.
-        let args = ['/usr/bin/gdb'];
+        let args = ['/usr/bin/gdb',
+                    '--eval-command', 'set architecture riscv:rv64'];
         this._jsmain(args.length, args.join('\0'));
+    }
+
+    /**
+     * Invokes a gdb command in the running gdb instance.
+     */
+    invoke(command) {
+        if (this._jsinvoke) {
+            this._jsinvoke(command, 0);
+        }
     }
 
     /**
@@ -137,9 +165,7 @@ class Debugger extends EventComponent {
 
         // Checksum is the modulo 256 sum of all characters in the packet data
         let checksum = parseInt(packet.substring(packet.length - 2), 16);
-        let realsum = data.split('')
-                          .map( (e) => e.charCodeAt(0) )
-                          .reduce( (e, a) => { return a + e; }) % 256;
+        let realsum = this.checksum(data)
 
         // Check for invalid checksum
         if (checksum != realsum) {
@@ -182,25 +208,94 @@ class Debugger extends EventComponent {
             last = chr;
         });
 
-        // Acknowledge
-        this.write('+');
-
         // Interpret packet
         console.log("Debugger: packet:", payload, checksum, realsum);
-        this.interpret(payload);
+        let response = this.interpret(payload);
+
+        // Send the response
+        this.write(response, true);
+    }
+
+    checksum(data) {
+        if ((typeof data === 'string') || data instanceof String) {
+            data = Buffer.from(data, 'utf-8');
+        }
+
+        return data.reduce( (a, e) => (a + e), 0) % 256;
+    }
+
+    encode(data, prefix = "") {
+        let ret = new Uint8Array(prefix.length + (data.length * 2));
+        let count = prefix.length;
+
+        ret.set(Buffer.from(prefix, 'utf-8'), 0);
+
+        if ((typeof data === 'string') || data instanceof String) {
+            data = Buffer.from(data, 'utf-8');
+        }
+
+        // We have to encode such that we escape the ASCII characters gdb uses
+        // to parse the packet names and arguments and checksums, etc.
+        for (let i = 0; i < data.length; i++) {
+            let b = data[i];
+            if (b == 0x7d || b == 0x23 || b == 0x24 || b == 0x2a) {
+                // An escaped byte is 0x7d followed by the original byte
+                // XOR'd by 0x20
+                ret[count] = 0x7d;
+                count++;
+
+                // XOR
+                b ^= 0x20;
+            }
+
+            // Add the byte to the stream and increment count
+            ret[count] = b;
+            count++;
+        }
+
+        ret = ret.slice(0, count);
+        return ret;
     }
 
     /**
      * Writes data to the serial connection.
      */
-    write(data) {
+    write(data, ack = false) {
         if ((typeof data === 'string') || data instanceof String) {
             data = Buffer.from(data, 'utf-8');
         }
-        console.log("serial write");
-        let serialin = new Uint8Array(this._serialin.byteLength + data.length);
+
+        // Form a new stdin buffer
+        let serialin = new Uint8Array(this._serialin.byteLength + 1 + data.length + 3 + (ack ? 1 : 0));
+
+        // Keep existing data in the stdin stream
         serialin.set(this._serialin, 0);
-        serialin.set(data, this._serialin.byteLength);
+
+        let position = this._serialin.byteLength;
+
+        if (ack) {
+            serialin[position] = '+'.charCodeAt(0);
+            position++;
+        }
+
+        // Write '$' to begin
+        serialin[position] = '$'.charCodeAt(0);
+        position++;
+
+        // Write packet data
+        serialin.set(data, position);
+        position += data.length;
+
+        // Write '#' to start the checksum
+        serialin[position] = '#'.charCodeAt(0);
+        position++;
+
+        // Write checksum
+        let sum = this.checksum(data).toString(16).padStart(2, '0');
+        serialin[position] = sum.charCodeAt(0);
+        serialin[position + 1] = sum.charCodeAt(1);
+
+        // Establish this stdin
         this._serialin = serialin;
     }
 
@@ -213,6 +308,44 @@ class Debugger extends EventComponent {
      * @param {string} packet - An unpacked packet data payload.
      */
     interpret(packet) {
+        // Try our best to get the packet name
+        let name = packet.match(/^\?|^[a-zA-Z]+/)[0]
+
+        // Issue the command (if we have an implementation)
+        let result = "";
+        if (name == "?") {
+            result = this.stopReply(packet);
+        }
+        else {
+            while (name.length > 0) {
+                if (this[name]) {
+                    try {
+                        result = this[name].bind(this)(packet) || "";
+                    }
+                    catch (e) {
+                        console.log(e);
+                        throw e;
+                    }
+                    break;
+                }
+
+                name = name.substring(0, name.length - 1);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Responds to the '?' packet.
+     *
+     * This packet is asking why the process has stopped.
+     *
+     * @param {string} packet - The '?' packet data, which is just '?'.
+     */
+    stopReply(packet) {
+        // Say we halted via SIGTRAP (breakpoint)
+        return "S05";
     }
 
     /**
@@ -221,12 +354,231 @@ class Debugger extends EventComponent {
      * @param {string} packet - The qSupported packet data.
      */
     qSupported(packet) {
+        return "PacketSize=256;swbreak+;hwbreak+;qXfer:exec-file:read+;vFile:open+";
+    }
+
+    vFile(packet) {
+        let parts = packet.split(':');
+
+        switch(parts[1]) {
+            // Select the filesystem on the target.
+            case "setfs":
+                // Returns 0 on success.
+                return "F 0";
+
+            // Opens the given file and returns a file descriptor or -1 on error.
+            case "open":
+                if (parts[2][0] == "6") {
+                    return "F -1";
+                }
+
+                return "F 1";
+            case "pread":
+                let args = parts[2].split(',');
+                let fd = parseInt(args[0], 16);
+                let count = parseInt(args[1], 16);
+                let offset = parseInt(args[2], 16);
+
+                if (this.simulator) {
+                    let data = this.simulator.binary.data;
+                    let bytes = data.slice(offset, offset + count);
+                    return this.encode(bytes, "F " + bytes.length.toString(16) + ";");
+                }
+                else {
+                    // Return error
+                    return "F -1";
+                }
+                break;
+        }
+    }
+
+    qXfer(packet) {
+        let parts = packet.split(':');
+
+        switch (parts[1]) {
+            case "exec-file":
+                switch (parts[2]) {
+                    case "read":
+                        return "l" + "/rawrs.elf";
+                }
+                break;
+        }
+    }
+
+    /**
+     * Responds to a qAttached packet to query the process info.
+     *
+     * This will respond with '1' if we are using an existing process or '0' if
+     * we are using a created process.
+     *
+     * @param {string} packet - The qAttached packet data.
+     */
+    qAttached(packet) {
+        return '1';
+    }
+
+    /**
+     * Responds to the query current thread packet.
+     *
+     * @param {string} packet - The qC packet data.
+     */
+    qC(packet) {
+        return 'QC 1';
+    }
+
+    /**
+     * Responds to the query trace status packet.
+     *
+     * This would be used by GDB to know about some existing running trace at
+     * our remote.
+     *
+     * @param {string} packet - The qTStatus packet data.
+     */
+    qTStatus(packet) {
+        return "T0;tnotrun:0";
+    }
+
+    /**
+     * Responds to a thread info query.
+     *
+     * This responds by sending a list of thread ids. GDB will keep asking
+     * until it sees a response of 'l' by itself via the qsThreadInfo query.
+     *
+     * @param {string} packet - The qfThreadInfo packet data.
+     */
+    qfThreadInfo(packet) {
+        return "1";
+    }
+
+    /**
+     * Responds to a register-get packet.
+     *
+     * @param {string} packet - The g packet data.
+     */
+    g(packet) {
+        // Get the registers from the simulator
+        let values = [];
+
+        if (this.simulator) {
+            values = this.simulator.registers;
+        }
+        else {
+            values = (new Array(32)).fill(BigInt(0));
+        }
+
+        // The 'pc' register is first in the list and needs to be the last.
+        let regs = new BigUint64Array(33);
+        regs[0] = BigInt(0);          // zero register
+        regs.set(values.slice(1), 1); // general registers 1-32
+        regs.set([values[0]], 32);    // pc
+
+        // Turn every register value into a string that is its little-endian
+        // representation in hexadecimal.
+        let strs = [];
+        regs.forEach( (v) => {
+            // Render it as a little-endian hex string
+            let bytes = new Uint8Array(8);
+            let view = new DataView(bytes.buffer);
+
+            // Write the little-endian value to the data view
+            view.setBigInt64(0, BigInt(v), true);
+
+            // Return the byte-string
+            let result = "";
+            bytes.forEach( (b) => {
+                result += b.toString(16).padStart(2, '0');
+            });
+            strs.push(result);
+        });
+
+        // Return the 'zero' register and the registers from the simulator
+        return strs.join('');
+    }
+
+    /**
+     * Responds to a register-set packet.
+     *
+     * @param {string} packet - The G packet data.
+     */
+    G(packet) {
+        packet = packet.slice(1);
+
+        // Unpack register values
+        return "";
+    }
+
+    /**
+     * Responds to a memory-read packet.
+     *
+     * @param {string} packet - The m packet data.
+     */
+    m(packet) {
+        packet = packet.slice(1);
+        let address = packet.split(',')[0];
+        let length = packet.split(',')[1];
+        console.log("examining memory at", address, "for", length, "bytes");
+
+        address = parseInt(address, 16);
+        length = parseInt(length, 16);
+        return "ab".padStart(length * 2, '0');
+    }
+
+    /**
+     * Responds to a memory-write packet.
+     *
+     * @param {string} packet - The M packet data.
+     */
+    M(packet) {
+        packet = packet.slice(1);
+        let address = packet.split(',')[0];
+        let length = packet.split(',')[1];
+        let value = packet.split(',')[2];
+        console.log("writing memory at", address, "for", length, "bytes", "with", value);
+
+        address = parseInt(address, 16);
+        length = parseInt(length, 16);
+        return "";
+    }
+
+    /**
+     * Responds to a step packet.
+     *
+     * @param {string} packet - The s packet data.
+     */
+    s(packet) {
+        // Step
+        //sim.step();
+        // Respond by saying we hit a breakpoint again.
+        return "S05";
+    }
+
+    /**
+     * Responds to a continue packet.
+     *
+     * @param {string} packet - The c packet data.
+     */
+    c(packet) {
+        //sim.run();
+        return "";
+    }
+
+    /**
+     * Responds to a Hc packet.
+     *
+     * @param {string} packet - The Hc packet data.
+     */
+    Hc(packet) {
+        return "OK"
+    }
+
+    /**
+     * Responds to a Hg packet.
+     *
+     * @param {string} packet - The Hg packet data.
+     */
+    Hg(packet) {
+        return "OK"
     }
 }
-
-/**
- * An empty gdb packet.
- */
-Debugger.EMPTY_PACKET = "$#00";
 
 export default Debugger;

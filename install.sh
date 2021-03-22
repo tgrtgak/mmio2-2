@@ -6,8 +6,8 @@ echo "=========="
 if [ ! -d "emsdk" ]; then
   git clone https://github.com/emscripten-core/emsdk.git
   cd emsdk
-  ./emsdk install 1.39.19
-  ./emsdk activate 1.39.19
+  ./emsdk install 2.0.13
+  ./emsdk activate 2.0.13
   cd ..
 else
   echo "emscripten already exists. delete the emsdk directory to reinstall"

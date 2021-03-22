@@ -1,0 +1,97 @@
+From fba9d0d57c40c562120a439f7fea07c93ad70aaf Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Mon, 15 Feb 2021 19:34:46 -0500
+Subject: [PATCH] Updates to support reading remote packets and adds jsinvoke.
+
+---
+ bfd/elf-bfd.h  | 1 +
+ gdb/main.c     | 6 ++++++
+ gdb/main.h     | 4 ++++
+ gdb/ser-base.c | 3 +++
+ gdb/ser-unix.c | 6 +++---
+ 5 files changed, 17 insertions(+), 3 deletions(-)
+
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index eebdf9ac73..6fba4a886d 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -22,6 +22,7 @@
+ #ifndef _LIBELF_H_
+ #define _LIBELF_H_ 1
+ 
++#include <string.h>
+ #include "elf/common.h"
+ #include "elf/external.h"
+ #include "elf/internal.h"
+diff --git a/gdb/main.c b/gdb/main.c
+index 0d798502c8..cbfc71ed70 100644
+--- a/gdb/main.c
++++ b/gdb/main.c
+@@ -81,6 +81,12 @@ jsstep() {
+   gdb_do_one_event();
+ }
+ 
++/* Emscripten entrypoint to perform a command */
++void
++jsinvoke(const char *cmd, int from_tty) {
++  execute_command(cmd, from_tty);
++}
++
+ /* The selected interpreter.  This will be used as a set command
+    variable, so it should always be malloc'ed - since
+    do_setshow_command will free it.  */
+diff --git a/gdb/main.h b/gdb/main.h
+index 3ad503b765..a7c85127c9 100644
+--- a/gdb/main.h
++++ b/gdb/main.h
+@@ -35,6 +35,10 @@ extern "C" {
+   void jsstep();
+ }
+ 
++extern "C" {
++  void jsinvoke(const char *cmd, int from_tty);
++}
++
+ extern int gdb_main (struct captured_main_args *);
+ 
+ /* From main.c.  */
+diff --git a/gdb/ser-base.c b/gdb/ser-base.c
+index fb6f4e056a..df830606fc 100644
+--- a/gdb/ser-base.c
++++ b/gdb/ser-base.c
+@@ -213,6 +213,9 @@ push_event (void *context)
+ static int
+ ser_base_wait_for (struct serial *scb, int timeout)
+ {
++  // Always return... presume there is always data for the JS build.
++  return 0;
++
+   while (1)
+     {
+       int numfds;
+diff --git a/gdb/ser-unix.c b/gdb/ser-unix.c
+index 9a13acddbc..2d8cdaa38e 100644
+--- a/gdb/ser-unix.c
++++ b/gdb/ser-unix.c
+@@ -174,15 +174,15 @@ hardwire_drain_output (struct serial *scb)
+ static int
+ hardwire_flush_output (struct serial *scb)
+ {
+-  return tcflush (scb->fd, TCOFLUSH);
++  return 0; //tcflush (scb->fd, TCOFLUSH);
+ }
+ 
+ static int
+ hardwire_flush_input (struct serial *scb)
+ {
+-  ser_base_flush_input (scb);
++  //ser_base_flush_input (scb);
+ 
+-  return tcflush (scb->fd, TCIFLUSH);
++  return 0; //tcflush (scb->fd, TCIFLUSH);
+ }
+ 
+ static int
+-- 
+2.30.0
+

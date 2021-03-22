@@ -4,7 +4,6 @@ import EventComponent from './event_component';
 
 class Tabs extends EventComponent {
     constructor(tabStrip) {
-        console.log("constructor", tabStrip);
         super();
 
         tabStrip.querySelectorAll(".tab > a, .tab > button").forEach( (tabButton) => {

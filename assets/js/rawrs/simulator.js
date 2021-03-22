@@ -234,6 +234,13 @@ class Simulator extends EventComponent {
         return this._breakpoints;
     }
 
+    /**
+     * Returns the File that is being run within the simulator.
+     */
+    get binary() {
+        return this._appBinary;
+    }
+
     /*
      * Called internally when the simulator starts.
      */
@@ -354,7 +361,7 @@ class Simulator extends EventComponent {
             for (let i = 0; i < 32; i++) {
                 ret[i] = window.BigInt(0);
             }
-            return window.BigUint64Array(ret);
+            return new window.BigUint64Array(ret);
         }
 
         // The items are PC, followed by registers 1 through 32.
@@ -374,7 +381,7 @@ class Simulator extends EventComponent {
 
             var num = window.BigInt(0);
             if (num.shiftLeft) {
-                // We are using the bigInt polyfill, which isn't exactly the same
+                // We are using the BigInt polyfill, which isn't exactly the same
                 values = values.split("").map( (c) => ((c >= "0" && c <= "9") ? c.charCodeAt(0) - "0".charCodeAt(0) : c.charCodeAt(0) - "a".charCodeAt(0) + 10) );
                 num = window.BigInt.fromArray(values, 16);
             }

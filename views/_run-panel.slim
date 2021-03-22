@@ -12,17 +12,17 @@
             img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/video.svg"
             span.caption
               = I18n.t(:"run.devices.video")
-        li.tab.active
+        li.tab
           button aria-controls=:"debugger"
-            img src="images/dynamic/hex/1e151e/toolbar/video.svg"
+            img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/debug.svg"
             span.caption
               = I18n.t(:"run.devices.video")
       ol.tab-panels
-        li.tab-panel#console
+        li.tab-panel.active#console
           div#term_container
         li.tab-panel#video
           canvas#video width="640" height="480"
-        li.tab-panel.active#debugger
+        li.tab-panel#debugger
           div#gdb_container
   .register-file
     ol.tabs
