@@ -8,3 +8,7 @@
 .xterm .live-region {
   top: 0;
 }
+
+.xterm .xterm-viewport {
+  overflow-y: hidden;
+}
