@@ -40,7 +40,7 @@ class RAWRS {
             }
         }
 
-        this._console = new Console(30, 80, 15);
+        this._console = new Console(30, 71, 15);
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
 
         Tabs.load();
