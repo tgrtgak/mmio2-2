@@ -112,16 +112,36 @@ syscall_print_integer:
 # syscall_print_hex(): Prints the integer in a0 in hexadecimal 
 syscall_print_hex:
   push  ra
+  
   li    a1, 16
+  li    a2, 8
+
+  move  t0, a0
+  srl  t0, t0, 32
+  beqz  t0, _syscall_print_hex_end
+  li    a2, 16
+
+_syscall_print_hex_end:
   jal   print_int_padded 
+
   pop   ra
   jr    ra
 
 # syscall_print_bin(): Prints the integer in a0 in binary 
 syscall_print_bin:
   push  ra
+
   li    a1, 2
+  li    a2, 32
+
+  move  t0, a0
+  srl  t0, t0, 32
+  beqz  t0, _syscall_print_bin_end
+  li    a2, 64
+
+_syscall_print_bin_end:
   jal   print_int_padded 
+
   pop   ra
   jr    ra
   
