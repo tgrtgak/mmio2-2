@@ -18,56 +18,92 @@
 #   a0: size by which to expand heap
 #
 # Return:
-#   a0: pointer to start of new heap space, or -1 if failed
+#   a0: pointer to start of new heap space, or 0 if failed
 paging_expand_heap:
-  push ra
-  push s0
-  push s1
-  push s2
+  push  ra
+  push  s0
+  push  s1
+  push  s2
+  push  s3
+  push  s4
+  push  s5
 
-  bltz a0,_expand_heap_failure  # if n < 0, return (should we cause exception?)
-  lw   s0, heap_address         # retain original heap address to return later
-  move s1, a0                   # number of bytes to expand by
-  li   t0, 0x10040000 
-  lw   t1, heap_address 
-  bne  t0, t1, _expand_heap_not_first_page 
-
-  jal memory_alloc_page
-  j _expand_heap_continue
+  bltz  a0, _expand_heap_failure  
   
- 
-_expand_heap_not_first_page:
-  move a0, s0
- jal paging_vaddr_to_paddr
+  # Retain original heap address and the argument in a0
+  la    s0, heap_address    
+  lw    s0, 0(s0)
+  move  s1, a0                   
+
+  # Start = alignPage(heap_address)
+  move  s4, s0
+  alignPage s4
+  
+  # t0 = (PAGE_SIZE - 1) & heap_address
+  li    t0, PAGE_SIZE
+  add   t0, t0, -1
+  and   t0, s0, t0
+
+  # if t0 == 0, we are at a page boundary,
+  #   so set start = heap_address
+  bnez  t0,  _expand_heap_continue
+  move  s4, s0
 
 _expand_heap_continue:
-  move s2, a0
+  # End = alignPage(heap_address + size)
+  add   s5, s0, s1
+  alignPage s5
+
+  # Returns root page table address in a0
+  jal   paging_get_root   
+  move  s2, a0
+
+_expand_heap_loop:
+  bge   s4, s5, _expand_heap_loop_end
+
+  jal   memory_alloc_page
+  # Physical address of new page
+  move  a1, a0
+  # Root page table
+  move  a0, s2
+  # Virtual address to map to (start) 
+  move  a2, s4  
+  # Number of bytes to add
+  li    a3, PAGE_SIZE           
+  # Flags
+  li    a4, PTE_USER | PTE_WRITE | PTE_READ
   
-  jal paging_get_root   # returns root page table address in a0
-  #print_hex a0
-  move a1, s2           # physical address to start at (return of paging_v_to_p or memory_alloc_page) 
- # print_hex a1
-  lw   a2, heap_address # virtual address to map to 
- # print_hex a2
-  move a3, s1           # number of bytes to add
- # print_hex a3
-  li   a4,  PTE_USER | PTE_WRITE| PTE_READ| PTE_EXECUTE    # flags;
- # print_hex a4
-  jal paging_map_range
-  lw   a0, heap_address # increment heap_address by n
-  add  t0, a0, s1
-  la   t1, heap_address
-  sw   t0, (t1)
-  move a0, s0           # move original heap address to a0 to return
-  j _expand_heap_exit
+  jal   paging_map_range
+
+  li    t0, PAGE_SIZE
+  add   s4, s4, t0
+  j     _expand_heap_loop
+
+_expand_heap_loop_end:
+  # Increment heap_address by n
+  add   t0, s0, s1
+
+  la    a0, heap_address
+  sw    t0, 0(a0)
+
+  # Move original heap address to a0 to return
+  move  a0, s0           
+  
+  j     _expand_heap_exit
+
 _expand_heap_failure:
-  li a0, -1
+  move  a0, zero
+
 _expand_heap_exit:
-  pop s2
-  pop s1
-  pop s0
-  pop ra
-  jr ra
+  pop   s5
+  pop   s4
+  pop   s3
+  pop   s2
+  pop   s1
+  pop   s0
+  pop   ra
+  jr    ra
+
 # paging_init(): Instantiates virtual memory for the system.
 paging_init:
   push ra
