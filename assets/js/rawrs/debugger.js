@@ -568,11 +568,26 @@ class Debugger extends EventComponent {
         packet = packet.slice(1);
         let address = packet.split(',')[0];
         let length = packet.split(',')[1];
-        console.log("examining memory at", address, "for", length, "bytes");
 
         address = parseInt(address, 16);
         length = parseInt(length, 16);
-        return "ab".padStart(length * 2, '0');
+
+        // TODO: what happens if it accesses at a page boundary?
+        let bytes = [];
+        if (this.simulator) {
+            bytes = this.simulator.memory(address, length);
+        }
+        else {
+            bytes = new Uint8Array(length);
+        }
+
+        // Transmit 'bytes'
+        let result = "";
+        bytes.forEach( (b) => {
+            result += b.toString(16).padStart(2, '0');
+        });
+
+        return result;
     }
 
     /**
@@ -582,13 +597,24 @@ class Debugger extends EventComponent {
      */
     M(packet) {
         packet = packet.slice(1);
-        let address = packet.split(',')[0];
-        let length = packet.split(',')[1];
-        let value = packet.split(',')[2];
+        let parts = packet.split(',');
+        let address = parts[0];
+        let length = parts[1].split(':')[0];
+        let value = parts[1].split(':')[1];
         console.log("writing memory at", address, "for", length, "bytes", "with", value);
 
         address = parseInt(address, 16);
         length = parseInt(length, 16);
+
+        // Get the bytes to set
+        let bytes = new Uint8Array(length);
+
+        // For each byte hex pair, decode the byte value
+        bytes.forEach( (b, i) => {
+            bytes[i] = parseInt(value.slice(i * 2, (i * 2) + 2), 16);
+        });
+
+        console.log("setting bytes at address", address, "to", bytes);
         return "";
     }
 
