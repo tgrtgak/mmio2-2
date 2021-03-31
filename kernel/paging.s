@@ -61,9 +61,12 @@ _expand_heap_continue:
 _expand_heap_loop:
   bge   s4, s5, _expand_heap_loop_end
 
+  
   jal   memory_alloc_page
   # Physical address of new page
   move  a1, a0
+  jal   fdt_get_memory_base_addr
+  add   a1, a1, a0
   # Root page table
   move  a0, s2
   # Virtual address to map to (start) 
