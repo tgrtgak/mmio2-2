@@ -152,6 +152,11 @@ class Editor {
             else {
                 Editor.hideTooltip();
             }
+            event.stopPropagation();
+        });
+
+        document.body.addEventListener("mousemove", function(event) {
+            Editor.hideTooltip();
         });
 
         // Inserts any new labels the user added when the cursor changes lines
