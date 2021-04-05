@@ -38,8 +38,12 @@ Refer to the table below for more information.
 | 4  | print string    |               | `{.register}a0`: address of string | Prints the null-terminated string given in `{.register}a0`. It does not print a newline.  |
 | 5  | read integer    | `{.register}a0`: integer read |           | |
 | 8  | read string     | `{.register}a0`: characters read | `{.register}a0`: address of buffer<br>`{.register}a1`: maximum number of characters to read. | |
+| 9  | sbrk            |               | `{.register}a0`: number of bytes to allocate | |
 | 10 | exit            |               | `{.register}a0`: exit code | Terminates the program and powers down the machine.          |
+| 11 | print character |               | `{.register}a0`: character to print | Prints the character given in `{.register}a0`.                            |
 | 30 | system time     | `{.register}a0`: milliseconds since boot | | Gets the number of milliseconds since booting the machine. Will not be incredibly accurate. |
+| 34 | print integer in hexadecimal |  | `{.register}a0`: integer to print | Prints the integer given in `{.register}a1` as an 8 or 16 digit hexadecimal number, padding with zeros if necessary. It does not print a newline. |
+| 35 | print integer in binary  |      | `{.register}a0`: integer to print | Prints the integer given in `{.register}a1` as a 32 or 64 digit binary numbder, padding with zeros if necessary. It does not print a newline. |
 | 40 | set seed        | | `{.register}a0`: id of generator | Sets the given random number generator to the given seed. |
 | 41 | random word     | `{.register}a0`: random word | `{.register}a0`: The id of the generator to use. |
 
@@ -48,8 +52,6 @@ Refer to the table below for more information.
 | 3  | print double    |               | `{.register}f0`: double to print | Prints the double given in `{.register}f0`. It does not print a newline.  |
 | 6  | read float      | `{.register}f0`: float read |           | |
 | 7  | read double     | `{.register}f0`: double read |           | |
-| 9  | sbrk            |               | `{.register}a0`: number of bytes to allocate | |
-| 11 | print character |               | `{.register}a0`: character to print | Prints the character given in `{.register}a0`.                            |
 -->
 
 ## Descriptions and Usage
