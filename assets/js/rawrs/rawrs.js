@@ -94,6 +94,21 @@ class RAWRS {
                 RAWRS.registerListing.update(RAWRS.simulator.registers);
             }
         });
+
+        RAWRS.memoryListing.on("change", (info) => {
+            if(RAWRS.simulator) {
+                let sim = RAWRS.simulator;
+                sim.writeMemory(info.address, info.data);
+
+                let numRows = RAWRS.memoryListing.numberOfRows;
+                let addresses = RAWRS.memoryListing.addresses;
+                RAWRS.memoryListing.clear();
+                for (let i = 0; i < numRows; i++) {
+                    let data = sim.readMemory(parseInt(addresses[i], 16), 32);
+                    RAWRS.memoryListing.update(addresses[i], data);
+                }
+            }
+        });
         
         RAWRS.toolbar.on('click', (button) => {
             switch (button.getAttribute("id")) {
@@ -171,6 +186,15 @@ class RAWRS {
                 RAWRS.registerListing.unhighlight();
                 RAWRS.registerListing.update(sim.registers);
 
+                // Update memory
+                let numRows = RAWRS.memoryListing.numberOfRows;
+                let addresses = RAWRS.memoryListing.addresses;
+                RAWRS.memoryListing.clear();
+                for (let i = 0; i < numRows; i++) {
+                    let data = sim.readMemory(parseInt(addresses[i], 16), 32);
+                    RAWRS.memoryListing.update(addresses[i], data);
+                }
+
                 if (RAWRS._clearBreakpoint) {
                     sim.breakpointClear(RAWRS._clearBreakpoint);
                     RAWRS._clearBreakpoint = false;
@@ -187,7 +211,13 @@ class RAWRS {
                 RAWRS.registerListing.update(sim.registers);
 
                 // Get updated memory
-                // TODO
+                let numRows = RAWRS.memoryListing.numberOfRows;
+                let addresses = RAWRS.memoryListing.addresses;
+                RAWRS.memoryListing.clear();
+                for (let i = 0; i < numRows; i++) {
+                    let data = sim.readMemory(parseInt(addresses[i], 16), 32);
+                    RAWRS.memoryListing.update(addresses[i], data);
+                }
 
                 // Highlight code line and scroll to it
                 RAWRS.codeListing.highlight(sim.pc.toString(16));
@@ -207,7 +237,13 @@ class RAWRS {
                 RAWRS.registerListing.update(sim.registers);
 
                 // Get updated memory
-                // TODO
+                let numRows = RAWRS.memoryListing.numberOfRows;
+                let addresses = RAWRS.memoryListing.addresses;
+                RAWRS.memoryListing.clear();
+                for (let i = 0; i < numRows; i++) {
+                    let data = sim.readMemory(parseInt(addresses[i], 16), 32);
+                    RAWRS.memoryListing.update(addresses[i], data);
+                }
 
                 // Highlight code line and scroll to it
                 RAWRS.codeListing.highlight(sim.pc.toString(16));

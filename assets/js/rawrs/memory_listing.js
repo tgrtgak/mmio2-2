@@ -29,6 +29,40 @@ class MemoryListing extends EventComponent {
     }
 
     /**
+     * Returns the number of rows of memory addresses
+     * 
+     * @returns {int} The number of rows for this memory listing.
+     */
+    get numberOfRows() {
+        let num = this._element.getElementsByClassName("address").length;
+        return num;
+    }
+
+    /**
+     * Returns all of the address rows
+     * 
+     * @returns {NodeList} A nodelist containing one element of each address
+     */
+    get addresses() {
+        let cells = this._element.getElementsByClassName("address");
+        let addresses = new Array();
+        for (let i = 0; i < cells.length; i++) {
+            addresses[i] = cells[i].textContent;
+        }
+        return addresses;
+    }
+
+    /**
+     * Returns all of the address rows
+     * 
+     * @returns {int} A int containing the address we need.
+     */
+    address(index) {
+        let node = this._element.querySelectorAll("tbody tr").item(index);
+        return node.getElementsByClassName("address").item(0).textContent;
+    }
+
+    /**
      * Clears the memory listing.
      */
     clear() {
@@ -50,10 +84,51 @@ class MemoryListing extends EventComponent {
         this._element.classList.remove("empty");
         var row = document.createElement("tr");
 
-        function createCell(type, value) {
+        function createCell(type, value, address, event) {
             var cell = document.createElement("td");
             cell.classList.add(type);
             cell.textContent = value;
+
+            if (type === "word") {
+                cell.setAttribute("current", value);
+                cell.setAttribute("address", address);
+                cell.setAttribute("contenteditable", "true");
+                cell.setAttribute("spellcheck", "false")
+
+                cell.addEventListener("keydown", function(event) {
+                    if (event.code === 'Enter') {
+                        event.preventDefault();
+                        cell.blur();
+                    }
+                });
+
+                cell.addEventListener('focusout', () => {
+                    let submit = "0x";
+                    let word = cell.textContent.slice(-8).padStart(8, '0');
+                    submit += word;
+                    try {
+                        BigInt(submit);
+                    }
+                    catch (err) {
+                        word = cell.getAttribute("current");
+                        submit = "0x" + word;
+                    }
+                    finally {
+                        cell.textContent = word;
+                        cell.setAttribute("current", word);
+                        window.getSelection().removeAllRanges();
+
+                        let splitWord = word.match(/([\S\s]{1,2})/g).reverse();
+                        let array = new Uint8Array(4);
+                        for (let i = 0; i < 4; i++) {
+                            array[i] = parseInt(splitWord[i], 16);
+                        }
+
+                        data = {address: parseInt(cell.getAttribute("address"), 16), data: array};
+                        event.trigger("change", data);
+                    }
+                });
+            }
             return cell;
         }
 
@@ -61,11 +136,11 @@ class MemoryListing extends EventComponent {
 
         // For each word, push a cell
         for (var i = 0; i < 32; i+=4) {
-            var wordString = "";
+            var word = "";
             for (var byteIndex = 0; byteIndex < 4; byteIndex++) {
-                wordString = (data[i+byteIndex] || 0).toString(16).padStart(2, '0') + wordString;
+                word = (data[i+byteIndex] || 0).toString(16).padStart(2, '0') + word;
             }
-            row.appendChild(createCell("word", wordString));
+            row.appendChild(createCell("word", word, (parseInt(address, 16) + i).toString(16), this));
         }
 
         var ascii = Array.from(data).map( (byte) => {

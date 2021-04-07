@@ -256,6 +256,7 @@ class Simulator extends EventComponent {
         this._force_refresh        = Module.cwrap('force_refresh', null, []);
         this._cpu_set_breakpoint   = Module.cwrap('cpu_set_breakpoint', null, ["number"]);
         this._cpu_clear_breakpoint = Module.cwrap('cpu_clear_breakpoint', null, ["number"]);
+        this._cpu_get_mem          = Module.cwrap('cpu_get_mem', null, ["number"]);
     }
 
     _runtimeInitialized() {
@@ -360,7 +361,6 @@ class Simulator extends EventComponent {
         // The 'zero' register is omitted, of course.
         var buf_len = 32 * 8;
         var buf = this._module._malloc(buf_len);
-
         this._cpu_get_regs(buf);
 
         /* Since we have a 64-bit CPU, the buffer is a 64-bit integer array */
@@ -418,7 +418,38 @@ class Simulator extends EventComponent {
         
         this._cpu_set_regs(cbuf);
     }
-    
+
+    /**
+     * Returns an integer array for a segment of data from memory
+     *
+     * @param {number} address The address to read memory at
+     * @param {number} size The size of memory to read
+     * @returns {Uint8Array} An array of unsigned 8-bit numbers.
+     */
+    readMemory(address, size = 32) {
+        let ptr = this._cpu_get_mem(address);
+        
+        let mem = new Uint8Array(size);
+        for (let i = 0; i < size; i++) {
+            mem[i] = this._module.getValue(ptr + i, 'i8');
+        }
+        return mem;
+    }
+
+    /**
+     * At the address location, sets memory according to the accepted integer array.
+     *
+     * @param {number} address The address to read memory at.
+     * @param {Uint8Array} data An array of unsigned 8-bit numbers.
+     */
+     writeMemory(address, data) {
+        let ptr = this._cpu_get_mem(address);
+
+        for (let i = 0; i < data.length; i++) {
+            this._module.setValue(ptr + i, data[i], 'i8');
+        }
+    }
+
     /**
      * Add a breakpoint.
      *
