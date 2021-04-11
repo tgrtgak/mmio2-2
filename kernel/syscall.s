@@ -184,6 +184,8 @@ syscall_print_float:
   push  s0
   push  s1
   push  s2
+  push  a0
+  push  a1
 
   # Pull out IEEE fields
 
@@ -306,6 +308,8 @@ _syscall_print_float_prepare:
   jal   syscall_print_floating_point
 
 _syscall_print_float_exit:
+  pop   a1
+  pop   a0
   pop   s2
   pop   s1
   pop   s0
@@ -318,6 +322,8 @@ syscall_print_double:
   push  s0
   push  s1
   push  s2
+  push  a0
+  push  a1
 
   # Pull out IEEE fields
 
@@ -436,6 +442,8 @@ _syscall_print_double_prepare:
   jal   syscall_print_floating_point
 
 _syscall_print_double_exit:
+  pop   a1
+  pop   a0
   pop   s2
   pop   s1
   pop   s0
@@ -546,7 +554,13 @@ _syscall_print_floating_point_exit:
 # syscall_print_string(): Prints the zero-terminated string in a0
 syscall_print_string:
   push  ra
+  push  a0
+  push  a1
+
   jal   console_writez
+
+  pop   a1
+  pop   a0
   pop   ra
   jr    ra
 
@@ -599,7 +613,27 @@ syscall_read_string:
   jr    ra
 
 syscall_exit:
-  jal   exit
+  # Restore context
+  pop   ra
+
+  # Pop target PC
+  pop   s0
+  csrw  sepc, s0
+
+  # Pop user stack
+  pop   s0
+  csrw  sscratch, s0
+
+  # Restore
+  popd
+  pop   s1
+  pop   s0
+
+  # Restore the stack pointer
+  csrr  sp, sscratch
+
+  # Soft jump to kmain's `exit` to shut down the machine
+  j     exit
 
 syscall_get_system_time:
   push  ra

@@ -190,16 +190,28 @@ _kmain_virtio_init_loop:
   j     exit
 
 exit:
+  # Store s10 in scratch, so the RAWRS environment can read it
+  # This is so that the application has its registers at the time of the
+  # environment call and not what they are at the machine's shutdown.
+  csrw  sscratch, s10
+
+  # Do the same for s11
+  csrw  stval, s11
+
+  # The RAWRS system can interpret an ecall `ecause` upon shutdown as an
+  # exit ecall and interpret `sscratch` and `sbadaddr` as s10 and s11.
+  # The `sepc` contains the address of the exit ecall, and therefore `pc`.
+
   # We write htif_tohost to be 0x80000000
   # And htif_fromhost to 1
+  # This will turn off the machine
   li    s11, HTIF_BASE
 
   # HTIF_TO_LOW
   li    s10, 0x0001
   sw    s10, 0(s11)
   # HTIF_TO_HIGH
-  li    s10, 0x0000
-  sw    s10, 4(s11)
+  sw    zero, 4(s11)
 
   # The machine should power off as we get here.
   # It will loop exit just in case.

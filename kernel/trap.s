@@ -99,7 +99,7 @@ trap:
 
   # Gather hardware information about the trap in question
   csrr  s0, scause
-  csrr  s1, sbadaddr
+  csrr  s1, stval
 
   # Determine if the trap was a system call
   li    t0, TRAP_CAUSE_ECALL
@@ -219,7 +219,7 @@ _trap_unknown:
 
   la    a0, str_trap_unknown_addr
   jal   print
-  csrr  s0, sbadaddr
+  csrr  s0, stval
   print_hex s0
 
   la    a0, str_trap_unknown_pc
