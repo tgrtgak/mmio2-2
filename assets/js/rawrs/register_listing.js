@@ -30,7 +30,7 @@ class RegisterListing extends EventComponent {
      * Resets the register listing to all zeros.
      */
     clear() {
-        Simulator.REGISTER_NAMES.forEach( (regName) => {
+        Simulator.REGISTER_NAMES.slice(0, 32).forEach( (regName) => {
             var str = "0000000000000000";
             this._element.querySelector("tr." + regName + " td.value button").textContent = "0x" + str;
         });
@@ -40,7 +40,7 @@ class RegisterListing extends EventComponent {
      * Removes highlights on updated entries.
      */
     unhighlight() {
-        Simulator.REGISTER_NAMES.forEach( (regName) => {
+        Simulator.REGISTER_NAMES.slice(0, 32).forEach( (regName) => {
             var str = "0000000000000000";
             this._element.querySelector("tr." + regName + " td.value").parentNode.classList.remove("updated");
         });
@@ -52,7 +52,7 @@ class RegisterListing extends EventComponent {
      * @param {BigUint64Array} regs The register values.
      */
     update(regs) {
-        regs.forEach( (reg, i) => { // for each register in the array
+        regs.slice(0, 32).forEach( (reg, i) => { // for each register in the array
             var str = reg.toString(16); // convert to a string represented as a hex value
             str = "0000000000000000".slice(str.length) + str; // pad the string with zeroes
             var regName = Simulator.REGISTER_NAMES[i]; // put the current register's name into regName

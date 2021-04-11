@@ -8,7 +8,6 @@ class Debugger extends EventComponent {
     constructor() {
         super();
 
-        console.log("loading gdb");
         this._stdin = new Uint8Array([]);
         this._serialin = new Uint8Array([]);
 
@@ -62,7 +61,6 @@ class Debugger extends EventComponent {
                 }
             },
             quit: (status, ex) => {
-                console.log("done");
             }
         };
 
@@ -97,7 +95,6 @@ class Debugger extends EventComponent {
         // TODO: throw up a loading graphic in the debugger pane
         window.GDB(this._module).then( (Module) => {
             // TODO: remove loading graphic as the app loads
-            console.log("GDB LOADED");
             this._console.clear();
             this._running = true;
             this._loaded = true;
@@ -171,7 +168,7 @@ class Debugger extends EventComponent {
         // Check for invalid packets
         if (packet.length <= 3) {
             // Throw away packet
-            console.log("Debugger: error: invalid packet", packet)
+            console.error("Debugger: error: invalid packet", packet)
             return;
         }
 
@@ -188,9 +185,9 @@ class Debugger extends EventComponent {
         if (checksum != realsum) {
             // Warn but otherwise accept the packet. We aren't expecting this to
             // matter since our connections are reliable since they are local.
-            console.log("Debugger: warning: checksum mismatch", packet,
-                        "expected:", checksum,
-                        "calculated:", realsum);
+            console.warn("Debugger: warning: checksum mismatch", packet,
+                         "expected:", checksum,
+                         "calculated:", realsum);
         }
 
         // Unpack packet
@@ -226,7 +223,7 @@ class Debugger extends EventComponent {
         });
 
         // Interpret packet
-        console.log("Debugger: packet:", payload, checksum, realsum);
+        console.debug("Debugger: packet:", payload, checksum, realsum);
         let response = this.interpret(payload);
 
         // Send the response
@@ -336,13 +333,7 @@ class Debugger extends EventComponent {
         else {
             while (name.length > 0) {
                 if (this[name]) {
-                    try {
-                        result = this[name].bind(this)(packet) || "";
-                    }
-                    catch (e) {
-                        console.log(e);
-                        throw e;
-                    }
+                    result = this[name].bind(this)(packet) || "";
                     break;
                 }
 
@@ -477,7 +468,7 @@ class Debugger extends EventComponent {
         let values = [];
 
         if (this.simulator) {
-            values = this.simulator.registers;
+            values = this.simulator.registers.slice(0, 32);
         }
         else {
             values = (new Array(32)).fill(BigInt(0));
@@ -575,7 +566,7 @@ class Debugger extends EventComponent {
         // TODO: what happens if it accesses at a page boundary?
         let bytes = [];
         if (this.simulator) {
-            bytes = this.simulator.memory(address, length);
+            bytes = this.simulator.readMemory(address, length);
         }
         else {
             bytes = new Uint8Array(length);
@@ -601,7 +592,6 @@ class Debugger extends EventComponent {
         let address = parts[0];
         let length = parts[1].split(':')[0];
         let value = parts[1].split(':')[1];
-        console.log("writing memory at", address, "for", length, "bytes", "with", value);
 
         address = parseInt(address, 16);
         length = parseInt(length, 16);
@@ -614,7 +604,10 @@ class Debugger extends EventComponent {
             bytes[i] = parseInt(value.slice(i * 2, (i * 2) + 2), 16);
         });
 
-        console.log("setting bytes at address", address, "to", bytes);
+        // Write memory
+        this.simulator.writeMemory(address, bytes);
+
+        // Acknowledge
         return "";
     }
 

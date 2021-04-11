@@ -82,6 +82,7 @@ class Simulator extends EventComponent {
      */
     _initialize() {
         var Module = this._module;
+        this._initialBreakpoint = true;
 
         let basepath = document.body.getAttribute('data-basepath');
         Module.locateFile = function(url) { return basepath + 'js/tinyemu/' + url; };
@@ -116,11 +117,19 @@ class Simulator extends EventComponent {
 
         Module.onBreakpoint = () => {
             this._breakpoint();
+
+            if (this._initialBreakpoint) {
+                this._initialBreakpoint = false;
+                this._ready = true;
+                this.trigger("ready");
+            }
         };
 
         Module.onVMReady = () => {
-            this._ready = true;
-            this.trigger("ready");
+            // The virtual machine is ready to run...
+            // Set a breakpoint to the start of userspace and run it!
+            this.breakpointSet("400000");
+            this._vm_resume();
         };
 
         Module.onVMPaused = () => {
@@ -296,6 +305,17 @@ class Simulator extends EventComponent {
     _quit() {
         this.forceRefresh();
         this.dump();
+
+        // Update s10 and s11 registers (if exited on an ecall)
+        // SCAUSE will be 0x8 when the last trap as an ecall
+        if (this.scause == 0x8) {
+            let regs = this.registers;
+            regs[0]  = this.sepc;
+            regs[26] = this.sscratch;
+            regs[27] = this.stval;
+            this.registers = regs;
+        }
+
         this.trigger("quit");
     }
 
@@ -336,47 +356,83 @@ class Simulator extends EventComponent {
      */
     get registers() {
         if (!this._loaded) {
-            let ret = [];
-            for (let i = 0; i < 32; i++) {
-                ret[i] = window.BigInt(0);
-            }
-            return new window.BigUint64Array(ret);
+            return new window.BigUint64Array(36);
         }
 
-        // The items are PC, followed by registers 1 through 32.
+        // The items are PC, followed by registers 1 through 31, floating point registers 0 through 31.
+        // Then sscratch, sepc, scause, stval.
         // The 'zero' register is omitted, of course.
-        var buf_len = 32 * 8;
-        var buf = this._module._malloc(buf_len);
-        this._cpu_get_regs(buf);
+        var cbuf = this._module._malloc(68 * 8);
+        this._cpu_get_regs(cbuf);
 
-        /* Since we have a 64-bit CPU, the buffer is a 64-bit integer array */
-        let ret = [];
-        for (let i = 0; i < 32; i++) {
-            var values = new Uint32Array([this._module.getValue(buf+(8*i)+4, 'i32'),
-                                          this._module.getValue(buf+(8*i)+0, 'i32')]);
-            values = [values[0].toString(16), values[1].toString(16)];
-            values = "00000000".slice(values[0].length) + values[0] +
-                     "00000000".slice(values[1].length) + values[1];
+        // Since we have a 64-bit CPU, the buffer is a 64-bit integer array
+        let ret = new BigUint64Array(36);
+        for (let i = 0; i < 36; i++) {
+            let index = 8 * i;
+            if (i >= 32) {
+                // Skip floating point registers
+                index += 32 * 8;
+            }
 
-            var num = window.BigInt(0);
-            if (num.shiftLeft) {
-                // We are using the BigInt polyfill, which isn't exactly the same
-                values = values.split("").map( (c) => ((c >= "0" && c <= "9") ? c.charCodeAt(0) - "0".charCodeAt(0) : c.charCodeAt(0) - "a".charCodeAt(0) + 10) );
-                num = window.BigInt.fromArray(values, 16);
-            }
-            else {
-                // We are using a native BigInt
-                num = window.BigInt("0x" + values);
-            }
-            ret[i] = num;
+            // Prepare the values in a little-endian uint32 array
+            let values = new Uint32Array([this._module.getValue(cbuf + index + 0, 'i32'),
+                                          this._module.getValue(cbuf + index + 4, 'i32')]);
+
+            // Read the little-endian double and assign it to our output array
+            ret[i] = (new DataView(values.buffer)).getBigUint64(0, true);
         }
 
         /* Free the buffer. */
-        this._module._free(buf);
-
-        ret = new window.BigUint64Array(ret);
-
+        this._module._free(cbuf);
         return ret;
+    }
+
+    /**
+     * Returns an array of floating point values contained in the floating point
+     * co-processor.
+     */
+    get fpRegisters() {
+        if (!this._loaded) {
+            return new Float64Array(32);
+        }
+
+        // The items are PC, followed by registers 1 through 31, floating point registers 0 through 31.
+        // Then sscratch, sepc, scause, stval.
+        // The 'zero' register is omitted, of course.
+        var cbuf = this._module._malloc(68 * 8);
+        this._cpu_get_regs(cbuf);
+
+        // Since we have a 64-bit CPU, the buffer is a 64-bit integer array
+        // We need to pull out floating point values from that array.
+        let ret = new Float64Array(32);
+        for (let i = 32; i < 64; i++) {
+            // Prepare the values in a little-endian uint32 array
+            let values = new Uint32Array([this._module.getValue(cbuf+(8*i)+0, 'i32'),
+                                          this._module.getValue(cbuf+(8*i)+4, 'i32')]);
+
+            // Read the little-endian double and assign it to our output array
+            ret[i - 32] = (new DataView(values.buffer)).getFloat64(0, true);
+        }
+
+        /* Free the buffer. */
+        this._module._free(cbuf);
+        return ret;
+    }
+
+    get sscratch() {
+        return this.registers[32];
+    }
+
+    get sepc() {
+        return this.registers[33];
+    }
+
+    get scause() {
+        return this.registers[34];
+    }
+
+    get stval() {
+        return this.registers[35];
     }
     
     /**
@@ -388,20 +444,29 @@ class Simulator extends EventComponent {
     set registers(buf) {
         // The items are PC, followed by registers 1 through 32.
         // The 'zero' register is omitted, of course.
-        var buf_len = 32 * 8;
-        var cbuf = this._module._malloc(buf_len);
+        var cbuf = this._module._malloc(68 * 8);
+
+        // Get the current values. We will override those we wish.
+        this._cpu_get_regs(cbuf);
  
         // Create a mask for dividing the 64-bit bigint to two half-words.
         let mask = BigInt("0xffffffff");
         
-        for (let i = 0; i < 32; i++) {
+        for (let i = 0; i < buf.length; i++) {
             let lowInt = Number(BigInt.asIntN(32, buf[i] & mask));
             let highInt = Number(BigInt.asIntN(32, (buf[i] >> BigInt(32)) & mask));
-            this._module.setValue(cbuf + (8 * i), lowInt, 'i32');
-            this._module.setValue(cbuf + (8 * i) + 4, highInt, 'i32');
+
+            let index = 8 * i;
+            if (i >= 32) {
+                // Skip floating point (keep those the same)
+                index += 32 * 8;
+            }
+            this._module.setValue(cbuf + index, lowInt, 'i32');
+            this._module.setValue(cbuf + index + 4, highInt, 'i32');
         }
         
         this._cpu_set_regs(cbuf);
+        this._module._free(cbuf);
         this.trigger('registers-change');
     }
 
@@ -475,6 +540,11 @@ class Simulator extends EventComponent {
             str = "0000000000000000".slice(str.length) + str;
             window.console.log(Simulator.REGISTER_NAMES[i] + ": 0x" + str);
         });
+
+        this.fpRegisters.forEach(function(reg, i) {
+            var str = reg.toString();
+            window.console.log(Simulator.FP_REGISTER_NAMES[i] + ": 0x" + str);
+        });
     }
 
     /**
@@ -543,11 +613,11 @@ class Simulator extends EventComponent {
      */
     resume() {
         if (this._ready) {
-            this._vm_resume();
             this._paused = false;
             this._running = true;
-            // TODO: move pause/running events to come from the emulator itself
             this.trigger('running');
+            this._vm_resume();
+            // TODO: move pause/running events to come from the emulator itself
         }
     }
 
@@ -577,7 +647,16 @@ Simulator.VM_URL = "tinyemu/riscvemu64-wasm.js";
 Simulator.REGISTER_NAMES = [
     "pc", "ra", "sp", "gp", "tp", "t0", "t1", "t2", "s0", "s1", "a0", "a1",
     "a2", "a3", "a4", "a5", "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
-    "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
+    "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
+    "sscratch", "sepc", "scause", "stval"
+];
+
+Simulator.FP_REGISTER_NAMES = [
+    "ft0", "ft1", "ft2", "ft3", "ft4", "ft5", "ft6", "ft7",
+    "fs0", "fs1",
+    "fa0", "fa1", "fa2", "fa3", "fa4", "fa5", "fa6", "fa7",
+    "fs2", "fs3", "fs4", "fs5", "fs6", "fs7", "fs8", "fs9", "fs10", "fs11",
+    "ft8", "ft9", "ft10", "ft11"
 ];
 
 export default Simulator;

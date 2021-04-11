@@ -174,8 +174,6 @@ class RAWRS {
     }
 
     static run() {
-        RAWRS.codeListing.unhighlight();
-
         if (RAWRS.simulator && RAWRS.simulator.paused) {
             // Resume simulation
             RAWRS.toolbar.setStatus("step", "");
@@ -200,7 +198,6 @@ class RAWRS {
                 RAWRS.toolbar.setStatus("step", "disabled");
 
                 // Dump the registers
-                RAWRS.registerListing.unhighlight();
                 RAWRS.registerListing.update(sim.registers);
 
                 // Update memory
@@ -215,7 +212,7 @@ class RAWRS {
                 // Tell debugger to stop
                 RAWRS._gdb.invoke("target remote /dev/serial");
 
-                if (RAWRS._clearBreakpoint) {
+                if (RAWRS._clearBreakpoint != false) {
                     sim.breakpointClear(RAWRS._clearBreakpoint);
                     RAWRS._clearBreakpoint = false;
                 }
@@ -249,6 +246,14 @@ class RAWRS {
                     sim.breakpointClear(RAWRS._clearBreakpoint);
                     RAWRS._clearBreakpoint = false;
                 }
+            });
+
+            sim.on("running", () => {
+                // When the simulator is running, unhighlight
+                RAWRS.codeListing.unhighlight();
+
+                // Tell the debugger the simulation is running
+                // TODO: debugger call-in
             });
 
             sim.on("paused", () => {
@@ -360,6 +365,7 @@ class RAWRS {
 
         // Destroy the current simulator
         RAWRS._simulator = null;
+        RAWRS._clearBreakpoint = false;
 
         var assembler = new Assembler();
         var linker    = new Linker();
