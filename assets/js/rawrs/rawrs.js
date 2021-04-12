@@ -60,8 +60,6 @@ class RAWRS {
         RAWRS.toolbar  = new Toolbar(document.body);
         RAWRS.fileList = new FileList(document.body);
 
-        this._gdb = new Debugger();
-
         var saveTimer = null;
         window.editor.getSession().on('change', () => {
             if (saveTimer) {
@@ -127,7 +125,7 @@ class RAWRS {
                 }
             }
         });
-        
+
         RAWRS.toolbar.on('click', (button) => {
             switch (button.getAttribute("id")) {
                 case "assemble":
@@ -367,6 +365,15 @@ class RAWRS {
         RAWRS._simulator = null;
         RAWRS._clearBreakpoint = false;
 
+        // Pass the files to a new debugger (when it is ready)
+        this._gdb = new Debugger();
+        this._gdb.on("ready", () => {
+            this._gdb.mount([{
+                name: "/input/foo.s",
+                data: text
+            }]);
+        });
+
         var assembler = new Assembler();
         var linker    = new Linker();
         var annotations = [];
@@ -414,12 +421,6 @@ class RAWRS {
         // Reset the console and video
         this._console.clear();
         this._video.reset();
-
-        // Pass the files to the debugger
-        this._gdb.mount([{
-            name: "/input/foo.s",
-            data: text
-        }]);
 
         assembler.assemble("foo.s", text, terminal, (object) => {
             linker.link(linkerScript, object, terminal, (binary) => {

@@ -434,7 +434,7 @@ class Simulator extends EventComponent {
     get stval() {
         return this.registers[35];
     }
-    
+
     /**
      * Accepts an integer array for the values in the registers.
      * Transfers this array to the TinyEmu simulator
@@ -448,10 +448,10 @@ class Simulator extends EventComponent {
 
         // Get the current values. We will override those we wish.
         this._cpu_get_regs(cbuf);
- 
+
         // Create a mask for dividing the 64-bit bigint to two half-words.
         let mask = BigInt("0xffffffff");
-        
+
         for (let i = 0; i < buf.length; i++) {
             let lowInt = Number(BigInt.asIntN(32, buf[i] & mask));
             let highInt = Number(BigInt.asIntN(32, (buf[i] >> BigInt(32)) & mask));
@@ -464,7 +464,7 @@ class Simulator extends EventComponent {
             this._module.setValue(cbuf + index, lowInt, 'i32');
             this._module.setValue(cbuf + index + 4, highInt, 'i32');
         }
-        
+
         this._cpu_set_regs(cbuf);
         this._module._free(cbuf);
         this.trigger('registers-change');
@@ -493,7 +493,7 @@ class Simulator extends EventComponent {
      * @param {number} address The address to read memory at.
      * @param {Uint8Array} data An array of unsigned 8-bit numbers.
      */
-     writeMemory(address, data) {
+    writeMemory(address, data) {
         let ptr = this._cpu_get_mem(address);
 
         for (let i = 0; i < data.length; i++) {

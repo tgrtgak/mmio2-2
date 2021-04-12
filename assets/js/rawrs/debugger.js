@@ -11,9 +11,11 @@ class Debugger extends EventComponent {
         this._stdin = new Uint8Array([]);
         this._serialin = new Uint8Array([]);
 
-        this._console = new Console("#gdb_container", 28, 71, 15);
+        if (!Debugger._console) {
+            Debugger._console = new Console("#gdb_container", 28, 71, 15);
+        }
 
-        this._console.on("data", (bytes) => {
+        Debugger._console.on("data", (bytes) => {
             let data = Buffer.from(bytes, 'utf-8');
             let stdin = new Uint8Array(this._stdin.byteLength + data.byteLength)
             stdin.set(this._stdin, 0);
@@ -31,10 +33,10 @@ class Debugger extends EventComponent {
         this._packet = "";
         var Module = {
             stdout: (ch, exit) => {
-                this._console.write(String.fromCharCode(ch));
+                Debugger._console.write(String.fromCharCode(ch));
             },
             stderr: (ch, exit) => {
-                this._console.write(String.fromCharCode(ch));
+                Debugger._console.write(String.fromCharCode(ch));
             },
             stdin: () => {
                 let data = this._stdin[0] || 0;
@@ -95,7 +97,7 @@ class Debugger extends EventComponent {
         // TODO: throw up a loading graphic in the debugger pane
         window.GDB(this._module).then( (Module) => {
             // TODO: remove loading graphic as the app loads
-            this._console.clear();
+            Debugger._console.clear();
             this._running = true;
             this._loaded = true;
             this._module = Module;
@@ -130,6 +132,9 @@ class Debugger extends EventComponent {
         let args = ['/usr/bin/gdb',
                     '--eval-command', 'set architecture riscv:rv64'];
         this._jsmain(args.length, args.join('\0'));
+
+        // Notify upstream that gdb is waiting for commands
+        this.trigger("ready");
     }
 
     /**
