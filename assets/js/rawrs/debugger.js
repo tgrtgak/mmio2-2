@@ -21,7 +21,14 @@ class Debugger extends EventComponent {
 
             // Flush
             while(this._stdin.byteLength) {
+                let len = this._stdin.byteLength;
+
                 this._jsstep();
+
+                // Bail out of this loop if something was not consumed.
+                if (this._stdin.byteLength == len) {
+                    break;
+                }
             }
         });
 
@@ -619,10 +626,8 @@ class Debugger extends EventComponent {
      * @param {string} packet - The s packet data.
      */
     s(packet) {
-        // Step
-        //sim.step();
-        // Respond by saying we hit a breakpoint again.
-        return "S05";
+        this.trigger("step");
+        return "";
     }
 
     /**
@@ -631,7 +636,7 @@ class Debugger extends EventComponent {
      * @param {string} packet - The c packet data.
      */
     c(packet) {
-        this.simulator.resume();
+        this.trigger("continue");
         return "";
     }
 

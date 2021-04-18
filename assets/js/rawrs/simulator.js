@@ -22,6 +22,7 @@ class Simulator extends EventComponent {
         this._startRequested = false;
         this._canStart = false;
         this._ready = false;
+        this._done = false;
         this._running = false;
         this._paused = false;
         this._breakpoints = [];
@@ -224,6 +225,13 @@ class Simulator extends EventComponent {
     }
 
     /**
+     * Returns whether or not the simulator has completed its run.
+     */
+    get done() {
+        return this._done;
+    }
+
+    /**
      * Returns whether or not the simulator is loaded, and running.
      */
     get running() {
@@ -303,6 +311,7 @@ class Simulator extends EventComponent {
      * Called internally when the simulator ends.
      */
     _quit() {
+        this._done = true;
         this.forceRefresh();
         this.dump();
 

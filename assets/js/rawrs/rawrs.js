@@ -375,6 +375,18 @@ class RAWRS {
             }]);
         });
 
+        this._gdb.on("step", () => {
+            if (!this._gdb.simulator.done) {
+                this.step();
+            }
+        });
+
+        this._gdb.on("continue", () => {
+            if (!this._gdb.simulator.done) {
+                this.run();
+            }
+        });
+
         var assembler = new Assembler();
         var linker    = new Linker();
         var annotations = [];
