@@ -5,17 +5,14 @@ import Console from './console';
 import Util from './util.js';
 
 class Debugger extends EventComponent {
-    constructor() {
+    constructor(console) {
         super();
 
         this._stdin = new Uint8Array([]);
         this._serialin = new Uint8Array([]);
+        this._console = console;
 
-        if (!Debugger._console) {
-            Debugger._console = new Console("#gdb_container", 28, 71, 15);
-        }
-
-        Debugger._console.on("data", (bytes) => {
+        this._console.on("data", (bytes) => {
             let data = Buffer.from(bytes, 'utf-8');
             let stdin = new Uint8Array(this._stdin.byteLength + data.byteLength)
             stdin.set(this._stdin, 0);
@@ -33,10 +30,10 @@ class Debugger extends EventComponent {
         this._packet = "";
         var Module = {
             stdout: (ch, exit) => {
-                Debugger._console.write(String.fromCharCode(ch));
+                this._console.write(String.fromCharCode(ch));
             },
             stderr: (ch, exit) => {
-                Debugger._console.write(String.fromCharCode(ch));
+                this._console.write(String.fromCharCode(ch));
             },
             stdin: () => {
                 let data = this._stdin[0] || 0;
@@ -97,7 +94,7 @@ class Debugger extends EventComponent {
         // TODO: throw up a loading graphic in the debugger pane
         window.GDB(this._module).then( (Module) => {
             // TODO: remove loading graphic as the app loads
-            Debugger._console.clear();
+            this._console.clear();
             this._running = true;
             this._loaded = true;
             this._module = Module;
@@ -634,7 +631,7 @@ class Debugger extends EventComponent {
      * @param {string} packet - The c packet data.
      */
     c(packet) {
-        //sim.run();
+        this.simulator.resume();
         return "";
     }
 

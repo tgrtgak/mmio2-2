@@ -44,6 +44,7 @@ class RAWRS {
 
         this._console = new Console("#term_container", 28, 71, 15);
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
+        this._debugConsole = new Console("#gdb_container", 28, 71, 15);
 
         // TinyEMU looks for this:
         window.term = {
@@ -366,7 +367,7 @@ class RAWRS {
         RAWRS._clearBreakpoint = false;
 
         // Pass the files to a new debugger (when it is ready)
-        this._gdb = new Debugger();
+        this._gdb = new Debugger(this._debugConsole);
         this._gdb.on("ready", () => {
             this._gdb.mount([{
                 name: "/input/foo.s",
