@@ -1,0 +1,29 @@
+From 81cf37b1d90a7e08164c9c5e27a71a5183e87e2f Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Sat, 17 Apr 2021 21:30:41 -0400
+Subject: [PATCH] Removes wait for a step/continue.
+
+---
+ gdb/remote.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/gdb/remote.c b/gdb/remote.c
+index 7066fa4b4b..906229290c 100644
+--- a/gdb/remote.c
++++ b/gdb/remote.c
+@@ -6353,8 +6353,10 @@ remote_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
+      only to the base all-stop protocol, however.  In non-stop (which
+      only supports vCont), the stub replies with an "OK", and is
+      immediate able to process further serial input.  */
+-  if (!target_is_non_stop_p ())
+-    rs->waiting_for_stop_reply = 1;
++
++  // For Emscripten, do not wait!
++  //if (!target_is_non_stop_p ())
++  //  rs->waiting_for_stop_reply = 1;
+ }
+ 
+ static int is_pending_fork_parent_thread (struct thread_info *thread);
+-- 
+2.30.0
+

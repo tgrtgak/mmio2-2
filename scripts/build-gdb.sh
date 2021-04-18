@@ -37,6 +37,7 @@ patch -N -p1 < ../../patches/gdb-emscripten-remote-jsinvoke.patch
 patch -N -p1 < ../../patches/gdb-emscripten-get_tty_state.patch
 patch -N -p1 < ../../patches/gdb-emscripten-removes_warnings.patch
 patch -N -p1 < ../../patches/gdb-emscripten-jsinvoke_prompt.patch
+patch -N -p1 < ../../patches/gdb-emscripten-no-wait-for-continue.patch
 
 # Configure
 echo ""
