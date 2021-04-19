@@ -154,6 +154,9 @@ class Editor {
             }
         });
 
+        // When the mouse leaves the editor, hide the tooltip
+        editor.container.addEventListener("mouseout", Editor.hideTooltip);
+
         // Inserts any new labels the user added when the cursor changes lines
         editor.session.selection.on('changeCursor', function(e) {
             // Checks if the cursor has changed lines
