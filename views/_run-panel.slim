@@ -27,24 +27,47 @@
   .register-file
     ol.tabs
       li.tab.active
-        button
+        button aria-controls=:"register-file"
           = I18n.t(:"run.registers.tab")
-    table.registers
-      tbody
-        - ["pc", "ra", "sp", "gp", "tp", "t0",
-           "t1", "t2", "t3", "t4", "t5", "t6",
-           "s0", "s1", "s2", "s3", "s4", "s5",
-           "s6", "s7", "s8", "s9", "s10", "s11",
-           "a0", "a1", "a2", "a3", "a4", "a5",
-           "a6", "a7"].each do |register_name|
-          tr.register class=register_name
-            td.name
-              = register_name
-            td.value
-              button
-                = "0x0000000000000000"
-            td.edit hidden=true
-              input.input type=:text id="register-#{register_name}"
+      li.tab
+        button aria-controls=:"co-processor-file"
+          | Co-Processor
+          /= I18n.t(:"run.registers.tab")
+    ol.tab-panels
+      li.tab-panel.active#register-file style="padding-top: 0;"
+        table.registers
+          tbody
+            - ["pc", "ra", "sp", "gp", "tp", "t0",
+               "t1", "t2", "t3", "t4", "t5", "t6",
+               "s0", "s1", "s2", "s3", "s4", "s5",
+               "s6", "s7", "s8", "s9", "s10", "s11",
+               "a0", "a1", "a2", "a3", "a4", "a5",
+               "a6", "a7"].each do |register_name|
+              tr.register class=register_name
+                td.name
+                  = register_name
+                td.value
+                  button
+                    = "0x0000000000000000"
+                td.edit hidden=true
+                  input.input type=:text id="register-#{register_name}"
+      li.tab-panel#co-processor-file style="padding-top: 0;"
+        table.registers
+          tbody
+            - ["ft0", "ft1", "ft2", "ft3", "ft4", "ft5",
+               "ft6", "ft7", "ft8", "ft9", "ft10", "ft11",
+               "fs0", "fs1", "fs2", "fs3", "fs4", "fs5",
+               "fs6", "fs7", "fs8", "fs9", "fs10", "fs11",
+               "fa0", "fa1", "fa2", "fa3", "fa4", "fa5",
+               "fa6", "fa7"].each do |register_name|
+              tr.register class=register_name
+                td.name
+                  = register_name
+                td.value
+                  button
+                    = "0x0000000000000000"
+                td.edit hidden=true
+                  input.input type=:text id="fp-register-#{register_name}"
 
 .bottom
   .left

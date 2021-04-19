@@ -33,9 +33,11 @@ class Tabs extends EventComponent {
                     if (tabPanel.querySelector("li.tab.active > a:not(.ajax)")) {
                         url = tabPanel.querySelector("li.tab.active > a:not(.ajax)").getAttribute('href');
                     }
-                    url = rootpath + url;
 
-                    window.history.replaceState(window.history.start, "", url);
+                    if (url) {
+                        url = rootpath + url;
+                        window.history.replaceState(window.history.start, "", url);
+                    }
 
                     // Check if the tabPanel is PJAX loaded
                     if (!tabPanel.classList.contains("pjax-loaded")) {
