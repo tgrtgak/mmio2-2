@@ -289,6 +289,7 @@ class RAWRS {
 
             sim.on("registers-change", () => {
                 RAWRS.registerListing.update(sim.registers);
+                RAWRS.codeListing.highlight(sim.pc.toString(16));
             });
 
             let framebufferRefresh = 0;
