@@ -79,43 +79,47 @@ class RegisterListing extends EventComponent {
         return ret;
     }
 
+    selectInput(val_td) {
+        val_td.setAttribute('hidden', '');
+        val_td.nextElementSibling.removeAttribute('hidden');
+        let input = val_td.nextElementSibling.querySelector('input');
+        input.focus();
+        input.value = val_td.firstElementChild.textContent;
+        input.select();
+    }
+
+    submitInput(input) {
+        let valid = true; 
+        try {
+            // Make sure that input.value can be interpreted as a BigInt
+            BigInt(input.value);
+        }
+        catch(err) {
+            valid = false;
+        }
+        finally {
+            let td = input.parentNode;
+            td.setAttribute('hidden', '');
+            td.previousElementSibling.removeAttribute('hidden');
+            if (valid) {
+                td.previousElementSibling.firstElementChild.textContent = input.value;
+            }
+            this.trigger('change');
+        }
+    }
+
     bindEvents() {
         var tableCells = this._element.querySelectorAll("td.value");
         tableCells.forEach( (td) => {
-            td.firstElementChild.addEventListener("click", (event) => {
-                td.setAttribute('hidden', '');
-                td.nextElementSibling.removeAttribute('hidden');
-                let input = td.nextElementSibling.querySelector('input');
-                input.focus();
-                input.value = td.firstElementChild.textContent;
-                input.select();
-            });
+            td.firstElementChild.addEventListener("click", this.selectInput.bind(this, td));
         });
 
         var inputCells = this._element.querySelectorAll("td.edit input");
         inputCells.forEach( (input) => {
-            let doneEvent = (event) => {
-                let valid = true; 
-                try {
-                    BigInt(input.value); //make sure that input.value can be interpreted as a BigBurger
-                }
-                catch(err) {
-                    valid = false;  
-                }
-                finally {
-                    let td = input.parentNode;
-                    td.setAttribute('hidden', '');
-                    td.previousElementSibling.removeAttribute('hidden');
-                    if (valid) {
-                        td.previousElementSibling.firstElementChild.textContent = input.value;
-                    }
-                    this.trigger('change');
-                }
-            }
-            input.addEventListener("blur", doneEvent);
+            input.addEventListener("blur", this.submitInput.bind(this, input));
             input.addEventListener("keydown", (keyEvent) => {
                 if(keyEvent.key === "Enter") {
-                    doneEvent(keyEvent);
+                    this.submitInput(input);
                 }
             });
         });
