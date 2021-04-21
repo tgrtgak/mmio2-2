@@ -72,6 +72,10 @@
                     = "0x0000000000000000"
                 td.edit hidden=true
                   input.input type=:text id="fp-register-#{register_name}"
+                td.actions
+                  img        src="#{@basepath}images/dynamic/hex/888888/actions.svg"
+                  /img.active src="#{@basepath}images/dynamic/hex/aa33aa/actions.svg"
+                  /img.hover  src="#{@basepath}images/dynamic/hex/aa33aa/actions.svg"
       li.tab-panel#supervisor-file style="padding-top: 0;"
         table.registers
           tbody
