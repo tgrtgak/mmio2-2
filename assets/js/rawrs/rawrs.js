@@ -209,7 +209,7 @@ class RAWRS {
                 }
 
                 // Tell debugger to stop
-                RAWRS._gdb.invoke("target remote /dev/serial");
+                RAWRS._gdb.showDisconnected();
 
                 if (RAWRS._clearBreakpoint != false) {
                     sim.breakpointClear(RAWRS._clearBreakpoint);

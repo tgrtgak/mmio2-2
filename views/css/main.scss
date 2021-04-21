@@ -747,6 +747,26 @@ ol.tab-panels {
                             background: black;
                         }
                     }
+
+                    div.disconnected {
+                      position: absolute;
+                      left: 0;
+                      right: 1px;
+                      top: 0;
+                      bottom: 0;
+                      background: rgba(96, 41, 41, 0.5);
+                      z-index: 9;
+                      display: flex;
+                      align-items: center;
+                      align-content: center;
+                      text-align: center;
+
+                      img {
+                        flex: 1;
+                        width: 50%;
+                        height: 50%;
+                      }
+                    }
                 }
             }
         }

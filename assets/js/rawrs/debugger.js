@@ -8,10 +8,21 @@ class Debugger extends EventComponent {
     constructor(console) {
         super();
 
+        // The input buffers that gdb consumes
         this._stdin = new Uint8Array([]);
         this._serialin = new Uint8Array([]);
+
+        // The console tty that is used to display gdb
         this._console = console;
 
+        // The disconnect overlay
+        this._disconnectOverlay = document.querySelector("div.disconnected");
+
+        // Ensure it shows itself as disconnected to start.
+        this.showDisconnected();
+
+        // When there is any 'data' on the tty (from people typing, etc), tell
+        // gdb. It will consume it as part of its event loop.
         this._console.on("data", (bytes) => {
             let data = Buffer.from(bytes, 'utf-8');
             let stdin = new Uint8Array(this._stdin.byteLength + data.byteLength)
@@ -137,8 +148,31 @@ class Debugger extends EventComponent {
                     '--eval-command', 'set architecture riscv:rv64'];
         this._jsmain(args.length, args.join('\0'));
 
+        // Hide the disconnected overlay
+        this.hideDisconnected();
+
         // Notify upstream that gdb is waiting for commands
         this.trigger("ready");
+    }
+
+    /**
+     * Disables the console and shows a graphical disconnected image.
+     */
+    showDisconnected() {
+        if (this._disconnectOverlay) {
+            this._disconnectOverlay.removeAttribute('hidden');
+            this._disconnectOverlay.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    /**
+     * Enables the console and hides the graphical disconnected image.
+     */
+    hideDisconnected() {
+        if (this._disconnectOverlay) {
+            this._disconnectOverlay.setAttribute('hidden', '');
+            this._disconnectOverlay.setAttribute('aria-hidden', 'true');
+        }
     }
 
     /**
