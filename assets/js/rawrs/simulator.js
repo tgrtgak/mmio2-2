@@ -457,6 +457,7 @@ class Simulator extends EventComponent {
         let mask = BigInt("0xffffffff");
 
         for (let i = 0; i < buf.length; i++) {
+            let index = i * 8;
             let lowInt = Number(BigInt.asIntN(32, buf[i] & mask));
             let highInt = Number(BigInt.asIntN(32, (buf[i] >> BigInt(32)) & mask));
             this._module.setValue(cbuf + index, lowInt, 'i32');

@@ -502,7 +502,7 @@ class Debugger extends EventComponent {
     }
 
     /**
-     * Responds to a register-get packet.
+     * Responds to a registers-get packet.
      *
      * @param {string} packet - The g packet data.
      */
@@ -511,22 +511,22 @@ class Debugger extends EventComponent {
         let values = [];
 
         if (this.simulator) {
-            values = this.simulator.registers.slice(0, 32);
+            values = this.simulator.registers;
         }
         else {
-            values = (new Array(32)).fill(BigInt(0));
+            values = (new Array(68)).fill(BigInt(0));
         }
 
         // The 'pc' register is first in the list and needs to be the last.
         let regs = new BigUint64Array(33);
-        regs[0] = BigInt(0);          // zero register
-        regs.set(values.slice(1), 1); // general registers 1-32
-        regs.set([values[0]], 32);    // pc
+        regs[0] = BigInt(0);                // zero register
+        regs.set(values.slice(1, 32), 1);   // general registers 1-32
+        regs.set([values[0]], 32);          // pc
 
         // Turn every register value into a string that is its little-endian
         // representation in hexadecimal.
         let strs = [];
-        regs.forEach( (v) => {
+        regs.slice(0, 33).forEach( (v) => {
             // Render it as a little-endian hex string
             let bytes = new Uint8Array(8);
             let view = new DataView(bytes.buffer);
@@ -547,7 +547,7 @@ class Debugger extends EventComponent {
     }
 
     /**
-     * Responds to a register-set packet.
+     * Responds to a registers-set packet.
      *
      * @param {string} packet - The G packet data.
      */
@@ -591,6 +591,51 @@ class Debugger extends EventComponent {
 
         // Return "" to simply ACK the message
         return "";
+    }
+
+    /**
+     * Responds to a register-get packet.
+     *
+     * @param {string} packet - The p packet data.
+     */
+    p(packet) {
+        // Ignore the 'p' part of the packet
+        packet = packet.slice(1);
+
+        // Get the register index (it is in hex)
+        let index = parseInt(packet, 16);
+
+        // 0-31 are the general purpose registers
+        // 32 is the pc
+        // 33-65 are the floating point registers
+        let value = BigInt(0);
+        let values = this.simulator.registers;
+        if (index > 0 && index <= 31) {
+            value = values[index];
+        }
+        else if (index == 32) {
+            value = values[0];
+        }
+        else if (index <= 65) {
+            value = values[index - 1];
+        }
+
+        console.log(value);
+
+        // Render it as a little-endian hex string
+        let bytes = new Uint8Array(8);
+        let view = new DataView(bytes.buffer);
+
+        // Write the little-endian value to the data view
+        view.setBigInt64(0, value, true);
+
+        // Return the byte-string
+        let result = "";
+        bytes.forEach( (b) => {
+            result += b.toString(16).padStart(2, '0');
+        });
+
+        return result;
     }
 
     /**
