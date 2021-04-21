@@ -9,8 +9,103 @@
 .global paging_install
 .global paging_get_root
 .global paging_vaddr_to_paddr
+.global paging_expand_heap
 
 .text
+# expand_heap(int n): Expands the heap by n bytes
+# 
+# Arguments: 
+#   a0: size by which to expand heap
+#
+# Return:
+#   a0: pointer to start of new heap space, or 0 if failed
+paging_expand_heap:
+  push  ra
+  push  s0
+  push  s1
+  push  s2
+  push  s3
+  push  s4
+  push  s5
+
+  bltz  a0, _expand_heap_failure  
+  
+  # Retain original heap address and the argument in a0
+  la    s0, heap_address    
+  lw    s0, 0(s0)
+  move  s1, a0                   
+
+  # Start = alignPage(heap_address)
+  move  s4, s0
+  alignPage s4
+  
+  # t0 = (PAGE_SIZE - 1) & heap_address
+  li    t0, PAGE_SIZE
+  add   t0, t0, -1
+  and   t0, s0, t0
+
+  # if t0 == 0, we are at a page boundary,
+  #   so set start = heap_address
+  bnez  t0,  _expand_heap_continue
+  move  s4, s0
+
+_expand_heap_continue:
+  # End = alignPage(heap_address + size)
+  add   s5, s0, s1
+  alignPage s5
+
+  # Returns root page table address in a0
+  jal   paging_get_root   
+  move  s2, a0
+
+_expand_heap_loop:
+  bge   s4, s5, _expand_heap_loop_end
+
+  
+  jal   memory_alloc_page
+  # Physical address of new page
+  move  a1, a0
+  jal   fdt_get_memory_base_addr
+  add   a1, a1, a0
+  # Root page table
+  move  a0, s2
+  # Virtual address to map to (start) 
+  move  a2, s4  
+  # Number of bytes to add
+  li    a3, PAGE_SIZE           
+  # Flags
+  li    a4, PTE_USER | PTE_WRITE | PTE_READ
+  
+  jal   paging_map_range
+
+  li    t0, PAGE_SIZE
+  add   s4, s4, t0
+  j     _expand_heap_loop
+
+_expand_heap_loop_end:
+  # Increment heap_address by n
+  add   t0, s0, s1
+
+  la    a0, heap_address
+  sw    t0, 0(a0)
+
+  # Move original heap address to a0 to return
+  move  a0, s0           
+  
+  j     _expand_heap_exit
+
+_expand_heap_failure:
+  move  a0, zero
+
+_expand_heap_exit:
+  pop   s5
+  pop   s4
+  pop   s3
+  pop   s2
+  pop   s1
+  pop   s0
+  pop   ra
+  jr    ra
 
 # paging_init(): Instantiates virtual memory for the system.
 paging_init:
@@ -657,3 +752,4 @@ str_paging_alloc_3: .string "alloc 3\n"
 str_paging_alloc_2: .string "alloc 2\n"
 str_paging_alloc_1: .string "alloc 1\n"
 str_paging_mapped:  .string "mapped page\n"
+heap_address:       .word   0x10040000  #initial VA of the heap

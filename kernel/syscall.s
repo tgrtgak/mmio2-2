@@ -24,19 +24,22 @@ syscall:
   # Vector the system call to various things
   # We don't have a stack right now, so we might want one of those
   li    t0, SYSCALL_COUNT
-  bgt   a7, t0, _syscall_error
+  bgt   a7, t0, _syscall_error_no_shift
+  bltz  a7, _syscall_error_no_shift
 
   # Call the appropriate system call
   la    t0, _syscall_table
   sll   a7, a7, 2   # multiply by 4 (the size of the j instruction)
   add   t0, a7, t0  # add this offset to our table's base address
   jalr  t0          # just to that particular 'j' instruction below
-
+  
   j     _syscall_exit
 
-_syscall_error:
-  j     _syscall_exit
-
+_syscall_error:     #invalid syscalls numbered between 0 and SYSCALL_COUNT
+  srl   a7, a7, 2   #were multiplied by 4, so divide by 4 to get original value
+_syscall_error_no_shift:
+  jal   syscall_invalid
+  jal   abort
 _syscall_exit:
   pop   ra
   jr    ra
@@ -53,37 +56,37 @@ _syscall_table:
   j syscall_read_float      # a7: 6
   j syscall_read_double     # a7: 7
   j syscall_read_string     # a7: 8
-  jr ra                     # a7: 9
+  j syscall_sbrk            # a7: 9
   j syscall_exit            # a7: 10
-  jr ra                     # a7: 11
-  jr ra                     # a7: 12
-  jr ra                     # a7: 13
-  jr ra                     # a7: 14
-  jr ra                     # a7: 15
-  jr ra                     # a7: 16
-  jr ra                     # a7: 17
-  jr ra                     # a7: 18
-  jr ra                     # a7: 19
-  jr ra                     # a7: 20
-  jr ra                     # a7: 21
-  jr ra                     # a7: 22
-  jr ra                     # a7: 23
-  jr ra                     # a7: 24
-  jr ra                     # a7: 25
-  jr ra                     # a7: 26
-  jr ra                     # a7: 27
-  jr ra                     # a7: 28
-  jr ra                     # a7: 29
+  j syscall_print_char      # a7: 11
+  j _syscall_error          # a7: 12
+  j _syscall_error          # a7: 13
+  j _syscall_error          # a7: 14
+  j _syscall_error          # a7: 15
+  j _syscall_error          # a7: 16
+  j _syscall_error          # a7: 17
+  j _syscall_error          # a7: 18
+  j _syscall_error          # a7: 19
+  j _syscall_error          # a7: 20
+  j _syscall_error          # a7: 21
+  j _syscall_error          # a7: 22
+  j _syscall_error          # a7: 23
+  j _syscall_error          # a7: 24
+  j _syscall_error          # a7: 25
+  j _syscall_error          # a7: 26
+  j _syscall_error          # a7: 27
+  j _syscall_error          # a7: 28
+  j _syscall_error          # a7: 29
   j syscall_get_system_time # a7: 30
-  jr ra                     # a7: 31
-  jr ra                     # a7: 32
-  jr ra                     # a7: 33
-  jr ra                     # a7: 34
-  jr ra                     # a7: 35
-  jr ra                     # a7: 36
-  jr ra                     # a7: 37
-  jr ra                     # a7: 38
-  jr ra                     # a7: 39
+  j _syscall_error          # a7: 31
+  j _syscall_error          # a7: 32
+  j _syscall_error          # a7: 33
+  j syscall_print_hex       # a7: 34
+  j syscall_print_bin       # a7: 35
+  j _syscall_error          # a7: 36
+  j _syscall_error          # a7: 37
+  j _syscall_error          # a7: 38
+  j _syscall_error          # a7: 39
   j syscall_srand           # a7: 40
   j syscall_rand            # a7: 41
 
@@ -91,11 +94,87 @@ _syscall_table:
 syscall_dump_regs:
   jr    ra
 
+# syscall_sbrk(): Increases the size of heap by value in a0
+syscall_sbrk:
+  push  ra
+  jal   paging_expand_heap
+  pop   ra
+  jr    ra
+
 # syscall_print_integer(): Prints the integer in a0
 syscall_print_integer:
   push  ra
   li    a1, 10
   jal   print_int
+  pop   ra
+  jr    ra
+ 
+# syscall_print_hex(): Prints the integer in a0 in hexadecimal 
+syscall_print_hex:
+  push  ra
+  
+  li    a1, 16
+  li    a2, 8
+
+  move  t0, a0
+  srl  t0, t0, 32
+  beqz  t0, _syscall_print_hex_end
+  li    a2, 16
+
+_syscall_print_hex_end:
+  jal   print_int_padded 
+
+  pop   ra
+  jr    ra
+
+# syscall_print_bin(): Prints the integer in a0 in binary 
+syscall_print_bin:
+  push  ra
+
+  li    a1, 2
+  li    a2, 32
+
+  move  t0, a0
+  srl  t0, t0, 32
+  beqz  t0, _syscall_print_bin_end
+  li    a2, 64
+
+_syscall_print_bin_end:
+  jal   print_int_padded 
+
+  pop   ra
+  jr    ra
+  
+# syscall_print_char(): Prints the char in a0 
+syscall_print_char:
+  push  ra
+  push  s0
+  push  s1
+
+  # Retain value of a0 and a1 to avoid side-effects
+  move  s0, a0
+  move  s1, a1
+
+  # Create string of length 2 on stack 
+  add   sp, sp, -2
+  
+  # Set string equal to char + '\0'
+  sb    zero, 1(sp)
+  sb    s0, 0(sp)
+
+  # Call console_writez() to print
+  move  a0, sp
+  jal   console_writez 
+
+  # Deallocate string 
+  add   sp, sp, 2
+
+  # Set a0 and a1 to original values
+  move  a0, s0
+  move  a1, s1
+
+  pop   s1
+  pop   s0
   pop   ra
   jr    ra
 
@@ -557,6 +636,25 @@ syscall_rand:
   pop   ra
   jr    ra
 
+syscall_invalid:
+  push  ra
+  move  s0, a7     
+  la    a0, syscall_invalid_str
+  jal   print
+
+  move  a0, s0
+  li    a1, 10
+  jal   print_int 
+
+  la    a0, syscall_invalid_address_str
+  jal   print
+ 
+  csrr  s0, sepc
+  print_hex s0
+
+  pop   ra
+  jr    ra
+
 .data
 
   syscall_line_buffer: .fill SYSCALL_LINE_BUFFER_MAX + 1, 1, 0
@@ -565,3 +663,5 @@ syscall_rand:
   syscall_print_float_sign: .asciz "-"
   syscall_print_float_delim: .asciz "."
   syscall_print_floating_point_buffer: .fill SYSCALL_PRINT_FLOATING_POINT_PRECISION + 1, 1, 0
+  syscall_invalid_str: .string "\n\nInvalid ecall "
+  syscall_invalid_address_str: .string " at address "
