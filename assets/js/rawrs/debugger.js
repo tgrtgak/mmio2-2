@@ -578,7 +578,7 @@ class Debugger extends EventComponent {
             // from the view.
             let value = view.getBigInt64(0, true);
 
-            // the $pc is first in the emulator but last in gdb, so map 33 -> 0,
+            // The $pc is first in the emulator but last in gdb, so map 33 -> 0,
             // but increment every other index
             let index = (i + 1) % 32;
             regs[index] = value;
@@ -589,8 +589,8 @@ class Debugger extends EventComponent {
             this.simulator.registers = regs;
         }
 
-        // Return "" to simply ACK the message
-        return "";
+        // Return "OK" to simply ACK the message
+        return "OK";
     }
 
     /**
@@ -620,8 +620,6 @@ class Debugger extends EventComponent {
             value = values[index - 1];
         }
 
-        console.log(value);
-
         // Render it as a little-endian hex string
         let bytes = new Uint8Array(8);
         let view = new DataView(bytes.buffer);
@@ -636,6 +634,58 @@ class Debugger extends EventComponent {
         });
 
         return result;
+    }
+
+    /**
+     * Responds to a register-set packet.
+     *
+     * @param {string} packet - The P packet data.
+     */
+    P(packet) {
+        // Ignore the 'P' part of the packet
+        packet = packet.slice(1);
+
+        // Get the register index (it is in hex)
+        let index = packet.split('=', 2)[0];
+        index = parseInt(index, 16);
+
+        // Get the value to set it as
+        // It will be a set of hexadecimal octets forming the little-endian
+        // 64-bit value of the register.
+        packet = packet.split('=', 2)[1];
+
+        // Prepare a byte array for the register value
+        let bytes = new Uint8Array(8);
+        let view = new DataView(bytes.buffer);
+
+        // For each byte hex pair, decode the byte value
+        bytes.forEach( (b, i) => {
+            bytes[i] = parseInt(packet.slice(i * 2, (i * 2) + 2), 16);
+        });
+
+        // Get the 'little-endian' value in the native endian by pulling it
+        // from the view.
+        let value = view.getBigInt64(0, true);
+
+        // 0-31 are the general purpose registers
+        // 32 is the pc
+        // 33-65 are the floating point registers
+        let values = this.simulator.registers;
+        if (index > 0 && index <= 31) {
+            values[index] = value;
+        }
+        else if (index == 32) {
+            values[0] = value;
+        }
+        else if (index <= 65) {
+            values[index - 1] = value;
+        }
+
+        // Send the register values to the simulator
+        this.simulator.registers = values;
+
+        // ACK the message
+        return "OK";
     }
 
     /**
