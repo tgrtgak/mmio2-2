@@ -30,8 +30,8 @@ class RegisterListing extends EventComponent {
      * Resets the register listing to all zeros.
      */
     clear() {
-        Simulator.REGISTER_NAMES.slice(0, 32).forEach( (regName) => {
-            var str = "0000000000000000";
+        Simulator.ALL_REGISTER_NAMES.forEach( (regName) => {
+            let str = "0000000000000000";
             this._element.querySelector("tr." + regName + " td.value button").textContent = "0x" + str;
         });
     }
@@ -40,8 +40,7 @@ class RegisterListing extends EventComponent {
      * Removes highlights on updated entries.
      */
     unhighlight() {
-        Simulator.REGISTER_NAMES.slice(0, 32).forEach( (regName) => {
-            var str = "0000000000000000";
+        Simulator.ALL_REGISTER_NAMES.forEach( (regName) => {
             this._element.querySelector("tr." + regName + " td.value").parentNode.classList.remove("updated");
         });
     }
@@ -52,14 +51,17 @@ class RegisterListing extends EventComponent {
      * @param {BigUint64Array} regs The register values.
      */
     update(regs) {
-        regs.slice(0, 32).forEach( (reg, i) => { // for each register in the array
-            var str = reg.toString(16); // convert to a string represented as a hex value
-            str = "0000000000000000".slice(str.length) + str; // pad the string with zeroes
-            var regName = Simulator.REGISTER_NAMES[i]; // put the current register's name into regName
-            var element = this._element.querySelector("tr." + regName + " td.value");
+        regs.forEach( (reg, i) => {
+            // Get the hex value of the register value padded to 16 digits
+            let str = reg.toString(16);
+            str = "0000000000000000".slice(str.length) + str;
+
+            // Get the register name and the element that represents it.
+            let regName = Simulator.ALL_REGISTER_NAMES[i];
+            let element = this._element.querySelector("tr." + regName + " td.value");
             if (element) {
-                var oldContent = element.firstElementChild.textContent;
-                var newContent = "0x" + str;
+                let oldContent = element.firstElementChild.textContent;
+                let newContent = "0x" + str;
                 if (oldContent != newContent) {
                     element.firstElementChild.textContent = newContent;
                     element.parentNode.classList.add("updated");
@@ -68,12 +70,15 @@ class RegisterListing extends EventComponent {
         });
     }
 
+    /**
+     * Retrieves all registers as 64-bit unsigned integers.
+     */
     get registers() {
-        let ret = new BigUint64Array(32);
-        var tableCells = this._element.querySelectorAll("td.value");
+        let ret = new BigUint64Array(68);
+        let tableCells = this._element.querySelectorAll("td.value");
         tableCells.forEach( (td, i) => {
             let registerName = td.previousElementSibling.textContent;
-            let realIndex = Simulator.REGISTER_NAMES.indexOf(registerName);
+            let realIndex = Simulator.ALL_REGISTER_NAMES.indexOf(registerName);
             ret[realIndex] = BigInt(td.firstElementChild.textContent);
         });
         return ret;
@@ -109,12 +114,12 @@ class RegisterListing extends EventComponent {
     }
 
     bindEvents() {
-        var tableCells = this._element.querySelectorAll("td.value");
+        let tableCells = this._element.querySelectorAll("td.value");
         tableCells.forEach( (td) => {
             td.firstElementChild.addEventListener("click", this.selectInput.bind(this, td));
         });
 
-        var inputCells = this._element.querySelectorAll("td.edit input");
+        let inputCells = this._element.querySelectorAll("td.edit input");
         inputCells.forEach( (input) => {
             input.addEventListener("blur", this.submitInput.bind(this, input));
             input.addEventListener("keydown", (keyEvent) => {

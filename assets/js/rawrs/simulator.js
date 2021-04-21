@@ -365,7 +365,7 @@ class Simulator extends EventComponent {
      */
     get registers() {
         if (!this._loaded) {
-            return new window.BigUint64Array(36);
+            return new window.BigUint64Array(68);
         }
 
         // The items are PC, followed by registers 1 through 31, floating point registers 0 through 31.
@@ -375,15 +375,10 @@ class Simulator extends EventComponent {
         this._cpu_get_regs(cbuf);
 
         // Since we have a 64-bit CPU, the buffer is a 64-bit integer array
-        let ret = new BigUint64Array(36);
-        for (let i = 0; i < 36; i++) {
-            let index = 8 * i;
-            if (i >= 32) {
-                // Skip floating point registers
-                index += 32 * 8;
-            }
-
+        let ret = new BigUint64Array(68);
+        for (let i = 0; i < ret.length; i++) {
             // Prepare the values in a little-endian uint32 array
+            let index = i * 8;
             let values = new Uint32Array([this._module.getValue(cbuf + index + 0, 'i32'),
                                           this._module.getValue(cbuf + index + 4, 'i32')]);
 
@@ -429,19 +424,19 @@ class Simulator extends EventComponent {
     }
 
     get sscratch() {
-        return this.registers[32];
+        return this.registers[64];
     }
 
     get sepc() {
-        return this.registers[33];
+        return this.registers[65];
     }
 
     get scause() {
-        return this.registers[34];
+        return this.registers[66];
     }
 
     get stval() {
-        return this.registers[35];
+        return this.registers[67];
     }
 
     /**
@@ -464,12 +459,6 @@ class Simulator extends EventComponent {
         for (let i = 0; i < buf.length; i++) {
             let lowInt = Number(BigInt.asIntN(32, buf[i] & mask));
             let highInt = Number(BigInt.asIntN(32, (buf[i] >> BigInt(32)) & mask));
-
-            let index = 8 * i;
-            if (i >= 32) {
-                // Skip floating point (keep those the same)
-                index += 32 * 8;
-            }
             this._module.setValue(cbuf + index, lowInt, 'i32');
             this._module.setValue(cbuf + index + 4, highInt, 'i32');
         }
@@ -547,12 +536,7 @@ class Simulator extends EventComponent {
         this.registers.forEach(function(reg, i) {
             var str = reg.toString(16);
             str = "0000000000000000".slice(str.length) + str;
-            window.console.log(Simulator.REGISTER_NAMES[i] + ": 0x" + str);
-        });
-
-        this.fpRegisters.forEach(function(reg, i) {
-            var str = reg.toString();
-            window.console.log(Simulator.FP_REGISTER_NAMES[i] + ": 0x" + str);
+            window.console.log(Simulator.ALL_REGISTER_NAMES[i] + ": 0x" + str);
         });
     }
 
@@ -657,7 +641,6 @@ Simulator.REGISTER_NAMES = [
     "pc", "ra", "sp", "gp", "tp", "t0", "t1", "t2", "s0", "s1", "a0", "a1",
     "a2", "a3", "a4", "a5", "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
     "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
-    "sscratch", "sepc", "scause", "stval"
 ];
 
 Simulator.FP_REGISTER_NAMES = [
@@ -667,5 +650,15 @@ Simulator.FP_REGISTER_NAMES = [
     "fs2", "fs3", "fs4", "fs5", "fs6", "fs7", "fs8", "fs9", "fs10", "fs11",
     "ft8", "ft9", "ft10", "ft11"
 ];
+
+Simulator.SUPERVISOR_REGISTER_NAMES = [
+    "sscratch", "sepc", "scause", "stval"
+];
+
+Simulator.ALL_REGISTER_NAMES = Array.prototype.concat(
+    Simulator.REGISTER_NAMES,
+    Simulator.FP_REGISTER_NAMES,
+    Simulator.SUPERVISOR_REGISTER_NAMES
+);
 
 export default Simulator;

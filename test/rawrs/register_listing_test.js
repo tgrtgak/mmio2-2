@@ -22,7 +22,7 @@ describe('Register Listing', () => {
         let tbody = document.createElement("tbody");
 
         // Make all rows
-        Simulator.REGISTER_NAMES.forEach( (regName) => {
+        Simulator.ALL_REGISTER_NAMES.forEach( (regName) => {
             // Make each tr
             let curr_row = document.createElement("tr");
             curr_row.classList.add("register");
@@ -78,7 +78,7 @@ describe('Register Listing', () => {
             let reg_list = new RegisterListing(document);
             
             // Set the values in table to hex value of index + 1
-            Simulator.REGISTER_NAMES.forEach( (regName, i) => {
+            Simulator.ALL_REGISTER_NAMES.forEach( (regName, i) => {
                 let str = (i + 1).toString(16); // Convert to a string represented as a hex value
                 str = "0000000000000000".slice(str.length) + str;
                 document.querySelector("tr." + regName + " td.value button").textContent = "0x" + str;
@@ -88,7 +88,7 @@ describe('Register Listing', () => {
             reg_list.clear();
 
             // Test to see if all is 0 hex values
-            Simulator.REGISTER_NAMES.forEach( (regName) => {
+            Simulator.ALL_REGISTER_NAMES.forEach( (regName) => {
                 let val = document.querySelector("tr." + regName + " td.value button").textContent
                 expect(val).toEqual("0x0000000000000000");
             });
@@ -120,9 +120,9 @@ describe('Register Listing', () => {
             // Make register_listing
             let reg_list = new RegisterListing(document);
 
-            // Make array of 32 random BigUint64
-            let nums = new BigUint64Array(32);
-            for (let i = 0; i < 32; i++) {
+            // Make array of 68 random BigUint64
+            let nums = new BigUint64Array(68);
+            for (let i = 0; i < 68; i++) {
                 let num = BigInt(Helper.randomInteger(1000000, 1));
                 nums[i] = num;
             }
@@ -131,7 +131,7 @@ describe('Register Listing', () => {
             reg_list.update(nums);
         
             // Check listed numbers against nums
-            Simulator.REGISTER_NAMES.forEach( (regName, i) => {
+            Simulator.ALL_REGISTER_NAMES.forEach( (regName, i) => {
                 let val = document.querySelector("tr." + regName + " td.value button").textContent
                 expect(BigInt(val)).toEqual(nums[i]);
             });
@@ -142,20 +142,20 @@ describe('Register Listing', () => {
             let reg_list = new RegisterListing(document);
 
             // Make array of what will be updated from 0
-            let isUpdated = new Array(32);
+            let isUpdated = new Array(68);
 
             // First two indexes set manually
             isUpdated[0] = true;
             isUpdated[1] = false;
 
             // Rest are random
-            for (let i = 2; i < 32; i++) {
+            for (let i = 2; i < 68; i++) {
                 isUpdated[i] = Math.random() < 0.5;
             }
 
             // Make array of 32 BigUint64, random for those being changed, 0 (default value) for those not
-            let nums = new BigUint64Array(32);
-            for (let i = 0; i < 32; i++) {
+            let nums = new BigUint64Array(68);
+            for (let i = 0; i < 68; i++) {
                 if (isUpdated[i]) {
                 let num = BigInt(Helper.randomInteger(1000000, 1));
                 nums[i] = num;
@@ -180,26 +180,26 @@ describe('Register Listing', () => {
             // Make register_listing
             let reg_list = new RegisterListing(document);
 
-            // Make array of 32 random BigUint64
-            let nums = new BigUint64Array(32);
-            for (let i = 0; i < 32; i++) {
-                let num = BigInt(Helper.randomInteger(1000000, 1));
-                nums[i] = num;
+            // Make array of 68 random BigUint64
+            let nums = new BigUint64Array(68);
+            for (let i = 0; i < 68; i++) {
+                nums[i] = BigInt(Helper.randomInteger(1000000, 1));
             }
 
             // Manually set values in table
-            Simulator.REGISTER_NAMES.forEach( (regName, i) => {
+            Simulator.ALL_REGISTER_NAMES.forEach( (regName, i) => {
                 let str = nums[i].toString(16); // Convert to a string represented as a hex value
                 str = "0000000000000000".slice(str.length) + str; // Pad the string with zeroes
                 document.querySelector("tr." + regName + " td.value button").textContent = "0x" + str;
             });
 
-            // Check if arrays are the same
-            expect(nums.length).toEqual(reg_list.registers.length);
-            for (let i = 0; i < 32; i++) {
-                expect(nums[i]).toEqual(reg_list.registers[i]);
-            }
+            let result = reg_list.registers;
 
+            // Check if arrays are the same
+            expect(nums.length).toEqual(result.length);
+            for (let i = 0; i < 68; i++) {
+                expect(nums[i]).toEqual(result[i]);
+            }
         });
     });
 

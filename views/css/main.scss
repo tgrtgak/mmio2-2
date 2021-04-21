@@ -187,21 +187,16 @@ ol.toolbar {
 
 ol.tabs {
     background: #464646;
-
     display: block;
     flex: 0 1 auto;
-    flex-direction: column;
-
-    height:      2rem;
-    min-height:  2rem;
-    line-height: 2rem;
-
-    overflow:    hidden;
-
-    padding: 0;
+    height: 2rem;
     margin: 0;
-
+    min-height: 2rem;
+    line-height: 2rem;
+    overflow: hidden;
+    padding: 0;
     position: relative;
+    white-space: nowrap;
 
     &::after {
         content: '';
@@ -772,8 +767,8 @@ ol.tab-panels {
         }
 
         .register-file {
-            flex: 0 1 15rem;
-            width: 15rem;
+            flex: 0 1 19rem;
+            width: 19rem;
             margin-left: 0.2rem;
             background: #fff;
             position: relative;
@@ -826,7 +821,7 @@ ol.tab-panels {
                             padding: 0;
                             outline: none;
                             border: none;
-                            background: white;
+                            background: transparent;
                             font-family: monospace,courier,fixed,swiss,sans-serif;
                             font-size: 15px;
                             font-weight: normal;
@@ -843,7 +838,7 @@ ol.tab-panels {
                             padding: 0;
                             outline: none;
                             border: none;
-                            background: white;
+                            background: transparent;
                             font-family: monospace,courier,fixed,swiss,sans-serif;
                             font-size: 15px;
                             font-weight: normal;

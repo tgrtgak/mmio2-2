@@ -16,7 +16,7 @@
           button aria-controls=:"debugger"
             img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/debug.svg"
             span.caption
-              = I18n.t(:"run.devices.video")
+              = I18n.t(:"run.devices.debugger")
       ol.tab-panels
         li.tab-panel.active#console
           div#term_container
@@ -33,8 +33,10 @@
           = I18n.t(:"run.registers.tab")
       li.tab
         button aria-controls=:"co-processor-file"
-          | Co-Processor
-          /= I18n.t(:"run.registers.tab")
+          = I18n.t(:"run.co-processor.tab")
+      li.tab
+        button aria-controls=:"supervisor-file"
+          = I18n.t(:"run.supervisor.tab")
     ol.tab-panels
       li.tab-panel.active#register-file style="padding-top: 0;"
         table.registers
@@ -70,7 +72,18 @@
                     = "0x0000000000000000"
                 td.edit hidden=true
                   input.input type=:text id="fp-register-#{register_name}"
-
+      li.tab-panel#supervisor-file style="padding-top: 0;"
+        table.registers
+          tbody
+            - ["sscratch", "sepc", "scause", "stval"].each do |register_name|
+              tr.register class=register_name
+                td.name
+                  = register_name
+                td.value
+                  button
+                    = "0x0000000000000000"
+                td.edit hidden=true
+                  input.input type=:text id="supervisor-register-#{register_name}"
 .bottom
   .left
     ol.tabs
