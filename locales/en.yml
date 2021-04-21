@@ -40,10 +40,10 @@ en:
       tab:              "Registers"
 
     co-processor:
-      tab:              "Co-Processor"
+      tab:              "FPU"
 
     supervisor:
-      tab:              "Supervisor"
+      tab:              "OS"
 
   guidance:
     tab:                "Guidance"
