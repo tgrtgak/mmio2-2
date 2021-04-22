@@ -1,0 +1,27 @@
+From 84d59bd416b8d0bf4c73b210787503d89f28b150 Mon Sep 17 00:00:00 2001
+From: wilkie <wilkie05@gmail.com>
+Date: Thu, 22 Apr 2021 02:33:26 -0400
+Subject: [PATCH] Ensures that pthread is not used to compile gdb.
+
+---
+ gdb/Makefile.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gdb/Makefile.in b/gdb/Makefile.in
+index e800be04cd..15b2535f28 100644
+--- a/gdb/Makefile.in
++++ b/gdb/Makefile.in
+@@ -211,8 +211,8 @@ WERROR_CFLAGS = @WERROR_CFLAGS@
+ GDB_WARN_CFLAGS = $(WARN_CFLAGS)
+ GDB_WERROR_CFLAGS = $(WERROR_CFLAGS)
+ 
+-PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+-PTHREAD_LIBS = @PTHREAD_LIBS@
++PTHREAD_CFLAGS =
++PTHREAD_LIBS =
+ 
+ DEBUGINFOD_CFLAGS = @DEBUGINFOD_CFLAGS@
+ DEBUGINFOD_LIBS = @DEBUGINFOD_LIBS@
+-- 
+2.30.0
+
