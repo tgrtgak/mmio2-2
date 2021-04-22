@@ -1,31 +1,36 @@
 .top
   div.container
-    div.output
-      ol.tabs.side
-        li.tab.active
-          button#console-select aria-controls=:"console"
-            img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/console.svg"
-            span.caption
-              = I18n.t(:"run.devices.console")
-        li.tab
-          button#video-select aria-controls=:"video"
-            img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/video.svg"
-            span.caption
-              = I18n.t(:"run.devices.video")
-        li.tab
-          button aria-controls=:"debugger"
-            img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/debug.svg"
-            span.caption
-              = I18n.t(:"run.devices.debugger")
-      ol.tab-panels
-        li.tab-panel.active#console
-          div#term_container
-        li.tab-panel#video
-          canvas#video width="640" height="480"
-        li.tab-panel#debugger
-          div#gdb_container
-          div.disconnected
-            img src="#{@basepath}images/disconnected.svg"
+    ol.tabs.side
+      li.tab.active
+        button#console-select aria-controls=:"console"
+          img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/console.svg"
+          span.caption
+            = I18n.t(:"run.devices.console")
+      li.tab
+        button#video-select aria-controls=:"video"
+          img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/video.svg"
+          span.caption
+            = I18n.t(:"run.devices.video")
+      li.tab
+        button aria-controls=:"debugger"
+          img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/debug.svg"
+          span.caption
+            = I18n.t(:"run.devices.debugger")
+    ol.tab-panels.side
+      li.tab-panel.active#console
+        div.output-container
+          div.output
+            div#term_container
+      li.tab-panel#video
+        div.output-container
+          div.output
+            canvas#video width="640" height="480"
+      li.tab-panel#debugger
+        div.output-container
+          div.output
+            div#gdb_container
+            div.disconnected
+              img src="#{@basepath}images/disconnected.svg"
   .register-file
     ol.tabs
       li.tab.active

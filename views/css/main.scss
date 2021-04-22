@@ -228,8 +228,8 @@ ol.tabs {
             display: inline-block;
             padding: 0 0.5rem;
             font: 400 1rem Lato;
-            height: 1.70rem;
-            line-height: 1.60rem;
+            height: 1.7rem;
+            line-height: 1.6rem;
             min-width: 5rem;
             text-align: center;
             text-decoration: none;
@@ -271,47 +271,55 @@ ol.tabs {
     }
 
     &.side {
-        position: absolute;
-        background: none;
-        border: none;
-        outline: none;
-        box-shadow: none;
         z-index: 99;
         height: auto;
         overflow: visible;
 
         > li.tab {
             display: block;
-            width: 1.8rem;
-            height: 1.8rem;
+            width: 1.9rem;
+            height: auto;
             background: none;
             margin-left: 0;
             margin-top: 0;
+            margin-left: 0.25rem;
 
             > button,
             > a {
                 min-width: auto;
-                width: 1.8rem;
-                height: 1.8rem;
-                text-indent: -9999px;
+                width: 1.9rem;
+                height: auto;
                 overflow: hidden;
                 display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
+                padding: 0.5rem 0;
+
+                img {
+                    margin-bottom: 0.5rem;
+                }
 
                 span.caption {
-                    display: none;
+                    left: 0.0625rem;
+                    position: relative;
+                    width: 1.5rem;
+
+                    // Write sideways
+                    writing-mode: vertical-lr;
+
+                    // Flip
+                    transform: scale(-1, -1);
                 }
             }
 
             &:first-child {
-                margin-left: 0;
+                margin-top: 0.5rem;
             }
 
             &.active {
-                margin-top: 0;
-                margin-left: 0;
                 left: -0.125rem;
+                margin-left: 0.25rem;
 
                 &::after {
                     width: 0.125rem;
@@ -320,10 +328,15 @@ ol.tabs {
 
                 > button,
                 > a {
-                    width: 1.9rem;
+                    width: 2rem;
+                    border-right: 0.125rem solid white;
 
                     img {
                         margin-left: 0.125rem;
+                    }
+
+                    span.caption {
+                        left: 0.25rem;
                     }
                 }
             }
@@ -368,6 +381,13 @@ ol.tab-panels {
 
         &.active {
             z-index: auto;
+        }
+    }
+
+    &.side {
+        > li.tab-panel {
+            padding-top: 0;
+            padding-left: 0.2rem;
         }
     }
 }
@@ -692,85 +712,90 @@ ol.tab-panels {
         height: 481px;
 
         .container {
+            display: flex;
             flex: 1 0 auto;
+            flex-direction: row;
             margin: 0;
             text-align: center;
             background: #211a21;
             background-image: url('../images/dynamic/hex/1d141d/tracks.svg');
             background-size: 10rem;
 
-            .output {
-                position: relative;
-                text-align: left;
-                margin: 0 auto;
-                display: inline-block;
-                border-left:  5px solid #2d242d;
-                border-right: 5px solid #2d242d;
-                outline:      1px solid #1d141d;
-                width: 640px;
-                height: 480px;
+            ol.tabs.side {
+                position: static;
+                flex: 1 1 0%;
+            }
 
-                ol.tabs.side {
-                    left: -2.25rem;
-                    top: 0.125rem;
+            ol.tab-panels {
+                height: 100%;
 
-                    > li.tab {
-                        > button,
-                        > a {
-                            background: #71596f;
-                            border-color: #2d242d;
-                        }
+                .tab-panel {
+                    .output-container {
+                        display: flex;
+                        flex: 1 0 auto;
+                        flex-direction: row;
+                        margin: 0;
+                        text-align: center;
+                        background: #211a21;
+                        background-image: url('../images/dynamic/hex/1d141d/tracks.svg');
+                        background-size: 10rem;
 
-                        &.active::after {
-                            background: #ffd6fc;
+                        .output {
+                            position: relative;
+                            text-align: left;
+                            margin: 0 auto;
+                            display: inline-block;
+                            border-left:  5px solid #2d242d;
+                            border-right: 5px solid #2d242d;
+                            outline:      1px solid #1d141d;
+                            width: 640px;
+                            height: 480px;
+
+                            #term_container,
+                            #gdb_container {
+                                width: 640px;
+                                height: 480px;
+                                background: #2e3436;
+                            }
                         }
                     }
                 }
 
-                ol.tab-panels {
-                    background: transparent;
-                    height: 100%;
-
-                    li.tab-panel#video {
-                        background: #3a303a;
-                        align-items: center;
-                        justify-content: center;
-
-                        canvas {
-                            width: 640px;
-                            height: 480px;
-                            background: black;
-                        }
+                li.tab-panel#video {
+                    canvas {
+                        width: 640px;
+                        height: 480px;
+                        background: black;
                     }
+                }
 
-                    div.disconnected {
-                      position: absolute;
-                      left: 0;
-                      right: 1px;
-                      top: 0;
-                      bottom: 0;
-                      background: rgba(96, 41, 41, 0.5);
-                      z-index: 9;
-                      display: flex;
-                      align-items: center;
-                      align-content: center;
-                      text-align: center;
+                div.disconnected {
+                    position: absolute;
+                    left: 0;
+                    right: 1px;
+                    top: 0;
+                    bottom: 0;
+                    background: rgba(96, 41, 41, 0.5);
+                    z-index: 9;
+                    display: flex;
+                    align-items: center;
+                    align-content: center;
+                    text-align: center;
 
-                      img {
+                    img {
                         flex: 1;
                         width: 40%;
                         height: 40%;
                         animation: 1s infinite alternate disconnect-pulse;
 
                         @keyframes disconnect-pulse {
-                          0% {
-                            opacity: 0.5;
-                          }
-                          100% {
-                            opacity: 1.0;
-                          }
+                            0% {
+                              opacity: 0.5;
+                            }
+                            100% {
+                              opacity: 1.0;
+                            }
                         }
-                      }
                     }
                 }
             }
