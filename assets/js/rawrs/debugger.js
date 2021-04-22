@@ -149,11 +149,11 @@ class Debugger extends EventComponent {
                     '--eval-command', 'set breakpoint always-inserted on'];
         this._jsmain(args.length, args.join('\0'));
 
-        // Hide the disconnected overlay
-        this.hideDisconnected();
-
         // Notify upstream that gdb is waiting for commands
         this.trigger("ready");
+
+        // Hide the disconnected overlay
+        this.hideDisconnected();
     }
 
     /**

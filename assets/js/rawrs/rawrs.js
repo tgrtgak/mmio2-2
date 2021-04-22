@@ -380,6 +380,8 @@ class RAWRS {
                 name: "/input/foo.s",
                 data: text
             }]);
+
+            RAWRS._gdb.invoke("target remote /dev/serial");
         });
 
         this._gdb.on("step", () => {

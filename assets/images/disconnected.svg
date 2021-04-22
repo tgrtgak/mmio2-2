@@ -5,7 +5,6 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="133.0477mm"
@@ -90,16 +89,5 @@
        id="path1554"
        style="fill:#c83737;stroke:#472f30;stroke-width:3.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 104.92946,81.976152 a 66.523811,66.523811 0 0 0 -66.453307,66.523588 66.523811,66.523811 0 0 0 66.524107,66.52411 66.523811,66.523811 0 0 0 66.52359,-66.52411 66.523811,66.523811 0 0 0 -66.52359,-66.523588 66.523811,66.523811 0 0 0 -0.0708,0 z m 0.0708,6.783049 A 59.740635,59.740635 0 0 1 164.7408,148.49974 59.740635,59.740635 0 0 1 105.00026,208.24028 59.740635,59.740635 0 0 1 45.259721,148.49974 59.740635,59.740635 0 0 1 105.00026,88.759201 Z" />
-    <image
-       width="10.31875"
-       height="13.49375"
-       preserveAspectRatio="none"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACcAAAAzCAYAAAAU5BG4AAAABHNCSVQICAgIfAhkiAAAAFNJREFU
-WIXtzjEBgCAAAEGgkLSwfyJt4HCLDH8Jbt7Xfsah1t+BL+VUOVVOlVPlVDlVTpVT5VQ5VU6VU+VU
-OVVOlVPlVDlVTpVT5VQ5VU6VU0fnXshVAgs19jvsAAAAAElFTkSuQmCC
-"
-       id="image1611"
-       x="194.33464"
-       y="126.63403" />
   </g>
 </svg>
