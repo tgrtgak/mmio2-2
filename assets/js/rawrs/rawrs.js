@@ -89,15 +89,15 @@ class RAWRS {
         RAWRS.labelListing = new LabelListing(document.body);
         RAWRS._simulator = null;
 
-        RAWRS.codeListing.on("breakpoint-set", (info) => {
+        RAWRS.codeListing.on("breakpoint-set", (address) => {
             if (RAWRS.simulator) {
-                RAWRS.simulator.breakpointSet(info.address);
+                RAWRS.simulator.breakpointSet(address);
             }
         });
 
-        RAWRS.codeListing.on("breakpoint-clear", (info) => {
+        RAWRS.codeListing.on("breakpoint-clear", (address) => {
             if (RAWRS.simulator) {
-                RAWRS.simulator.breakpointClear(info.address);
+                RAWRS.simulator.breakpointClear(address);
             }
         });
 
@@ -385,6 +385,20 @@ class RAWRS {
         this._gdb.on("continue", () => {
             if (!this._gdb.simulator.done) {
                 this.run();
+            }
+        });
+
+        this._gdb.on("breakpoint-set", (address) => {
+            this.codeListing.check(address);
+            if (RAWRS.simulator) {
+                RAWRS.simulator.breakpointSet(address);
+            }
+        });
+
+        this._gdb.on("breakpoint-clear", (address) => {
+            this.codeListing.uncheck(address);
+            if (RAWRS.simulator) {
+                RAWRS.simulator.breakpointClear(address);
             }
         });
 

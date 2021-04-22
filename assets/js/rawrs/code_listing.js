@@ -105,6 +105,32 @@ class CodeListing extends EventComponent {
     }
 
     /**
+     * Marks the given address as having its breakpoint set.
+     */
+    check(address) {
+        var element = this._element.querySelector(".address-" + address);
+        if (element) {
+            let breakpointCell = element.parentNode.querySelector("td.breakpoint");
+            let checkbox = breakpointCell.querySelector("input");
+            checkbox.checked = true;
+            breakpointCell.classList.add("checked");
+        }
+    }
+
+    /**
+     * Removes the mark for the given address so as to clear its breakpoint.
+     */
+    uncheck(address) {
+        var element = this._element.querySelector(".address-" + address);
+        if (element) {
+            let breakpointCell = element.parentNode.querySelector("td.breakpoint");
+            let checkbox = breakpointCell.querySelector("input");
+            checkbox.checked = false;
+            breakpointCell.classList.remove("checked");
+        }
+    }
+
+    /**
      * Adds an instruction.
      */
     add(info) {
@@ -130,11 +156,11 @@ class CodeListing extends EventComponent {
         checkbox.addEventListener("change", (event) => {
             if (checkbox.checked) {
                 breakpointCell.classList.add("checked");
-                this.trigger("breakpoint-set", info);
+                this.trigger("breakpoint-set", info.address);
             }
             else {
                 breakpointCell.classList.remove("checked");
-                this.trigger("breakpoint-clear", info);
+                this.trigger("breakpoint-clear", info.address);
             }
         });
         breakpointCell.appendChild(checkbox);

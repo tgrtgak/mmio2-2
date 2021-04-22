@@ -145,7 +145,8 @@ class Debugger extends EventComponent {
         // and just let emscripten do its thing. We build argv out of this
         // longer string in the jsmain implementation.
         let args = ['/usr/bin/gdb',
-                    '--eval-command', 'set architecture riscv:rv64'];
+                    '--eval-command', 'set architecture riscv:rv64',
+                    '--eval-command', 'set breakpoint always-inserted on'];
         this._jsmain(args.length, args.join('\0'));
 
         // Hide the disconnected overlay
@@ -784,6 +785,47 @@ class Debugger extends EventComponent {
      * @param {string} packet - The Hg packet data.
      */
     Hg(packet) {
+        return "OK"
+    }
+
+    /**
+     * Responds to a z packet, which removes a breakpoint.
+     *
+     * @param {string} packet - The Z packet data.
+     */
+    z(packet) {
+        return this.Z(packet);
+    }
+
+    /**
+     * Responds to a Z packet, which sets a breakpoint.
+     *
+     * @param {string} packet - The Z packet data.
+     */
+    Z(packet) {
+        // We also flow the 'z' packet through here, so if the packet is a 'Z'
+        // packet proper, then `insert` will be `true`, otherwise we are
+        // removing the breakpoint and the packet is 'z' and `insert` is `false`
+        // instead.
+        let insert = packet[0] == 'Z';
+
+        // Decode the packet header: Ztype,addr,kind[;cond-list...]
+        packet = packet.slice(1);
+        let parts = packet.split(',');
+        let type = parts[0];
+        let address = parts[1];
+
+        // We are ignoring the conditional list.
+        let kind = parts[2].split(';')[0];
+
+        // OK, signal the breakpoint should be set
+        if (insert) {
+            this.trigger("breakpoint-set", address);
+        }
+        else {
+            this.trigger("breakpoint-clear", address);
+        }
+
         return "OK"
     }
 }
