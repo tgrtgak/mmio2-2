@@ -8,6 +8,12 @@ else
   echo "Toolchain seems to exist. Remove assets/js/riscv64-unknown-elf-*.wasm to rebuild."
 fi
 
+if [ ! -f assets/js/riscv64-unknown-elf-gdb-bare.wasm ]; then
+  bash ./scripts/build-gdb.sh
+else
+  echo "GDB seems to exist. Remove assets/js/riscv64-unknown-elf-gdb-bare.wasm to rebuild."
+fi
+
 if [ ! -d assets/js/tinyemu ]; then
   bash ./scripts/build-tinyemu.sh
 else
