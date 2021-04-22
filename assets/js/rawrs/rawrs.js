@@ -93,11 +93,17 @@ class RAWRS {
             if (RAWRS.simulator) {
                 RAWRS.simulator.breakpointSet(address);
             }
+            if (this._gdb) {
+                this._gdb.breakpointSet(address);
+            }
         });
 
         RAWRS.codeListing.on("breakpoint-clear", (address) => {
             if (RAWRS.simulator) {
                 RAWRS.simulator.breakpointClear(address);
+            }
+            if (this._gdb) {
+                this._gdb.breakpointClear(address);
             }
         });
 

@@ -199,6 +199,24 @@ class Debugger extends EventComponent {
     }
 
     /**
+     * Reports a set breakpoint to `gdb`.
+     *
+     * @param {string} address - The hex encoded address such as `40000c`.
+     */
+    breakpointSet(address) {
+        this.invoke("b *0x" + address);
+    }
+
+    /**
+     * Reports a breakpoint has been cleared to `gdb`.
+     *
+     * @param {string} address - The hex encoded address such as `40000c`.
+     */
+    breakpointClear(address) {
+        this.invoke("clear *0x" + address);
+    }
+
+    /**
      * Parses a gdb packet.
      *
      * @param {string} packet - The full packet including payload and checksum.
