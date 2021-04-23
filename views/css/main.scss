@@ -190,6 +190,7 @@ ol.tabs {
 
     display: block;
     flex: 0 1 auto;
+    flex-direction: column;
 
     height:      2rem;
     min-height:  2rem;
@@ -836,20 +837,33 @@ ol.tab-panels {
     }
     .bottom {
         display: flex;
-        flex-direction: column;
-
+        flex-direction: row;
         margin-top: 0.2rem;
 
         flex: 1 1 100%;
 
-        li.tab-panel {
-            background: white;
+        .left {
+            display: flex;
+            flex: 75%;
+            flex-direction: column;
+        }
+
+        .right {
+            flex: 0 1 15rem;
+            width: 15rem;
+            margin-left: 0.2rem;
+            background: #fff;
+            position: relative;
+
+            display: flex;
+            flex-direction: column;
         }
     }
 }
 
 table.memory ,
-table.instructions {
+table.instructions ,
+table.labels {
     position: absolute;
     top: 0.15rem;
     left: 0;
@@ -961,6 +975,33 @@ table.instructions {
 
         & + img {
             display: block;
+        }
+    }
+}
+
+#labels-panel {
+    left: 0;
+    right: 0;
+    .labels {
+        & + img {
+            display: none;
+
+            position: absolute;
+            top: 0.15rem;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            box-sizing: content-box;
+            height: 100%;
+            margin: 0 auto;
+        }
+
+        &.empty {
+            display: none;
+
+            & + img {
+                display: block;
+            }
         }
     }
 }
