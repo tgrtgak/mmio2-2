@@ -4,5 +4,8 @@
   "description": "A RISC-V Teaching Environment",
   "main": "main.js",
   "author": "wilkie",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "custom-electron-titlebar": "^3.2.6"
+  }
 }

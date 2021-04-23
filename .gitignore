@@ -3,9 +3,10 @@ node_modules/
 emsdk/
 riscv-gnu-toolchain/
 utils/
-assets/js/riscv64*
 assets/js/compiled-*
 assets/js/ace-builds/
+assets/js/binutils/
+assets/js/gdb/
 assets/kernel/kernel.bin
 assets/css/
 kernel/*.o
