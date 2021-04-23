@@ -29,6 +29,12 @@ en:
         line:           "Line"
         source:         "Source"
 
+    labels:
+      tab:              "Labels"
+      headers:
+        name:           "Name"
+        address:        "Address"
+
     registers:
       tab:              "Registers"
 

@@ -14,6 +14,7 @@ import Terminal        from './terminal';
 import FileList        from './file_list';
 import CodeListing     from './code_listing';
 import MemoryListing   from './memory_listing';
+import LabelListing    from './label_listing';
 import RegisterListing from './register_listing';
 
 class RAWRS {
@@ -73,6 +74,7 @@ class RAWRS {
         RAWRS.codeListing = new CodeListing(document.body);
         RAWRS.registerListing = new RegisterListing(document.body);
         RAWRS.memoryListing = new MemoryListing(document.body);
+        RAWRS.labelListing = new LabelListing(document.body);
         RAWRS._simulator = null;
 
         RAWRS.codeListing.on("breakpoint-set", (info) => {
@@ -98,6 +100,9 @@ class RAWRS {
         RAWRS.memoryListing.on("change", (info) => {
             if(RAWRS.simulator) {
                 let sim = RAWRS.simulator;
+                console.log("memoryListing.on('change')");
+                console.log(info.address);
+                console.log(info.data);
                 sim.writeMemory(info.address, info.data);
 
                 let numRows = RAWRS.memoryListing.numberOfRows;
@@ -175,7 +180,6 @@ class RAWRS {
 
             let basepath = document.body.getAttribute('data-basepath');
             let sim = new Simulator(32, "basic-riscv64.cfg", basepath + "kernel/kernel.bin", this._binary, this._console, this._video, bp);
-            console.log(sim, this._binary);
 
             sim.on("quit", () => {
                 // Update the toolbar buttons
@@ -323,6 +327,8 @@ class RAWRS {
 
         RAWRS.memoryListing.clear();
 
+        RAWRS.labelListing.clear();
+
         var linkerScript = "SECTIONS { . = 0x00400000; .text : { *(.text) } . = 0x10010000; .data : { *(.data) } }";
 
         // Destroy the current simulator
@@ -348,9 +354,20 @@ class RAWRS {
             RAWRS.codeListing.add(instruction);
         });
 
-        var dumper = new Dumper();
-        dumper.on('update', (row) => {
+        var data_dumper = new Dumper();
+        data_dumper.on('update', (row) => {
             RAWRS.memoryListing.update(row.address, row.data);
+        });
+
+        var label_dumper = new Dumper();
+        var label_array = [];
+        label_dumper.on('update', (row) => {
+            label_array.push(row);
+        });
+
+        label_dumper.on('done', (row) => {
+            label_array.sort((a, b) => parseInt(a.address, 16) - parseInt(b.address, 16));
+            label_array.forEach((element) => RAWRS.labelListing.update(element.label, element.address));
         });
 
         assembler.on('done', () => {
@@ -365,6 +382,7 @@ class RAWRS {
         this._video.reset();
         assembler.assemble("foo.s", text, terminal, (object) => {
             linker.link(linkerScript, object, terminal, (binary) => {
+                
                 RAWRS.toolbar.setStatus("assemble", "success");
                 RAWRS.toolbar.setStatus("run", "");
                 this._binary = binary;
@@ -394,7 +412,11 @@ class RAWRS {
                 });
 
                 // And dump its memory (data segment)
-                dumper.dump(binary, ".data", terminal, () => {
+                data_dumper.dump(binary, "-x", ".data", terminal, () => {
+                });
+                
+                // Then retrieve the labels (.symtab)
+                label_dumper.dump(binary, "-s", "", terminal, () => {
                 });
 
                 // Run
