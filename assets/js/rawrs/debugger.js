@@ -81,7 +81,7 @@ class Debugger extends EventComponent {
             }
         };
 
-        Module.locateFile = function(url) { return 'js/' + url; };
+        Module.locateFile = function(url) { return 'js/gdb/' + url; };
 
         // Should be aligned to 16MiB
         var alloc_size = 16;

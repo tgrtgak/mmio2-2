@@ -15,7 +15,7 @@ class Linker extends EventComponent {
         this._errors = [];
 
         let basepath = document.body.getAttribute('data-basepath');
-        var worker = new Worker(basepath + "js/riscv64-unknown-elf-ld.js");
+        var worker = new Worker(basepath + "js/binutils/riscv64-unknown-elf-ld.js");
 
         linkerScript = linkerScript + "\n";
         var fileData = new Blob([linkerScript], {'type': 'text/plain'});

@@ -9,7 +9,7 @@ class Disassembler extends EventComponent {
 
     disassemble(binary, terminal, callback) {
         let basepath = document.body.getAttribute('data-basepath');
-        var worker = new Worker(basepath + "js/riscv64-unknown-elf-objdump.js");
+        var worker = new Worker(basepath + "js/binutils/riscv64-unknown-elf-objdump.js");
 
         var blobs = [];
         var files = [binary];

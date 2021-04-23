@@ -41,6 +41,7 @@ echo "===================="
 if [ ! -d riscv-gnu-toolchain ]; then
   git clone https://github.com/riscv/riscv-gnu-toolchain
   cd riscv-gnu-toolchain
+  git reset --hard d45cfc68be6ce0a2f69daf66e64fc446224b3416
   git submodule init
   git submodule update riscv-binutils
   git submodule update riscv-gdb

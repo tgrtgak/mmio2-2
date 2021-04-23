@@ -16,6 +16,11 @@ pages:
     - /bin/bash build.sh
     - /bin/bash package.sh
     - mv static/public public
+  cache:
+    paths:
+      - node_modules/
+      - assets/js/binutils
+      - assets/js/gdb
   artifacts:
     paths:
       - public
