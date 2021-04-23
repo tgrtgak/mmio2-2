@@ -430,8 +430,8 @@ class RAWRS {
             RAWRS.codeListing.add(instruction);
         });
 
-        var dumper = new Dumper();
-        dumper.on('update', (row) => {
+        var data_dumper = new Dumper();
+        data_dumper.on('update', (row) => {
             RAWRS.memoryListing.update(row.address, row.data);
         });
 

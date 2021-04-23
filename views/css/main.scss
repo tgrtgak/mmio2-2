@@ -271,9 +271,10 @@ ol.tabs {
     }
 
     &.side {
-        z-index: 99;
+        background-color: #272727;
         height: auto;
         overflow: visible;
+        z-index: 99;
 
         > li.tab {
             display: block;
@@ -883,22 +884,23 @@ ol.tab-panels {
                     }
 
                     .actions {
-                      padding: 0;
-                      margin: 0;
-                      line-height: 0;
-
-                      img {
-                        width: 1rem;
-                        height: 1rem;
                         padding: 0;
                         margin: 0;
-                        vertical-align: middle;
-                      }
+                        line-height: 0;
+
+                        img {
+                            width: 1rem;
+                            height: 1rem;
+                            padding: 0;
+                            margin: 0;
+                            vertical-align: middle;
+                        }
                     }
                 }
             }
         }
     }
+
     .bottom {
         display: flex;
         flex-direction: row;
@@ -913,14 +915,13 @@ ol.tab-panels {
         }
 
         .right {
-            flex: 0 1 15rem;
-            width: 15rem;
-            margin-left: 0.2rem;
             background: #fff;
-            position: relative;
-
             display: flex;
+            flex: 0 1 17rem;
             flex-direction: column;
+            margin-left: 0.2rem;
+            position: relative;
+            width: 17rem;
         }
     }
 }
@@ -1022,16 +1023,11 @@ table.labels {
     }
 
     & + img {
-        display: none;
-
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
         box-sizing: content-box;
+        display: none;
         height: 100%;
         margin: 0 auto;
+        width: 100%;
     }
 
     &.empty {
@@ -1039,58 +1035,7 @@ table.labels {
 
         & + img {
             display: block;
-        }
-    }
-}
-
-#labels-panel {
-    left: 0;
-    right: 0;
-    .labels {
-        & + img {
-            display: none;
-
-            position: absolute;
-            top: 0.15rem;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            box-sizing: content-box;
-            height: 100%;
-            margin: 0 auto;
-        }
-
-        &.empty {
-            display: none;
-
-            & + img {
-                display: block;
-            }
-        }
-    }
-}
-
-#memory-panel {
-    .memory {
-        & + img {
-            display: none;
-
-            position: absolute;
-            top: 0.15rem;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            box-sizing: content-box;
-            height: 100%;
-            margin: 0 auto;
-        }
-
-        &.empty {
-            display: none;
-
-            & + img {
-                display: block;
-            }
+            box-shadow: 0 0 0.125rem 0rem black inset;
         }
     }
 }
