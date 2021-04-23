@@ -47,28 +47,28 @@ emconfigure ./configure --target=riscv64-unknown-elf --disable-nls --disable-sha
 
 echo ""
 echo "Building"
-emmake make --no-silent CXX=emcc CFLAGS="${CFLAGS}" CPPFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PTHREAD_CFLAGS=""
+emmake make CXX=emcc CFLAGS="${CFLAGS}" CPPFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PTHREAD_CFLAGS=""
 cp ../riscv-gdb/bfd/doc/chew bfd/doc/chew
 chmod +x bfd/doc/chew
 cp ../riscv-gdb/binutils/sysinfo binutils/sysinfo
 chmod +x binutils/sysinfo
 cp ../riscv-gdb/sim/riscv/gentmap sim/riscv/gentmap
 chmod +x sim/riscv/gentmap
-emmake make --no-silent CXX=emcc CFLAGS="${CFLAGS}" CPPFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PTHREAD_CFLAGS=""
+emmake make CXX=emcc CFLAGS="${CFLAGS}" CPPFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PTHREAD_CFLAGS=""
 cp ../riscv-gdb/bfd/doc/chew bfd/doc/chew
 chmod +x bfd/doc/chew
 cp ../riscv-gdb/binutils/sysinfo binutils/sysinfo
 chmod +x binutils/sysinfo
 cp ../riscv-gdb/sim/riscv/gentmap sim/riscv/gentmap
 chmod +x sim/riscv/gentmap
-emmake make --no-silent CXX=emcc CFLAGS="${CFLAGS}" CPPFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PTHREAD_CFLAGS=""
+emmake make CXX=emcc CFLAGS="${CFLAGS}" CPPFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PTHREAD_CFLAGS=""
 cp ../riscv-gdb/bfd/doc/chew bfd/doc/chew
 chmod +x bfd/doc/chew
 cp ../riscv-gdb/binutils/sysinfo binutils/sysinfo
 chmod +x binutils/sysinfo
 cp ../riscv-gdb/sim/riscv/gentmap sim/riscv/gentmap
 chmod +x sim/riscv/gentmap
-emmake make --no-silent CXX=emcc CFLAGS="${CFLAGS}" CPPFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PTHREAD_CFLAGS=""
+emmake make CXX=emcc CFLAGS="${CFLAGS}" CPPFLAGS="${CPPFLAGS}" LDFLAGS="${LDFLAGS}" PTHREAD_CFLAGS=""
 cd ../..
 
 echo ""
