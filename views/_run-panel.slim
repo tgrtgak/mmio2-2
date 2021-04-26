@@ -72,15 +72,32 @@
               tr.register class=register_name
                 td.name
                   = register_name
+                td.type
+                  | x
                 td.value
                   button
                     = "0x0000000000000000"
                 td.edit hidden=true
                   input.input type=:text id="fp-register-#{register_name}"
-                td.actions hidden=true
-                  img        src="#{@basepath}images/dynamic/hex/888888/actions.svg"
-                  /img.active src="#{@basepath}images/dynamic/hex/aa33aa/actions.svg"
-                  /img.hover  src="#{@basepath}images/dynamic/hex/aa33aa/actions.svg"
+                td.actions
+                  button.actions
+                    img        src="#{@basepath}images/dynamic/hex/888888/actions.svg"
+                    img.active src="#{@basepath}images/dynamic/hex/aa33aa/actions.svg"
+                    img.hover  src="#{@basepath}images/dynamic/hex/aa33aa/actions.svg"
+                  - id = "fp-register-#{register_name}-actions"
+                  ul.dropdown-menu role=:menu id=id aria-hidden="true" hidden=true
+                    li.dropdown-menu-option
+                      button.action disabled=true data-action=:"as-hex" role=:menuitem
+                        | View as hexadecimal
+                    li.dropdown-menu-option
+                      button.action data-action=:"as-float" role=:menuitem
+                        | View as 32-bit float
+                    li.dropdown-menu-option
+                      button.action data-action=:"as-double" role=:menuitem
+                        | View as 64-bit double
+                    li.dropdown-menu-option
+                      button.action data-action=:explore role=:menuitem
+                        | Explore representation
       li.tab-panel#supervisor-file style="padding-top: 0;"
         table.registers
           tbody

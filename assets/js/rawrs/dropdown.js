@@ -21,7 +21,8 @@ class Dropdown extends EventComponent {
         this._dropdown = element.nextElementSibling;
 
         this._dropdown.addEventListener("blur", this.blurEvent.bind(this));
-        
+
+        // TODO: remove
         this.fileRename = null;
         this.fileNamePlace = null;
 

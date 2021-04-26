@@ -2,6 +2,8 @@
 
 import EventComponent from './event_component';
 import Simulator      from './simulator';
+import Dropdown       from './dropdown';
+import FloatExplorer  from './float_explorer';
 
 class RegisterListing extends EventComponent {
     /**
@@ -14,7 +16,10 @@ class RegisterListing extends EventComponent {
 
         let element = root.querySelector(".register-file");
         this._element = element;
+
         this.bindEvents();
+
+        this.clear();
     }
 
     /**
@@ -32,7 +37,10 @@ class RegisterListing extends EventComponent {
     clear() {
         Simulator.ALL_REGISTER_NAMES.forEach( (regName) => {
             let str = "0000000000000000";
-            this._element.querySelector("tr." + regName + " td.value button").textContent = "0x" + str;
+            let row = this._element.querySelector("tr." + regName);
+            row.setAttribute("data-hex-value", "0x" + str);
+            row.querySelector("td.value button").textContent = "0x" + str;
+            this.switchToHex(row);
         });
     }
 
@@ -53,12 +61,13 @@ class RegisterListing extends EventComponent {
     update(regs) {
         regs.forEach( (reg, i) => {
             // Get the hex value of the register value padded to 16 digits
-            let str = reg.toString(16);
-            str = "0000000000000000".slice(str.length) + str;
+            let str = reg.toString(16).padStart(16, '0');
 
             // Get the register name and the element that represents it.
             let regName = Simulator.ALL_REGISTER_NAMES[i];
-            let element = this._element.querySelector("tr." + regName + " td.value");
+            let row = this._element.querySelector("tr." + regName);
+            row.setAttribute("data-hex-value", "0x" + str);
+            let element = row.querySelector("td.value");
             if (element) {
                 let oldContent = element.firstElementChild.textContent;
                 let newContent = "0x" + str;
@@ -79,7 +88,7 @@ class RegisterListing extends EventComponent {
         tableCells.forEach( (td, i) => {
             let registerName = td.previousElementSibling.textContent;
             let realIndex = Simulator.ALL_REGISTER_NAMES.indexOf(registerName);
-            ret[realIndex] = BigInt(td.firstElementChild.textContent);
+            ret[realIndex] = BigInt(td.parentNode.getAttribute("data-hex-value"));
         });
         return ret;
     }
@@ -96,6 +105,7 @@ class RegisterListing extends EventComponent {
     submitInput(input) {
         let valid = true; 
         try {
+            // TODO: interpret float/double when in that mode
             // Make sure that input.value can be interpreted as a BigInt
             BigInt(input.value);
         }
@@ -107,16 +117,133 @@ class RegisterListing extends EventComponent {
             td.setAttribute('hidden', '');
             td.previousElementSibling.removeAttribute('hidden');
             if (valid) {
-                td.previousElementSibling.firstElementChild.textContent = input.value;
+                let hexValue = "0x" + BigInt.asUintN(64, BigInt(input.value)).toString(16).padStart(16, '0');
+                td.parentNode.setAttribute("data-hex-value", hexValue);
+                td.previousElementSibling.firstElementChild.textContent = hexValue;
             }
             this.trigger('change');
         }
+    }
+
+    switchToHex(row) {
+        let typeCell = row.querySelector("td.type");
+        if (typeCell) {
+            typeCell.textContent = "x";
+        }
+
+        let dataButton = row.querySelector("td.value button");
+
+        if (!row.hasAttribute("data-hex-value")) {
+            row.setAttribute("data-hex-value", dataButton.textContent);
+        }
+
+        dataButton.textContent = row.getAttribute("data-hex-value");
+
+        // Enable all dropdown entries
+        row.querySelectorAll("button[data-action^=\"as-\"]").forEach( (item) => {
+            item.removeAttribute("disabled");
+        });
+
+        // Disable as-hex
+        let asHexItem = row.querySelector("button[data-action=\"as-hex\"]");
+        if (asHexItem) {
+            asHexItem.setAttribute("disabled", "");
+        }
+    }
+
+    switchToFloat(row) {
+        // Switch to Hex first
+        this.switchToHex(row);
+
+        // Now switch to float
+        let typeCell = row.querySelector("td.type");
+        typeCell.textContent = "f";
+
+        let value = BigInt(row.getAttribute("data-hex-value"));
+        let buffer = new Uint8Array(8);
+        let view = new DataView(buffer.buffer);
+        view.setBigUint64(0, value);
+        value = view.getFloat32(4).toString();
+        if (value.indexOf(".") == -1 && value != "NaN") {
+            value = value + ".0";
+        }
+
+        let dataButton = row.querySelector("td.value button");
+        dataButton.textContent = value;
+
+        // Enable all dropdown entries
+        row.querySelectorAll("button[data-action^=\"as-\"]").forEach( (item) => {
+            item.removeAttribute("disabled");
+        });
+
+        // Disable as-float
+        row.querySelector("button[data-action=\"as-float\"]").setAttribute("disabled", "");
+    }
+
+    switchToDouble(row) {
+        // Switch to Hex first
+        this.switchToHex(row);
+
+        // Now switch to double
+        let typeCell = row.querySelector("td.type");
+        typeCell.textContent = "d";
+
+        let value = BigInt(row.getAttribute("data-hex-value"));
+        let buffer = new Uint8Array(8);
+        let view = new DataView(buffer.buffer);
+        view.setBigUint64(0, value);
+        value = view.getFloat64(0).toString();
+        if (value.indexOf(".") == -1 && value != "NaN") {
+            value = value + ".0";
+        }
+
+        let dataButton = row.querySelector("td.value button");
+        dataButton.textContent = value;
+
+        // Enable all dropdown entries
+        row.querySelectorAll("button[data-action^=\"as-\"]").forEach( (item) => {
+            item.removeAttribute("disabled");
+        });
+
+        // Disable as-double
+        row.querySelector("button[data-action=\"as-double\"]").setAttribute("disabled", "");
     }
 
     bindEvents() {
         let tableCells = this._element.querySelectorAll("td.value");
         tableCells.forEach( (td) => {
             td.firstElementChild.addEventListener("click", this.selectInput.bind(this, td));
+
+            // Bind dropdown events
+            let actionButton = td.parentNode.querySelector("button.actions");
+            if (actionButton) {
+                // Create the dropdown menu
+                let dropdown = new Dropdown(actionButton);
+
+                dropdown.on('click', (event) => {
+                    if (event == "as-hex") {
+                        this.switchToHex(td.parentNode);
+                    }
+                    else if (event == "as-float") {
+                        this.switchToFloat(td.parentNode);
+                    }
+                    else if (event == "as-double") {
+                        this.switchToDouble(td.parentNode);
+                    }
+                    else if (event == "explore") {
+                        let floatExplorer = new FloatExplorer();
+                        floatExplorer.update(BigInt(td.parentNode.getAttribute('data-hex-value')));
+
+                        let typeCell = td.parentNode.querySelector("td.type");
+                        if (typeCell && typeCell.textContent == "f") {
+                            floatExplorer.view32();
+                        }
+                        else if (typeCell && typeCell.textContent == "d") {
+                            floatExplorer.view64();
+                        }
+                    }
+                });
+            }
         });
 
         let inputCells = this._element.querySelectorAll("td.edit input");

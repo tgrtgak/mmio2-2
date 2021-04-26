@@ -261,7 +261,7 @@ ol.tabs {
                 background: #46b1e4;
             }
 
-            > button, 
+            > button,
             > a {
                 color: #46b1e4;
                 height: 1.8rem;
@@ -528,7 +528,7 @@ ol.tab-panels {
                             cursor: pointer;
 
                             &:focus,
-                            &:hover {
+                            &:hover:not([disabled]) {
                                 background: #46b1e4;
                                 color: white;
                             }
@@ -704,10 +704,6 @@ ol.tab-panels {
         flex: 1 0 auto;
         flex-direction: row;
         flex-basis: 481px;
-        font-family: monospace,courier,fixed,swiss,sans-serif;
-        font-size: 15px;
-        font-weight: normal;
-        font-variant-ligatures: none;
         overflow: hidden;
         line-height: 1.2;
         height: 481px;
@@ -825,6 +821,9 @@ ol.tab-panels {
 
                 .register {
                     padding: 0.2rem;
+                    font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                    font-weight: normal;
+                    font-variant-ligatures: none;
 
                     > * {
                         border-bottom: 1px solid #ddd;
@@ -853,15 +852,12 @@ ol.tab-panels {
                         width: 100%;
 
                         button {
+                            font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
                             margin: 0;
                             padding: 0;
                             outline: none;
                             border: none;
                             background: transparent;
-                            font-family: monospace,courier,fixed,swiss,sans-serif;
-                            font-size: 15px;
-                            font-weight: normal;
-                            font-variant-ligatures: none;
                             text-align: center;
                         }
                     }
@@ -870,30 +866,85 @@ ol.tab-panels {
                         width: 100%;
 
                         .input {
-                            margin: 0;
-                            padding: 0;
-                            outline: none;
-                            border: none;
                             background: transparent;
-                            font-family: monospace,courier,fixed,swiss,sans-serif;
-                            font-size: 15px;
-                            font-weight: normal;
-                            font-variant-ligatures: none;
+                            border: none;
+                            font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                            margin: 0;
+                            outline: none;
+                            padding: 0;
                             text-align: center;
+                            width: 100%;
                         }
                     }
 
                     .actions {
-                        padding: 0;
-                        margin: 0;
                         line-height: 0;
+                        margin: 0;
+                        padding: 0;
+                        position: relative;
 
-                        img {
+                        > button.actions {
+                            cursor: pointer;
+                            background: none;
+                            border: 1px solid #ffffff;
+                            border-radius: 50%;
                             width: 1rem;
                             height: 1rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+
+                            &:active {
+                                outline: none;
+                            }
+
+                            > img {
+                                width: 1rem;
+                                height: 1rem;
+                                line-height: 1rem;
+                                padding: 0;
+                                margin: 0;
+                                vertical-align: middle;
+
+                                &.active ,
+                                &.hover {
+                                    display: none;
+                                }
+                            }
+                        }
+
+                        > ul.dropdown-menu {
+                            list-style: none;
+                            position: absolute;
+                            z-index: 999;
                             padding: 0;
                             margin: 0;
-                            vertical-align: middle;
+                            right: 0;
+                            outline: 0;
+                            background: white;
+                            border: 0.0625rem solid #333;
+
+                            > li {
+                                padding: 0;
+                                margin: 0;
+                                white-space: nowrap;
+
+                                > button {
+                                    width: 100%;
+                                    text-align: left;
+                                    background: none;
+                                    border: 0;
+                                    padding: 0.2rem;
+                                    margin: 0;
+                                    cursor: pointer;
+
+                                    &:focus,
+                                    &:hover:not([disabled]) {
+                                        background: #46b1e4;
+                                        color: white;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1084,131 +1135,378 @@ iframe {
   }
 }
 
-dialog#dialog-upload-files {
-    height: 35%;
-    width: 30%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    text-align: center;
-    color: black;
-    font-family: 'Lato', sans-serif;
-    margin: auto;
+dialog.dialog {
+    background: white;
+    border: 0.0625rem solid black;
+    box-shadow: 0 0 0.25rem 0.0625rem black;
+    padding: 0;
 
-    button#button-complete-upload {
-        background-color: #43ac43;
-        color: white;
+    &::backdrop {
+        backdrop-filter: grayscale(0.5);
+        background: rgba(0, 0, 0, 0.25);
+    }
+
+    > h1.title {
+        padding: 0;
+        border-bottom: 0.0625rem solid black;
+        display: flex;
+        flex-direction: row;
+        margin: 0;
+
+        > span.caption {
+            border-right: 0.0625rem solid #cdcdcd;
+            flex: 1 1 100%;
+            font: 800 12pt/1.5rem Lato;
+            padding: 0.25rem 0.5rem;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        > button.close {
+            background: white;
+            border: none;
+            cursor: pointer;
+            flex: 1 1 2rem;
+            height: 2rem;
+            overflow: hidden;
+            position: relative;
+            text-indent: -9999px;
+            width: 2rem;
+            outline: none;
+
+            &:focus {
+                outline: none;
+            }
+
+            &::after {
+                bottom: 0;
+                content: '\00D7';
+                font: 800 1rem/2rem Lato;
+                left: 0;
+                position: absolute;
+                right: 0;
+                text-align: center;
+                text-indent: 0;
+                top: 0;
+                vertical-align: middle;
+            }
+
+            &:hover {
+                background-color: #46b1e4;
+
+                &::after {
+                    color: white;
+                }
+            }
+        }
+    }
+
+    > .client {
+        padding: 0.5rem;
+
+        h2 {
+            font: 800 1rem Lato;
+            padding: 0;
+            margin: 0;
+            margin-top: 0.5rem;
+
+            &:first-child {
+              margin-top: 0;
+            }
+        }
+    }
+
+    &#dialog-upload-files {
+        height: 35%;
+        width: 30%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        text-align: center;
+        color: black;
         font-family: 'Lato', sans-serif;
-        border-width: 0;
-        display: inline-block;
-        border-width: 2px;
-        cursor: pointer;
-    }
-
-    button#button-cancel-upload {
-        background-color: rgb(148, 12, 12);
-        color: white;
-        font-family: 'Lato', sans-serif;
-        border-width: 0;
-        display: inline-block;
-        margin-right: 2%;
-        border-width: 2px;
-        cursor: pointer;
-    }
-
-    input#input-choose-files {
-        width: 0.1px;
-        height: 0.1px;
-        opacity: 0;
-        overflow: hidden;
-        position: absolute;
-        z-index: -1;
-    }
-
-    .upload-zone {
-        height: 90%;
-        width: 90%;
         margin: auto;
 
-        label.drop-area {
-            background-color: rgb(211,211,211);
+        button#button-complete-upload {
+            background-color: #43ac43;
+            color: white;
+            font-family: 'Lato', sans-serif;
+            border-width: 0;
             display: inline-block;
-            border: 3px dotted black;
+            border-width: 2px;
             cursor: pointer;
+        }
+
+        button#button-cancel-upload {
+            background-color: rgb(148, 12, 12);
+            color: white;
+            font-family: 'Lato', sans-serif;
+            border-width: 0;
+            display: inline-block;
+            margin-right: 2%;
+            border-width: 2px;
+            cursor: pointer;
+        }
+
+        input#input-choose-files {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .upload-zone {
             height: 90%;
             width: 90%;
             margin: auto;
 
-            .drop-area-header {
-                font-size: 2em;
-                font-weight: 700;
-                padding: 2%;
-            }
-
-            .drop-area-caption {
-                font-size: 1.1em;
-                font-weight: 250;
-            }
-        }
-
-        label.drop-preview-message {
-            cursor: pointer;
-            display: none;
-
-            span.preview-message {
-                color: blue;
-
-                &:hover {
-                    text-decoration: underline;
-                }
-            }
-        }
-
-        .drop-previews {
-            display: none;
-            font-size: 1em;
-
-            .drop-preview-header {
-                font-weight: 700;
-                display: flex;
-                justify-content: space-between;
-
-                span.header-file-name {
-                    text-align: left;
-                }
-
-                span.header-file-size {
-                    text-align: right;
-                }
-            }
-
-            .drop-preview {
-                display: flex;
-                justify-content: space-between;
+            label.drop-area {
+                background-color: rgb(211,211,211);
+                display: inline-block;
+                border: 3px dotted black;
                 cursor: pointer;
+                height: 90%;
+                width: 90%;
+                margin: auto;
 
-                span.file-name {
-                    text-align: left;
-                    max-height: 1.2em;
-                    overflow-y: scroll;
-                }
-            
-
-                span.file-size {
-                    text-align: right;
+                .drop-area-header {
+                    font-size: 2em;
+                    font-weight: 700;
+                    padding: 2%;
                 }
 
-                .drop-preview-remove-file {
-                    display: none;
+                .drop-area-caption {
+                    font-size: 1.1em;
+                    font-weight: 250;
+                }
+            }
+
+            label.drop-preview-message {
+                cursor: pointer;
+                display: none;
+
+                span.preview-message {
+                    color: blue;
 
                     &:hover {
-                        display: inline;
+                        text-decoration: underline;
+                    }
+                }
+            }
+
+            .drop-previews {
+                display: none;
+                font-size: 1em;
+
+                .drop-preview-header {
+                    font-weight: 700;
+                    display: flex;
+                    justify-content: space-between;
+
+                    span.header-file-name {
+                        text-align: left;
+                    }
+
+                    span.header-file-size {
+                        text-align: right;
                     }
                 }
 
-                &:hover {
-                    background-color: #ffb6c1;
+                .drop-preview {
+                    display: flex;
+                    justify-content: space-between;
+                    cursor: pointer;
+
+                    span.file-name {
+                        text-align: left;
+                        max-height: 1.2em;
+                        overflow-y: scroll;
+                    }
+
+
+                    span.file-size {
+                        text-align: right;
+                    }
+
+                    .drop-preview-remove-file {
+                        display: none;
+
+                        &:hover {
+                            display: inline;
+                        }
+                    }
+
+                    &:hover {
+                        background-color: #ffb6c1;
+                    }
                 }
             }
+        }
+    }
+
+    &#dialog-float-explorer {
+        > .client {
+            padding: 0;
+        }
+
+        ol.tab-panels {
+            li.tab-panel.active {
+                position: relative;
+                padding: 0.5rem;
+            }
+        }
+
+        table {
+            border-spacing: 0.125rem;
+
+            tbody {
+                tr {
+                    td {
+                        font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                        height: 1.25rem;
+                        padding: 0.125rem;
+
+                        label {
+                            position: relative;
+                            cursor: pointer;
+                            padding: 0.125rem;
+
+                            input {
+                                background: transparent;
+                                border: none;
+                                bottom: 0;
+                                cursor: pointer;
+                                display: inline-block;
+                                height: 100%;
+                                left: 0;
+                                opacity: 0;
+                                outline: none;
+                                position: absolute;
+                                right: 0;
+                                top: 0;
+                                width: 100%;
+
+                                  & + span::after {
+                                    content: '0';
+                                  }
+
+                                &:checked {
+                                  & + span::after {
+                                    content: '1';
+                                  }
+                                }
+                            }
+                        }
+                    }
+
+                    &:first-child:last-child {
+                        td {
+                            border-top: 0.8125rem solid white;
+                            border-bottom: 0.8125rem solid white;
+                        }
+                    }
+                }
+            }
+        }
+
+        .sign {
+            background-color: #ababd6;
+            border-color: #ababd6;
+        }
+
+        .exponent {
+            background-color: #ff9e9e;
+            border-color: #ff9e9e;
+        }
+
+        .mantissa {
+            background-color: #da9dda;
+            border-color: #da9dda;
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: row;
+
+            .legend-item {
+                flex: 1 1 33%;
+                text-align: center;
+
+                .box {
+                    display: inline-block;
+                    width: 0.5rem;
+                    height: 0.5rem;
+                    margin-right: 0.5rem;
+                }
+
+                span {
+                    font: 400 0.8rem Lato;
+                }
+            }
+        }
+
+        .calculation {
+            padding-top: 1rem;
+            padding-bottom: 0.5rem;
+            text-align: center;
+
+            span {
+                background: transparent;
+                margin-right: 0.5rem;
+            }
+
+            span.super {
+                font-size: 0.75rem;
+                position: relative;
+                top: -0.5rem;
+            }
+
+            span.left,
+            span.exponent,
+            span.leading,
+            span.bias,
+            span.two {
+                margin-right: 0;
+            }
+
+            span.minus {
+                margin-left: 0.5rem;
+            }
+
+            span.sign,
+            span.exponent,
+            span.mantissa {
+                color: black;
+                border-bottom-width: 0.1875rem;
+                border-bottom-style: double;
+            }
+
+            & + .normalization {
+                display: block;
+                font: 800 0.75rem Lato;
+                text-align: center;
+
+                .denormalized {
+                    font-style: italic;
+                }
+            }
+        }
+
+        input {
+            box-sizing: border-box;
+            font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+            width: 100%;
+        }
+
+        p {
+            display: block;
+            font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     }
 }

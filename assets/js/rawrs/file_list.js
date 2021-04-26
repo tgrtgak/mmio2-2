@@ -7,6 +7,7 @@ import Util from './util.js';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
 import Editor from './editor';
+
 import dialogPolyfill from 'dialog-polyfill';
 
 /**
@@ -198,7 +199,7 @@ class FileList extends EventComponent {
      */
     async cancelUpload() {
         //Empties out the current selected files.
-        await this._dialog.close();
+        this._dialog.close();
     }
 
     /**

@@ -1,24 +1,210 @@
-dialog#dialog-upload-files
-  input#input-choose-files type=:file multiple=true
-  .upload-zone
-    label.drop-area for="input-choose-files" aria-label="Select to upload your files" role="button"
-      .drop-area-header
-        | Drag & Drop
-      .drop-area-caption
-        | Any files accepted. Click to browse.
-    label.drop-preview-message for="input-choose-files" aria-label="Select to upload your files" role="button"
-      span.preview-message
-        | Browse Additional Files
-    .drop-previews
-      .drop-preview-header
-        span.header-file-name
-          | Name
-        span.header-file-size
-          | Size
-      .drop-preview
-        span.file-name
-        span.file-size
-  button#button-complete-upload
-    | Submit
-  button#button-cancel-upload
-    | Cancel
+dialog.dialog#dialog-upload-files
+  h1.title
+    span.caption
+      | Upload Files
+    button.close
+      | Close
+  .client
+    input#input-choose-files type=:file multiple=true
+    .upload-zone
+      label.drop-area for="input-choose-files" aria-label="Select to upload your files" role="button"
+        .drop-area-header
+          | Drag & Drop
+        .drop-area-caption
+          | Any files accepted. Click to browse.
+      label.drop-preview-message for="input-choose-files" aria-label="Select to upload your files" role="button"
+        span.preview-message
+          | Browse Additional Files
+      .drop-previews
+        .drop-preview-header
+          span.header-file-name
+            | Name
+          span.header-file-size
+            | Size
+        .drop-preview
+          span.file-name
+          span.file-size
+    button#button-complete-upload
+      | Submit
+    button#button-cancel-upload
+      | Cancel
+
+dialog.dialog#dialog-float-explorer
+  h1.title
+    span.caption
+      | Float Explorer
+    button.close
+      | Close
+  .client
+    ol.tabs
+      li.tab
+        button#float-explorer-32 aria-controls=:"float-explorer-32-panel"
+          | 32-bit
+      li.tab.active
+        button#float-explorer-64 aria-controls=:"float-explorer-64-panel"
+          | 64-bit
+    ol.tab-panels
+      li.tab-panel#float-explorer-32-panel
+        table.float-32
+          tbody
+            tr
+              td.sign data-bit-index="31"
+                label
+                  input type=:checkbox
+                  span role=:presentation aria-hidden=:true
+              - 8.times do |i|
+                td.exponent data-bit-index=(31 - (i + 1)).to_s
+                  label
+                    input type=:checkbox
+                    span role=:presentation aria-hidden=:true
+              - 23.times do |i|
+                td.mantissa data-bit-index=(31 - (i + 9)).to_s
+                  label
+                    input type=:checkbox
+                    span role=:presentation aria-hidden=:true
+        .legend aria-hidden=:true
+          .legend-item
+            .box.sign
+            span role=:presentation
+              | sign
+          .legend-item
+            .box.exponent
+            span role=:presentation
+              | exponent
+          .legend-item
+            .box.mantissa
+            span role=:presentation
+              | mantissa
+        .calculation
+          span.sign
+            | -1
+          span
+            | ×
+          span.two
+            | 2
+          span.super.left
+            | (
+          span.super.exponent
+            | 123
+          span.super.minus
+            | -
+          span.super.bias
+            | 127
+          span.super.right
+            | )
+          span.denormalized hidden=true aria-hidden=:true
+            | ×
+          span.two.denormalized hidden=true aria-hidden=:true
+            | 2
+          span.super.denormalized hidden=true aria-hidden=:true
+            | 1
+          span
+            | ×
+          span.leading
+            | 1.
+          span.mantissa
+            | 234
+        .normalization
+          span.normalized
+            | normalized
+          span.denormalized hidden=true aria-hidden=:true
+            | denormalized
+        h2
+          | Calculated Value
+        p.calculated-value
+          | 500
+        h2
+          | Error
+        p.error-value
+          | 500
+        h2
+          | Hexadecimal Representation
+        input.hex-value value="0xfabc0000"
+        h2
+          | Decimal Representation
+        input.entered-value value="500"
+      li.tab-panel.active#float-explorer-64-panel
+        table.float-64
+          tbody
+            tr
+              td.sign data-bit-index="63"
+                label
+                  input type=:checkbox
+                  span role=:presentation aria-hidden=:true
+              - 11.times do |i|
+                td.exponent data=i.to_s data-bit-index=(63 - (i + 1)).to_s
+                  label
+                    input type=:checkbox
+                    span role=:presentation aria-hidden=:true
+              - 20.times do |i|
+                td.mantissa data-bit-index=(63 - (i + 12)).to_s
+                  label
+                    input type=:checkbox
+                    span role=:presentation aria-hidden=:true
+            tr
+              - 32.times do |i|
+                td.mantissa data-bit-index=(63 - (i + 32)).to_s
+                  label
+                    input type=:checkbox
+                    span role=:presentation aria-hidden=:true
+        .legend aria-hidden=:true
+          .legend-item
+            .box.sign
+            span role=:presentation
+              | sign
+          .legend-item
+            .box.exponent
+            span role=:presentation
+              | exponent
+          .legend-item
+            .box.mantissa
+            span role=:presentation
+              | mantissa
+        .calculation
+          span.sign
+            | -1
+          span
+            | ×
+          span.two
+            | 2
+          span.super.left
+            | (
+          span.super.exponent
+            | 123
+          span.super.minus
+            | -
+          span.super.bias
+            | 1023
+          span.super.right
+            | )
+          span.denormalized hidden=true aria-hidden=:true
+            | ×
+          span.two.denormalized hidden=true aria-hidden=:true
+            | 2
+          span.super.denormalized hidden=true aria-hidden=:true
+            | 1
+          span
+            | ×
+          span.leading
+            | 1.
+          span.mantissa
+            | 234
+        .normalization
+          span.normalized
+            | normalized
+          span.denormalized hidden=true aria-hidden=:true
+            | denormalized
+        h2
+          | Calculated Value
+        p.calculated-value
+          | 500
+        h2
+          | Error
+        p.error-value
+          | 500
+        h2
+          | Hexadecimal Representation
+        input.hex-value value="0xfabc0000"
+        h2
+          | Decimal Representation
+        input.entered-value value="500"
