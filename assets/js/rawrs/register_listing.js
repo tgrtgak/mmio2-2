@@ -66,14 +66,30 @@ class RegisterListing extends EventComponent {
             // Get the register name and the element that represents it.
             let regName = Simulator.ALL_REGISTER_NAMES[i];
             let row = this._element.querySelector("tr." + regName);
-            row.setAttribute("data-hex-value", "0x" + str);
             let element = row.querySelector("td.value");
             if (element) {
-                let oldContent = element.firstElementChild.textContent;
+                // Determine what the value should be encoded as
+                let typeCell = row.querySelector("td.type");
+                let type = (typeCell ? typeCell.textContent : "x");
+
+                // Determine the new value and if the value has changed
+                let oldContent = row.getAttribute("data-hex-value");
                 let newContent = "0x" + str;
+                row.setAttribute("data-hex-value", newContent);
+
+                // Conform to hex to start
+                this.switchToHex(row);
+
                 if (oldContent != newContent) {
-                    element.firstElementChild.textContent = newContent;
-                    element.parentNode.classList.add("updated");
+                    row.classList.add("updated");
+                }
+
+                // Re-encode to the requested type
+                if (type == "f") {
+                    this.switchToFloat(row);
+                }
+                else if (type == "d") {
+                    this.switchToDouble(row);
                 }
             }
         });
