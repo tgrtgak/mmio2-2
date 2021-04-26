@@ -20,7 +20,7 @@ fi
 
 cd _ROOTPATH
 
-if [ ! -d assets/js/tinyemu ]; then
+if [ ! -f assets/js/tinyemu/riscvemu64-wasm.wasm ]; then
   bash ./scripts/build-tinyemu.sh
 else
   echo "TinyEMU seems to exist. Remove assets/js/tinyemu to rebuild."

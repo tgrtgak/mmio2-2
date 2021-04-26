@@ -21,6 +21,7 @@ pages:
       - node_modules/
       - assets/js/binutils
       - assets/js/gdb
+      - assets/js/tinyemu
       - utils
   artifacts:
     paths:
