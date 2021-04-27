@@ -7,26 +7,24 @@ dialog.dialog#dialog-upload-files
   .client
     input#input-choose-files type=:file multiple=true
     .upload-zone
+      table.drop-preview-table
+        thead
+          tr.drop-preview-header
+            th.header-file-name
+              | Name
+            th.header-file-size
+              | Size
+        tbody.drop-previews
       label.drop-area for="input-choose-files" aria-label="Select to upload your files" role="button"
-        .drop-area-header
+        .drop-area-header role=:presentation aria-hidden=:true
           | Drag & Drop
-        .drop-area-caption
+        .drop-area-caption role=:presentation aria-hidden=:true
           | Any files accepted. Click to browse.
-      label.drop-preview-message for="input-choose-files" aria-label="Select to upload your files" role="button"
-        span.preview-message
+        span.preview-message hidden=true aria-hidden=:true
           | Browse Additional Files
-      .drop-previews
-        .drop-preview-header
-          span.header-file-name
-            | Name
-          span.header-file-size
-            | Size
-        .drop-preview
-          span.file-name
-          span.file-size
-    button#button-complete-upload
-      | Submit
-    button#button-cancel-upload
+    button.button#button-complete-upload disabled=true
+      | Upload
+    button.button.red#button-cancel-upload
       | Cancel
 
 dialog.dialog#dialog-float-explorer

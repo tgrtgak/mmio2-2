@@ -4,7 +4,7 @@ source "$PWD/emsdk/emsdk_env.sh"
 
 _ROOTPATH=$PWD
 
-if [ ! -f assets/js/binutils/riscv64-unknown-elf-as.wasm ] || [ ! -f assets/js/binutils/riscv64-unknown-elf-ld.wasm ] || [ ! -f assets/js/binutils/riscv64-unknown-elf-objdump.wasm ] || [ ! -f assets/js/binutils/riscv64-unknown-elf-readelf.wasm ]; then
+if [ ! -f assets/js/binutils/riscv64-unknown-elf-as-bare.wasm ] || [ ! -f assets/js/binutils/riscv64-unknown-elf-ld-bare.wasm ] || [ ! -f assets/js/binutils/riscv64-unknown-elf-objdump-bare.wasm ] || [ ! -f assets/js/binutils/riscv64-unknown-elf-readelf-bare.wasm ]; then
   bash ./scripts/build-toolchain.sh
 else
   echo "Toolchain seems to exist. Remove assets/js/binutils/riscv64-unknown-elf-*.wasm to rebuild."

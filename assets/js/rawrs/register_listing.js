@@ -1,9 +1,9 @@
 "use strict";
 
-import EventComponent from './event_component';
-import Simulator      from './simulator';
-import Dropdown       from './dropdown';
-import FloatExplorer  from './float_explorer';
+import EventComponent      from './event_component';
+import Simulator           from './simulator';
+import Dropdown            from './dropdown';
+import FloatExplorerDialog from './float_explorer_dialog';
 
 class RegisterListing extends EventComponent {
     /**
@@ -247,7 +247,7 @@ class RegisterListing extends EventComponent {
                         this.switchToDouble(td.parentNode);
                     }
                     else if (event == "explore") {
-                        let floatExplorer = new FloatExplorer();
+                        let floatExplorer = new FloatExplorerDialog();
                         floatExplorer.update(BigInt(td.parentNode.getAttribute('data-hex-value')));
 
                         let typeCell = td.parentNode.querySelector("td.type");

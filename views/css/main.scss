@@ -18,6 +18,120 @@ body, html {
     }
 }
 
+/* Normal button colors */
+$start-color: hsl(190, 0%, 100%);
+$end-color: hsl(190, 0%, 90%);
+
+// Button
+//
+// This is a simple button.
+//
+// Markup
+// <div><button class="button">Ok</button></div>
+//
+// Styleguide Components.button
+.button {
+    position: relative;
+    display: inline-block;
+    border: 0.0625rem solid #ccc;
+    border-radius: 0.125rem;
+    color: #333;
+    cursor: pointer;
+    padding: 0.25rem 0.4rem;
+    margin-top: 0.5rem;
+    text-align: center;
+    text-decoration: none;
+    font: 800 0.8rem/1.0rem Lato, sans-serif;
+    background: linear-gradient(to bottom, $start-color 5%, $end-color 100%);
+    box-shadow: inset 0 0 0.0625rem 0.0625rem hsl(190, 60%, 100%);
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Safari */
+    -khtml-user-select: none;    /* Konqueror HTML */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                          supported by Chrome and Opera */
+
+    + .button {
+        margin-left: 0.5rem;
+    }
+
+    svg,
+    img {
+        display: inline-block;
+        height: calc(100% - 0.25rem);
+
+        &.hover {
+            display: none;
+        }
+    }
+
+    &.inline {
+        margin-top: 0;
+    }
+
+    &:hover {
+        text-decoration: none;
+        box-shadow: inset 0 0 0.0625rem 0.0625rem #d400ff;
+
+        img {
+            display: none;
+        }
+
+        img.hover {
+            display: inline-block;
+        }
+    }
+
+    &:active {
+        top: 0.0625rem;
+        background: linear-gradient(to bottom, hsl(190, 0%, 95%) 5%, hsl(190, 0%, 90%) 100%);
+        background-color: rgb(221, 221, 221);
+    }
+
+    &.disabled,
+    &:disabled {
+        color: #aaa;
+        cursor: default;
+
+        &:active {
+            position: relative;
+            top: 0;
+            background: linear-gradient(to bottom, hsl(190, 0%, 100%) 5%, hsl(190, 0%, 90%) 100%);
+            background-color: rgb(221, 221, 221);
+        }
+
+        &:hover {
+            box-shadow: inset 0 0 0.0625rem 0.0625rem hsl(190, 60%, 100%);
+        }
+    }
+
+    /* "red" button colors */
+    &.red {
+        background: linear-gradient(to bottom, hsl(0, 0%, 100%) 5%, hsl(0, 0%, 90%) 100%);
+        box-shadow: inset 0 0 0.0625rem 0.0625rem hsl(0, 60%, 100%);
+
+        &:hover {
+            box-shadow: inset 0 0 0.0625rem 0.0625rem hsl(0, 60%, 50%);
+        }
+
+        &:active {
+            background: linear-gradient(to bottom, hsl(0, 0%, 95%) 5%, hsl(0, 0%, 90%) 100%);
+        }
+
+        &.disabled,
+        &:disabled {
+            &:active {
+                background: linear-gradient(to bottom, hsl(0, 0%, 100%) 5%, hsl(0, 0%, 90%) 100%);
+            }
+
+            &:hover {
+                box-shadow: inset 0 0 0.0625rem 0.0625rem hsl(0, 60%, 100%);
+            }
+        }
+    }
+}
+
 /* Making sure hidden things are hidden */
 template, *[hidden] {
     display: none !important;
@@ -68,7 +182,7 @@ pre#output {
 
         font: 400 0.8rem Lato;
 
-        border: 1px solid #71526e;
+        border: 0.0625rem solid #71526e;
         border-radius: 0.5rem;
 
         background: #382c37;
@@ -102,10 +216,10 @@ ol.toolbar {
             width:  1.40rem;
             position: relative;
             background: #585858;
-            border: 1px solid #3a3a3a;
+            border: 0.0625rem solid #3a3a3a;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0px 0px 0px 2px #ddd;
+            box-shadow: 0 0 0 0.125rem #ddd;
             outline: none;
 
             &#run {
@@ -146,15 +260,15 @@ ol.toolbar {
 
             @keyframes pulse {
                 0% {
-                    box-shadow: 0px 0px 0px 2px #9bcbea;
+                    box-shadow: 0 0 0 0.125rem #9bcbea;
                 }
                 100% {
-                    box-shadow: 0px 0px 0px 2px #46b1e4;
+                    box-shadow: 0 0 0 0.125rem #46b1e4;
                 }
             }
 
             &[data-status="paused"] {
-                box-shadow: 0px 0px 0px 2px #a681e8;
+                box-shadow: 0 0 0 0.125rem #a681e8;
             }
 
             &[data-status="active"] {
@@ -162,11 +276,11 @@ ol.toolbar {
             }
 
             &[data-status="success"] {
-                box-shadow: 0px 0px 0px 2px #a5ea9b;
+                box-shadow: 0 0 0 0.125rem #a5ea9b;
             }
 
             &[data-status="failure"] {
-                box-shadow: 0px 0px 0px 2px #ea9b9b;
+                box-shadow: 0 0 0 0.125rem #ea9b9b;
             }
 
             &[disabled] {
@@ -205,7 +319,7 @@ ol.tabs {
         bottom: 0;
         left: 0;
         right: 0;
-        box-shadow: 0px 0px 2px 0px black inset;
+        box-shadow: 0 0 0.125rem 0 black inset;
         pointer-events: none;
     }
 
@@ -248,7 +362,7 @@ ol.tabs {
             height: 1.8rem;
             margin-top: 0.25rem;
             background: #333;
-            box-shadow: 0px 0px 0.1875rem 0px #464646;
+            box-shadow: 0 0 0.1875rem 0 #464646;
             z-index: 9;
 
             &::after {
@@ -353,7 +467,7 @@ ol.tabs {
 // Nested tabs
 ol.tab-panels ol.tabs:not(.side) {
     background: #927a90;
-    box-shadow: 0px 0px 4px 0px black inset;
+    box-shadow: 0 0 0.25rem 0 black inset;
 }
 
 ol.tab-panels {
@@ -395,7 +509,7 @@ ol.tab-panels {
 
 .project-pane {
     background: #fff;
-    box-shadow: 0px 0px 4px -1px black inset;
+    box-shadow: 0 0 0.25rem -0.0625rem black inset;
     user-select: none;
     cursor: default;
     flex: 1 0 auto;
@@ -405,6 +519,16 @@ ol.tab-panels {
 
     ol {
         padding: 0.5rem;
+
+        p.empty {
+            color: #888;
+            display: none;
+            font: 400 0.7rem/1.0rem Lato, sans-serif;
+            font-style: italic;
+            margin: 0;
+            margin-left: 1rem;
+            padding: 0;
+        }
 
         // Nested list
         ol {
@@ -428,8 +552,8 @@ ol.tab-panels {
                         border-left: 0.4rem solid black;
                         border-top: 0.25rem solid transparent;
                         border-bottom: 0.25rem solid transparent;
-                        height: 0px;
-                        width: 0px;
+                        height: 0;
+                        width: 0;
                         display: inline-block;
                         margin-right: 0.4rem;
                         position: relative;
@@ -451,6 +575,10 @@ ol.tab-panels {
 
                     > ol {
                         display: block;
+
+                        &:empty ~ p.empty {
+                            display: block;
+                        }
                     }
                 }
             }
@@ -479,7 +607,7 @@ ol.tab-panels {
                     right: 0.2rem;
                     top: 0.2rem;
                     background: none;
-                    border: 1px solid #ffffff;
+                    border: 0.0625rem solid #ffffff;
                     border-radius: 50%;
                     width: 1rem;
                     height: 1rem;
@@ -742,9 +870,9 @@ ol.tab-panels {
                             text-align: left;
                             margin: 0 auto;
                             display: inline-block;
-                            border-left:  5px solid #2d242d;
-                            border-right: 5px solid #2d242d;
-                            outline:      1px solid #1d141d;
+                            border-left: 0.3125rem solid #2d242d;
+                            border-right: 0.3125rem solid #2d242d;
+                            outline: 0.0625rem solid #1d141d;
                             width: 640px;
                             height: 480px;
 
@@ -769,7 +897,7 @@ ol.tab-panels {
                 div.disconnected {
                     position: absolute;
                     left: 0;
-                    right: 1px;
+                    right: 0.0625rem;
                     top: 0;
                     bottom: 0;
                     background: rgba(96, 41, 41, 0.5);
@@ -809,7 +937,7 @@ ol.tab-panels {
             flex-direction: column;
 
             .registers {
-                box-shadow: 0px 0px 4px -1px black inset;
+                box-shadow: 0 0 0.25rem -0.0625rem black inset;
                 padding: 0;
                 margin: 0;
                 margin-top: 0.2rem;
@@ -826,11 +954,11 @@ ol.tab-panels {
                     font-variant-ligatures: none;
 
                     > * {
-                        border-bottom: 1px solid #ddd;
+                        border-bottom: 0.0625rem solid #ddd;
                         padding: 0.2rem 0.4rem;
 
                         &:not(:first-child) {
-                            border-left: 1px solid #ddd;
+                            border-left: 0.0625rem solid #ddd;
                         }
 
                         text-align: center;
@@ -886,7 +1014,7 @@ ol.tab-panels {
                         > button.actions {
                             cursor: pointer;
                             background: none;
-                            border: 1px solid #ffffff;
+                            border: 0.0625rem solid #ffffff;
                             border-radius: 50%;
                             width: 1rem;
                             height: 1rem;
@@ -989,7 +1117,7 @@ table.labels {
     overflow: auto;
     height:   100%;
     display:  block;
-    box-shadow: 0px 0px 4px -1px black inset;
+    box-shadow: 0 0 0.25rem -0.0625rem black inset;
     border-collapse: collapse;
     tr {
         &:hover td {
@@ -1002,8 +1130,8 @@ table.labels {
             font-size: 15px;
             font-weight: normal;
             font-variant-ligatures: none;
-            border-top: 1px solid #ddd;
-            border-left: 1px solid #ddd;
+            border-top: 0.0625rem solid #ddd;
+            border-left: 0.0625rem solid #ddd;
             padding: 0.2rem;
 
             &:first-child {
@@ -1056,7 +1184,7 @@ table.labels {
 
         th {
             font: bold 0.9rem Lato, sans-serif;
-            border-bottom: 1px solid #333;
+            border-bottom: 0.0625rem solid #333;
             text-align: center;
         }
 
@@ -1068,7 +1196,7 @@ table.labels {
 
         &:last-child {
             td {
-                border-bottom: 1px solid #ddd;
+                border-bottom: 0.0625rem solid #ddd;
             }
         }
     }
@@ -1095,7 +1223,7 @@ iframe {
     height: 100%;
     width:  100%;
     border: 0;
-    box-shadow: 0px 0px 4px -1px black inset;
+    box-shadow: 0 0 0.25rem -0.0625rem black inset;
 }
 
 .ace_scroller {
@@ -1217,35 +1345,15 @@ dialog.dialog {
     }
 
     &#dialog-upload-files {
-        height: 35%;
-        width: 30%;
         overflow-x: hidden;
         overflow-y: auto;
         text-align: center;
         color: black;
         font-family: 'Lato', sans-serif;
         margin: auto;
-
-        button#button-complete-upload {
-            background-color: #43ac43;
-            color: white;
-            font-family: 'Lato', sans-serif;
-            border-width: 0;
-            display: inline-block;
-            border-width: 2px;
-            cursor: pointer;
-        }
-
-        button#button-cancel-upload {
-            background-color: rgb(148, 12, 12);
-            color: white;
-            font-family: 'Lato', sans-serif;
-            border-width: 0;
-            display: inline-block;
-            margin-right: 2%;
-            border-width: 2px;
-            cursor: pointer;
-        }
+        width: 35rem;
+        min-width: 20rem;
+        max-width: 100%;
 
         input#input-choose-files {
             width: 0.1px;
@@ -1257,23 +1365,29 @@ dialog.dialog {
         }
 
         .upload-zone {
-            height: 90%;
-            width: 90%;
             margin: auto;
+            max-width: 100%;
+            min-width: 20rem;
+            width: 100%;
+            box-sizing: border-box;
 
             label.drop-area {
-                background-color: rgb(211,211,211);
+                background-color: #ffe9f0;
                 display: inline-block;
-                border: 3px dotted black;
+                border: 0.125rem dotted black;
                 cursor: pointer;
-                height: 90%;
-                width: 90%;
                 margin: auto;
+                padding: 0.5rem;
+                max-width: 100%;
+                min-width: 20rem;
+                width: 100%;
+                box-sizing: border-box;
 
                 .drop-area-header {
                     font-size: 2em;
                     font-weight: 700;
-                    padding: 2%;
+                    padding: 1.0rem;
+                    padding-top: 0;
                 }
 
                 .drop-area-caption {
@@ -1295,50 +1409,44 @@ dialog.dialog {
                 }
             }
 
-            .drop-previews {
-                display: none;
-                font-size: 1em;
+            table.drop-preview-table {
+                width: 100%;
 
                 .drop-preview-header {
                     font-weight: 700;
-                    display: flex;
-                    justify-content: space-between;
 
-                    span.header-file-name {
+                    .header-file-name {
                         text-align: left;
                     }
 
-                    span.header-file-size {
+                    .header-file-size {
                         text-align: right;
                     }
                 }
 
-                .drop-preview {
-                    display: flex;
-                    justify-content: space-between;
-                    cursor: pointer;
+                .drop-previews {
+                    .drop-preview {
+                        cursor: pointer;
 
-                    span.file-name {
-                        text-align: left;
-                        max-height: 1.2em;
-                        overflow-y: scroll;
-                    }
+                        .file-name {
+                            text-align: left;
+                        }
 
+                        .file-size {
+                            text-align: right;
+                        }
 
-                    span.file-size {
-                        text-align: right;
-                    }
+                        .drop-preview-remove-file {
+                            display: none;
 
-                    .drop-preview-remove-file {
-                        display: none;
+                            &:hover {
+                                display: inline;
+                            }
+                        }
 
                         &:hover {
-                            display: inline;
+                            background-color: #ffb6c1;
                         }
-                    }
-
-                    &:hover {
-                        background-color: #ffb6c1;
                     }
                 }
             }

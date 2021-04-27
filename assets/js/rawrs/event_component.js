@@ -24,7 +24,7 @@ class EventComponent {
      */
     on(name, callback) {
         if (callback === undefined) {
-          return this._events[name];
+            return this._events[name];
         }
 
         this._events[name] = callback;
@@ -39,7 +39,7 @@ class EventComponent {
      */
     trigger(name, data) {
         if (this._events[name]) {
-          this._events[name].call(this, data);
+            return this._events[name].call(this, data);
         }
 
         return this;

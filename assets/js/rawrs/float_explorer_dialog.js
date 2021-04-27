@@ -1,23 +1,25 @@
 "use strict";
 
 import Tabs from './tabs';
+import Dialog from './dialog';
 
-import dialogPolyfill from 'dialog-polyfill';
-
-class FloatExplorer {
+class FloatExplorerDialog extends Dialog {
     constructor() {
-        // Find the float explorer dialog
-        this._dialog = document.querySelector("dialog#dialog-float-explorer");
-        this._tabs = Tabs.load(this._dialog.querySelector("ol.tabs"));
+        // Wrap the dialog
+        super('dialog-float-explorer');
 
+        // Show the dialog
+        this.open();
+
+        // Find the float explorer dialog tabs
+        this._tabs = Tabs.load(this.dialog.querySelector("ol.tabs"));
+
+        // Bind the events for the float explorer
         this.bindEvents();
 
-        dialogPolyfill.registerDialog(this._dialog);
-        this._dialog.showModal();
-
         // Ensure the calculated and error fields never grow out of their boxes
-        let width = this._dialog.querySelector("li.active p.calculated-value").offsetWidth;
-        this._dialog.querySelectorAll("p.calculated-value, p.error-value").forEach( (p) => {
+        let width = this.dialog.querySelector("li.active p.calculated-value").offsetWidth;
+        this.dialog.querySelectorAll("p.calculated-value, p.error-value").forEach( (p) => {
             p.style.width = width + "px";
         });
     }
@@ -32,7 +34,7 @@ class FloatExplorer {
      */
     update(value, bits) {
         let binary = BigInt.asUintN(64, value).toString(2).padStart(64, '0');
-        let table = this._dialog;
+        let table = this.dialog;
 
         // Filter to just the given table
         if (bits) {
@@ -76,10 +78,10 @@ class FloatExplorer {
 
         // Pad to at least our precision requirement
         // This will ensure that we have an integer part and a full fractional
-        value = value.padStart(FloatExplorer.FIXED_PRECISION, '0');
+        value = value.padStart(FloatExplorerDialog.FIXED_PRECISION, '0');
 
         // Get the integer portion of the string
-        let intDigits = value.length - FloatExplorer.FIXED_PRECISION + 1;
+        let intDigits = value.length - FloatExplorerDialog.FIXED_PRECISION + 1;
         let intPart = value.substring(0, intDigits) || '0';
 
         // Get the fractional remaining part of the string
@@ -105,7 +107,7 @@ class FloatExplorer {
             selector += ".float-" + bits;
         }
 
-        this._dialog.querySelectorAll(selector).forEach( (table) => {
+        this.dialog.querySelectorAll(selector).forEach( (table) => {
             // Which are we on?
             let is32 = table.classList.contains("float-32");
 
@@ -164,7 +166,7 @@ class FloatExplorer {
             // Get the calculated exponent
             let bias = parseInt(table.parentNode.querySelector(".calculation span.bias").textContent);
             let actualExponent = exponent - bias;
-            let scalar = BigInt("1".padEnd(FloatExplorer.FIXED_PRECISION, '0'));
+            let scalar = BigInt("1".padEnd(FloatExplorerDialog.FIXED_PRECISION, '0'));
 
             if (actualExponent <= 0) {
                 for (let i = actualExponent; i < 0; i++) {
@@ -178,8 +180,8 @@ class FloatExplorer {
             }
 
             // Get mantissa
-            let mantissa = BigInt("1".padEnd(FloatExplorer.FIXED_PRECISION, '0'));
-            let considering = BigInt("1".padEnd(FloatExplorer.FIXED_PRECISION, '0'));
+            let mantissa = BigInt("1".padEnd(FloatExplorerDialog.FIXED_PRECISION, '0'));
+            let considering = BigInt("1".padEnd(FloatExplorerDialog.FIXED_PRECISION, '0'));
             table.querySelectorAll("td.mantissa input").forEach( (input) => {
                 value = value << BigInt(1);
                 considering /= BigInt(2);
@@ -196,14 +198,14 @@ class FloatExplorer {
             // Now, alter the mantissa for the final calculation
             if (exponent == 0) {
                 // If denormalized, we remove the implicit 1
-                mantissa -= BigInt("1".padEnd(FloatExplorer.FIXED_PRECISION, '0'));
+                mantissa -= BigInt("1".padEnd(FloatExplorerDialog.FIXED_PRECISION, '0'));
 
                 // And we also multiply by 2
                 mantissa *= BigInt(2);
             }
 
             // Calculate the actual value (as a big integer fixed value)
-            let calculated = mantissa * scalar / BigInt("1".padEnd(FloatExplorer.FIXED_PRECISION, '0'));
+            let calculated = mantissa * scalar / BigInt("1".padEnd(FloatExplorerDialog.FIXED_PRECISION, '0'));
             if (sign) {
                 calculated *= BigInt(-1);
             }
@@ -247,7 +249,7 @@ class FloatExplorer {
                 // value as a BigInt multiplied by 10^(precision - 1).
                 let parts = decimalValue.getAttribute('data-entered').split('.');
                 let intPart = parts[0]
-                let fracPart = parts[1].padEnd(FloatExplorer.FIXED_PRECISION - 1, '0');
+                let fracPart = parts[1].padEnd(FloatExplorerDialog.FIXED_PRECISION - 1, '0');
                 let entered = BigInt(intPart + fracPart);
 
                 // We can calculate the error by subtracting it from the
@@ -286,21 +288,21 @@ class FloatExplorer {
 
     bindEvents() {
         // Bail if this was called before
-        if (this._dialog.classList.contains("bound")) {
+        if (this.dialog.classList.contains("bound")) {
             return;
         }
 
         // Do not allow the events to be bound twice
-        this._dialog.classList.add("bound");
+        this.dialog.classList.add("bound");
 
         // Bind to the bit checkboxes
-        this._dialog.querySelectorAll("table td label input").forEach( (cell) => {
+        this.dialog.querySelectorAll("table td label input").forEach( (cell) => {
             cell.addEventListener('change', (event) => {
                 this.calculate();
             });
         });
 
-        this._dialog.querySelectorAll("input.entered-value").forEach( (input) => {
+        this.dialog.querySelectorAll("input.entered-value").forEach( (input) => {
             input.addEventListener('change', (event) => {
                 this.interpretEnteredValue(input);
             });
@@ -309,15 +311,9 @@ class FloatExplorer {
                 this.interpretEnteredValue(input);
             });
         });
-
-        // Close button
-        let closeButton = this._dialog.querySelector('button.close');
-        closeButton.addEventListener('click', (event) => {
-            this._dialog.close();
-        });
     }
 }
 
-FloatExplorer.FIXED_PRECISION = 320;
+FloatExplorerDialog.FIXED_PRECISION = 320;
 
-export default FloatExplorer;
+export default FloatExplorerDialog;
