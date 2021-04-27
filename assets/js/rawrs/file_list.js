@@ -156,22 +156,26 @@ class FileList extends EventComponent {
      */
     bind(item) {
         if (item.classList.contains("file")) {
-            item.addEventListener('click', (event) => {
-                this.loadItem(item);
-
-                event.stopPropagation();
-                event.preventDefault();
-            });
-
             let fileNamePlace = item.querySelector("span.name");
             let oldFileName = fileNamePlace.textContent;
             let renameFileInput = item.querySelector(".info > input");
             let dataPath = atob(item.getAttribute('data-path'));
 
+            item.addEventListener('click', (event) => {
+                if (event.target !== renameFileInput) {
+                    this.loadItem(item);
+                }
+
+                event.stopPropagation();
+                event.preventDefault();
+            });
+
             if (renameFileInput) {
                 renameFileInput.addEventListener("blur", (event) => {
-                    renameFileInput.style.display = "none";
-                    fileNamePlace.style.display = "inline";
+                    if (event.target !== renameFileInput) {
+                        renameFileInput.style.display = "none";
+                        fileNamePlace.style.display = "inline";
+                    }
                 });
 
                 renameFileInput.addEventListener("keydown", async (event) => {
@@ -183,32 +187,44 @@ class FileList extends EventComponent {
                     // Rename the file.
                     else if (event.key === "Enter") {
                         await this.revealPath(dataPath);
-                        const data = await this._storage.load(dataPath);
-
-                        // Removes file with old name.
-                        await this._storage.remove(dataPath);
-                        item.parentNode.removeChild(item);
 
                         let newName = renameFileInput.value;
-
                         if (!newName.includes(".")) {
                             newName += ".s";
                         }
 
-                        // Saves the renamed file.
+                        // Determine the new paths
                         let directoryPath = dataPath.substring(0, dataPath.length - oldFileName.length - 1);
                         let newPath = directoryPath.substring(1) + "/" + newName;
-
-                        await this._storage.save(newPath, data);
-
-                        // Creates the renamed file item.
-                        const newItem = {name: newName, type: "file"};
-                        const itemElement = this.newItem(newItem, directoryPath);
-
-                        // Adds the renamed file element to the DOM.
                         const parentDirectory = this.itemFor(directoryPath);
-                        const parentListing = parentDirectory.querySelector(":scope > ol");
-                        parentListing.appendChild(itemElement);
+
+                        // Check if the file already exists with that name
+                        const currentItem = this.itemFor("/" + newPath);
+                        console.log(newPath, currentItem);
+                        if (!currentItem) {
+                            // Get the data
+                            const data = await this._storage.load(dataPath);
+
+                            // Removes file with old name.
+                            await this._storage.remove(dataPath);
+                            item.parentNode.removeChild(item);
+
+                            // Saves the renamed file.
+                            await this._storage.save(newPath, data);
+
+                            // Creates the renamed file item.
+                            const newItem = {name: newName, type: "file"};
+                            const itemElement = this.newItem(newItem, directoryPath);
+
+                            // Adds the renamed file element to the DOM.
+                            const parentDirectory = this.itemFor(directoryPath);
+                            const parentListing = parentDirectory.querySelector(":scope > ol");
+                            parentListing.appendChild(itemElement);
+                        }
+                        else {
+                            renameFileInput.style.display = "none";
+                            fileNamePlace.style.display = "inline";
+                        }
                     }
                 });
             }
