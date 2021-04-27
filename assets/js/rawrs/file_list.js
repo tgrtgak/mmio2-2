@@ -107,7 +107,7 @@ class FileList extends EventComponent {
      * Initializes the root directory from local storage.
      */
     async loadRoot() {
-        let listing = await this._storage.list("");
+        let listing = await this._storage.list("/");
 
         // Read the root directory of our storage and add the files
         let localRoot = this._element.querySelector("li.directory.root > ol");
@@ -155,20 +155,34 @@ class FileList extends EventComponent {
      * Binds events on the given list item.
      */
     bind(item) {
-        if (item.classList.contains("file")) {
+        let renameFileInput = item.querySelector(":scope > .info > input");
+        if (!item.classList.contains("new")) {
             let fileNamePlace = item.querySelector("span.name");
             let oldFileName = fileNamePlace.textContent;
-            let renameFileInput = item.querySelector(".info > input");
-            let dataPath = atob(item.getAttribute('data-path'));
 
-            item.addEventListener('click', (event) => {
-                if (event.target !== renameFileInput) {
-                    this.loadItem(item);
-                }
+            if (item.classList.contains("file")) {
+                item.addEventListener('click', (event) => {
+                    if (event.target !== renameFileInput) {
+                        this.loadItem(item);
+                    }
 
-                event.stopPropagation();
-                event.preventDefault();
-            });
+                    event.stopPropagation();
+                    event.preventDefault();
+                });
+            }
+            else if (item.classList.contains("directory")) {
+                item.addEventListener('click', (event) => {
+                    if (this.isOpen(item)) {
+                        this.close(item);
+                    }
+                    else {
+                        this.open(item);
+                    }
+
+                    event.stopPropagation();
+                    event.preventDefault();
+                });
+            }
 
             if (renameFileInput) {
                 renameFileInput.addEventListener("blur", (event) => {
@@ -183,13 +197,12 @@ class FileList extends EventComponent {
                         renameFileInput.style.display = "none";
                         fileNamePlace.style.display = "inline";
                     }
-
-                    // Rename the file.
-                    else if (event.key === "Enter") {
+                    else if (event.key === "Enter") { // Rename the file.
+                        let dataPath = atob(item.getAttribute('data-path'));
                         await this.revealPath(dataPath);
 
                         let newName = renameFileInput.value;
-                        if (!newName.includes(".")) {
+                        if (item.classList.contains("file") && !newName.includes(".")) {
                             newName += ".s";
                         }
 
@@ -200,52 +213,30 @@ class FileList extends EventComponent {
 
                         // Check if the file already exists with that name
                         const currentItem = this.itemFor("/" + newPath);
-                        console.log(newPath, currentItem);
                         if (!currentItem) {
                             // Get the data
-                            const data = await this._storage.load(dataPath);
+                            let token = await this._storage.move(dataPath, newPath);
 
-                            // Removes file with old name.
-                            await this._storage.remove(dataPath);
-                            item.parentNode.removeChild(item);
+                            // Update the name on the element
+                            oldFileName = newName;
+                            fileNamePlace.textContent = oldFileName;
 
-                            // Saves the renamed file.
-                            await this._storage.save(newPath, data);
+                            // Update the data-path on the element
+                            item.setAttribute('data-path', btoa(newPath));
 
-                            // Creates the renamed file item.
-                            const newItem = {name: newName, type: "file"};
-                            const itemElement = this.newItem(newItem, directoryPath);
-
-                            // Adds the renamed file element to the DOM.
-                            const parentDirectory = this.itemFor(directoryPath);
-                            const parentListing = parentDirectory.querySelector(":scope > ol");
-                            parentListing.appendChild(itemElement);
+                            // Deal with renaming the open file
+                            if (this._activeItem == item) {
+                                this.startupFile = "/" + newPath;
+                            }
                         }
-                        else {
-                            renameFileInput.style.display = "none";
-                            fileNamePlace.style.display = "inline";
-                        }
+
+                        renameFileInput.style.display = "none";
+                        fileNamePlace.style.display = "inline";
                     }
                 });
             }
         }
-
-        else if (item.classList.contains("directory")) {
-            item.addEventListener('click', (event) => {
-                if (this.isOpen(item)) {
-                    this.close(item);
-                }
-                else {
-                    this.open(item);
-                }
-
-                event.stopPropagation();
-                event.preventDefault();
-            });
-        }
-
-        // Bind inputs for creating directories/files
-        if (item.classList.contains("new")) {
+        else { // Bind inputs for creating directories/files
             let newDirectoryInput = item.querySelector(".info > input");
             if (newDirectoryInput) {
                 newDirectoryInput.addEventListener("blur", (event) => {
@@ -405,7 +396,8 @@ class FileList extends EventComponent {
         // Load the file
         if (item.hasAttribute('data-path')) {
             let path = atob(item.getAttribute('data-path'));
-            let text = await this._storage.load(path);
+            let token = item.getAttribute('data-token');
+            let text = await this._storage.load(path, token);
 
             Editor.load(text);
             Editor.focus();
@@ -451,10 +443,14 @@ class FileList extends EventComponent {
         // Updates path itself.
         element.setAttribute('data-path', btoa(path + '/' + item.name));
 
+        // Add the token
+        element.setAttribute('data-token', item.token);
+
         // Bind events
         this.bind(element);
 
         let dataPath = atob(element.getAttribute('data-path'));
+        let token = element.getAttribute('data-token');
 
         // Attaches event handlers to each dropdown button
         if (element.dropdown) {
@@ -474,7 +470,9 @@ class FileList extends EventComponent {
                         await this.revealPath(path);
 
                         // Deletes the individual file.
-                        await this._storage.remove(dataPath, item.type);
+                        let directoryElement = element.parentNode.parentNode;
+                        let directoryToken = directoryElement.getAttribute('data-token');
+                        await this._storage.remove(dataPath, directoryToken);
 
                         // Removes itself.
                         if (element.parentNode) {
@@ -490,7 +488,7 @@ class FileList extends EventComponent {
                         await this.revealPath(path);
 
                         // Loads the text of the file.
-                        const data = await this._storage.load(dataPath);
+                        const data = await this._storage.load(dataPath, token);
 
                         // Creates and downloads the text blob to the client.
                         const dataBlob = new Blob([data], {type: "text/plain;charset=utf-8"});
@@ -511,7 +509,7 @@ class FileList extends EventComponent {
                         for (const entry of listing) {
                             if (entry.type === 'file') {
                                 // Loads the text of the file.
-                                const data = await this._storage.load(dataPath + '/' + entry.name);
+                                const data = await this._storage.load(dataPath + '/' + entry.name, entry.token);
 
                                 // Stores the file,
                                 // Creates any subdirectories implicitly.

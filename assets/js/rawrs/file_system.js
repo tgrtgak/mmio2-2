@@ -5,6 +5,14 @@ import localForage from 'localforage';
 
 /**
  * This class manages the local file system.
+ *
+ * Directories are stored as dictionaries where the key is the name of the file
+ * or subdirectory. The data at that key is a dictionary with a 'type' field
+ * which is 'directory' or 'file' depending on its type, and a 'token' field
+ * that indicates where the data is stored. If it is a 'directory', then the
+ * data is another dictionary.
+ *
+ * The roor is stored at the '/' key.
  */
 class FileSystem {
     /**
@@ -17,6 +25,18 @@ class FileSystem {
             storeName: 'rawrs-file-system',
             description: 'The RAWRS local file system.'
         });
+
+        // Install a global to clear the filesystem for dev access
+        window.clearRAWRSFS = function() {
+            this.clear();
+        }.bind(this);
+    }
+
+    /**
+     * Produces a string-based token that is unique.
+     */
+    token() {
+        return (Date.now() + Math.random()).toString();
     }
 
     /**
@@ -26,40 +46,134 @@ class FileSystem {
      * @param {string} data The text for the file.
      */
     async save(path, data) {
-        let tag = "files";
-        let directory = (await this.retrieve('files')) || [];
-        let current = "";
+        if (path[0] != '/') {
+            path = "/" + path;
+        }
 
-        // Split path
-        let parts = path.split('/');
-        for (var i = 0; i < parts.length; i++) {
+        // Start at the root and get its listing
+        let directoryToken = '/';
+        let directory = (await this.retrieve(directoryToken)) || {};
+
+        // Split path into the subdirectories (and eventual file name we want)
+        let parts = path.substring(1).split('/');
+        for (let i = 0; i < parts.length; i++) {
             let part = parts[i];
-            current = current + "/" + part;
-
             if (i == (parts.length - 1)) {
-                let directoryTag = 'file-' + part;
-                if (!directory.includes(directoryTag)) {
+                // We are storing a file. Does it exist?
+                if (!directory[part]) {
+                    let token = this.token();
+
                     // Add file to current directory
-                    directory.push(directoryTag);
-                    await this.store(tag, directory);
+                    directory[part] = {
+                        type: 'file',
+                        token: token
+                    };
+
+                    // Update the directory
+                    await this.store(directoryToken, directory);
                 }
 
                 // Store the file
-                await this.store('file-' + current, data);
+                await this.store(directory[part].token, data);
+                return directory[part].token;
             }
             else {
-                let directoryTag = 'directory-' + part;
-                if (!directory.includes(directoryTag)) {
+                // A directory. We need to update our listing to find the
+                // next directory.
+                if (!directory[part]) {
+                    let token = this.token();
+
                     // Add directory to current directory
-                    directory.push(directoryTag);
-                    await this.store(tag, directory);
+                    directory[part] = {
+                        type: 'directory',
+                        token: token
+                    };
+
+                    // Add the empty directory
+                    await this.store(token, {});
+
+                    // Update the containing directory
+                    await this.store(directoryToken, directory);
                 }
 
                 // Get next directory
-                tag = 'directory-' + current;
-                directory = (await this.retrieve(tag)) || [];
+                if (directory[part].type != 'directory') {
+                    // It is not a directory, but it must be. So bail.
+                    return null;
+                }
+
+                // Retrieve the data/token and keep going
+                directoryToken = directory[part].token;
+                directory = await this.retrieve(directoryToken);
             }
-        };
+        }
+    }
+
+    /**
+     * Moves a file or directory from the given old to new path.
+     */
+    async move(path, newPath) {
+        if (path[0] != '/') {
+            path = "/" + path;
+        }
+
+        if (newPath[0] != '/') {
+            newPath = "/" + newPath;
+        }
+
+        // We need to locate the directory containing 'path'
+        let parts = path.substring(1).split('/');
+        let directoryPath = parts.slice(0, parts.length - 1).join('/') || '/';
+        let fileName = parts[parts.length - 1];
+
+        let directoryToken = null;
+        if (!directoryToken) {
+            directoryToken = await this.locate(directoryPath);
+        }
+
+        // Pull up the directory listing for this directory to find the source
+        let directory = await this.load(directoryPath, directoryToken);
+
+        // Bail if the source does not exist
+        if (!directory[fileName]) {
+            return null;
+        }
+
+        // Now we look up the destination path
+        parts = newPath.substring(1).split('/');
+        let destDirectoryPath = parts.slice(0, parts.length - 1).join('/') || '/';
+        let destFileName = parts[parts.length - 1];
+
+        let destDirectoryToken = null;
+        if (!destDirectoryToken) {
+            destDirectoryToken = await this.locate(destDirectoryPath);
+        }
+
+        // Bail if the destination path does not exist
+        if (!destDirectoryToken) {
+            return null;
+        }
+
+        // Get the source file metadata
+        let metadata = directory[fileName];
+
+        // Delete the source file entry
+        delete directory[fileName];
+
+        // Store the source directory again
+        await this.store(directoryToken, directory);
+
+        // Pull up the directory listing for this directory to find the source
+        let destDirectory = await this.load(destDirectoryPath, destDirectoryToken);
+
+        // Add the file to the destination directory
+        destDirectory[destFileName] = metadata;
+
+        // Store the destination directory again
+        await this.store(destDirectoryToken, destDirectory);
+
+        // Return the file token
+        return metadata.token;
     }
 
     /**
@@ -80,7 +194,6 @@ class FileSystem {
      * Low-level function to retrieve the data from the provided key.
      */
     async retrieve(key) {
-        console.log("retrieving", key);
         return localForage.getItem(key);
     }
 
@@ -92,12 +205,65 @@ class FileSystem {
     }
 
     /**
+     * Locates the token for the given path.
+     */
+    async locate(path) {
+        if (path[0] != '/') {
+            path = "/" + path;
+        }
+
+        // Start at the root and get its listing
+        let directoryToken = '/';
+        let directory = (await this.retrieve(directoryToken)) || {};
+
+        // Just return the root directory data if requested.
+        if (path == '/') {
+            return directoryToken;
+        }
+
+        // Split path into the subdirectories (and eventual file name we want)
+        let parts = path.substring(1).split('/');
+        for (let i = 0; i < parts.length; i++) {
+            let part = parts[i];
+            if (i == (parts.length - 1)) {
+                // We are reading the file. Does it exist?
+                if (!directory[part]) {
+                    return null;
+                }
+
+                // Return the token
+                return directory[part].token;
+            }
+            else {
+                // A directory. Does the subdirectory exist?
+                if (!directory[part]) {
+                    // Does not exist, therefore the file doesn't either
+                    return null;
+                }
+
+                // Get next directory
+                if (directory[part].type != 'directory') {
+                    // It is not a directory, but it must be. So bail.
+                    return null;
+                }
+
+                directoryToken = directory[part].token;
+                directory = await this.retrieve(directoryToken);
+            }
+        }
+    }
+
+    /**
      * Loads the given path.
      *
      * @returns string The file data.
      */
-    async load(path) {
-        return this.retrieve('file-' + path);
+    async load(path, token) {
+        if (!token) {
+            token = await this.locate(path);
+        }
+
+        return await this.retrieve(token);
     }
 
     /**
@@ -106,39 +272,46 @@ class FileSystem {
      * Recursively deletes any empty directories.
      *
      * @param {string} path The path of the file to remove.
-     * @param {string} type Whether or not this is a file or directory.
      */
-    async remove(path, type = 'file') {
-        console.log('wait');
-        // If this is a directory, remove each file within
-        if (type == 'directory') {
-            let listing = await this.list(path);
+    async remove(path, directoryToken) {
+        if (path[0] != '/') {
+            path = "/" + path;
+        }
 
-            console.log('removing files within', path);
-            for (const info of listing) {
-                await this.remove(path + '/' + info.name, info.type);
+        let parts = path.substring(1).split('/');
+        let directoryPath = parts.slice(0, parts.length - 1).join('/') || '/';
+        let fileName = parts[parts.length - 1];
+
+        if (!directoryToken) {
+            directoryToken = await this.locate(directoryPath);
+        }
+
+        let directory = await this.load(directoryPath, directoryToken);
+
+        // Look for the file in the directory and remove it
+        if (directory[fileName]) {
+            // Get the file token
+            let token = directory[fileName].token;
+
+            // If it is a directory, recursively delete everything in it
+            if (directory[fileName].type == 'directory') {
+                let subdirectory = await this.load(path, token);
+                let names = Object.keys(subdirectory);
+                for (let i = 0; i < names.length; i++) {
+                    let name = names[i];
+                    await this.remove(path + '/' + name, token);
+                }
             }
-            console.log('done removing files within', path);
+
+            // Delete the file entry
+            delete directory[fileName];
+
+            // Store it again
+            await this.store(directoryToken, directory);
+
+            // Delete the file data
+            this.purge(token);
         }
-
-        // Remove the given path
-        console.log("removing", type, path);
-        await this.purge(type + '-' + path);
-
-        let last = path.lastIndexOf('/');
-        let name = path.substring(last + 1);
-        path = path.substring(0, last);
-
-        let token = 'directory-' + path;
-        if (path == '') {
-            // Remove from root
-            token = 'files';
-        }
-        let listing = await this.retrieve(token);
-
-        // Remove the file from the listing
-        listing.splice(listing.indexOf(type + '-' + name), 1);
-        await this.store(token, listing);
     }
 
     /**
@@ -146,33 +319,25 @@ class FileSystem {
      *
      * @param {string} path The path to list.
      */
-    async list(path) {
-        let listing = [];
-        if (path === undefined || path === "" || path === "/") {
-            let data = await this.retrieve('files');
-            data = data || [];
-            listing = data;
-        }
-        else {
-            listing = await this.retrieve('directory-' + path);
+    async list(path, token) {
+        let data = await this.load(path, token);
+
+        if (!data) {
+            return [];
         }
 
-        listing = listing.map( (tag) => {
-            if (tag.startsWith("file-")) {
-                return {
-                    name: tag.substring(5),
-                    type: 'file'
-                };
-            }
-            else {
-                return {
-                    name: tag.substring(10),
-                    type: 'directory'
-                };
-            }
+        // Convert to a list of files
+        let ret = [];
+
+        Object.keys(data).forEach( (name) => {
+            ret.push({
+                name: name,
+                type: data[name].type,
+                token: data[name].token
+            });
         });
 
-        return listing;
+        return ret;
     }
 }
 
