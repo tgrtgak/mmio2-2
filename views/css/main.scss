@@ -507,6 +507,7 @@ ol.tab-panels {
     }
 }
 
+.file-list,
 .project-pane {
     background: #fff;
     box-shadow: 0 0 0.25rem -0.0625rem black inset;
@@ -532,7 +533,7 @@ ol.tab-panels {
 
         // Nested list
         ol {
-            padding: 0.2rem 0.5rem;
+            padding: 0.2rem 0.75rem;
             padding-right: 0;
         }
 
@@ -543,6 +544,10 @@ ol.tab-panels {
             margin: 0;
             padding-bottom: 0.2rem;
             position: relative;
+
+            &[disabled] {
+                opacity: 0.5;
+            }
 
             // Specifically, a directory
             &.directory {
@@ -1615,6 +1620,34 @@ dialog.dialog {
             width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+    }
+
+    &#dialog-copy-file {
+        overflow-x: hidden;
+        overflow-y: auto;
+        color: black;
+        font-family: 'Lato', sans-serif;
+        margin: auto;
+        width: 35rem;
+        min-width: 20rem;
+        max-width: 100%;
+        text-align: center;
+
+        h2 {
+            text-align: left;
+        }
+
+        .file-list {
+            height: 20rem;
+            margin-top: 0.25rem;
+            overflow: auto;
+            text-align: left;
+            width: 100%;
+
+            ol {
+                margin: 0;
+            }
         }
     }
 }

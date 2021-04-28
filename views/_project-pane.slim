@@ -16,6 +16,9 @@ ol
             button.action data-action=:rename role=:menuitem
               | Rename
           li.dropdown-menu-option
+            button.action data-action=:clone role=:menuitem
+              | Copy
+          li.dropdown-menu-option
             button.action data-action=:delete role=:menuitem
               | Delete
           li.dropdown-menu-option
@@ -28,7 +31,7 @@ ol
       p.empty
         | Empty
   template.file
-    li.file
+    li.file data-selectable=true
       span.info
         img        src="#{@basepath}images/dynamic/hex/46b1e4/text.svg"
         img.active src="#{@basepath}images/dynamic/hex/ffffff/text.svg"
@@ -44,13 +47,16 @@ ol
             button.action data-action=:rename role=:menuitem
               | Rename
           li.dropdown-menu-option
+            button.action data-action=:clone role=:menuitem
+              | Copy
+          li.dropdown-menu-option
             button.action data-action=:delete role=:menuitem
               | Delete
           li.dropdown-menu-option
             button.action data-action=:download role=:menuitem
               | Download
   -# Render all files in assets/files
-  li.directory.root
+  li.directory.root data-path=Base64.encode64("/").strip data-type=:directory
     span.info
       img        src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
       img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
@@ -69,7 +75,7 @@ ol
           img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
           img.hover  src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
           input type=:text value="my-project"
-  == partial(:"project-pane-directory", :locals => { :path => "assets/files", :root => "files" })
+  == partial(:"project-pane-directory", :locals => { :path => "assets/files", :root => "files", :suppress => true })
   li.directory.built-in data-path=Base64.encode64("kernel").strip
     span.info
       img        src="#{@basepath}images/dynamic/hex/aaaaaa/group.svg"

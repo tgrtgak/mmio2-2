@@ -8,6 +8,7 @@ import JSZip from 'jszip';
 import FileSaver from 'file-saver';
 import Editor from './editor';
 import FileUploadDialog from './file_upload_dialog';
+import CopyDialog from './copy_dialog';
 
 /**
  * This represents the file listing.
@@ -18,10 +19,10 @@ class FileList extends EventComponent {
      *
      * @param {HTMLElement} root The element to look for the file list within.
      */
-    constructor(root, editor) {
+    constructor(root) {
         super();
 
-        this._element = root.querySelector(".project-pane");
+        this._element = root.querySelector(".project-pane, .file-list");
         this._storage = new FileSystem();
 
         // Bind events to built-in files
@@ -162,8 +163,14 @@ class FileList extends EventComponent {
 
             if (item.classList.contains("file")) {
                 item.addEventListener('click', (event) => {
+                    if (item.hasAttribute('disabled')) {
+                        return;
+                    }
+
                     if (event.target !== renameFileInput) {
-                        this.loadItem(item);
+                        if (item.hasAttribute('data-selectable')) {
+                            this.loadItem(item);
+                        }
                     }
 
                     event.stopPropagation();
@@ -172,6 +179,14 @@ class FileList extends EventComponent {
             }
             else if (item.classList.contains("directory")) {
                 item.addEventListener('click', (event) => {
+                    if (item.hasAttribute('disabled')) {
+                        return;
+                    }
+
+                    if (item.hasAttribute('data-selectable')) {
+                        this.select(item);
+                    }
+
                     if (this.isOpen(item)) {
                         this.close(item);
                     }
@@ -235,6 +250,13 @@ class FileList extends EventComponent {
                     }
                 });
             }
+
+            // Bind dropdown events
+            let actionButton = item.querySelector(":scope > span.info > button.actions");
+            if (actionButton) {
+                item.dropdown = new Dropdown(actionButton);
+            }
+            this.bindDropdownActions(item);
         }
         else { // Bind inputs for creating directories/files
             let newDirectoryInput = item.querySelector(".info > input");
@@ -274,12 +296,6 @@ class FileList extends EventComponent {
                 });
             }
         }
-
-        // Bind dropdown events
-        let actionButton = item.querySelector("button.actions");
-        if (actionButton) {
-            item.dropdown = new Dropdown(actionButton);
-        }
     }
 
     /**
@@ -318,13 +334,11 @@ class FileList extends EventComponent {
      */
     async load(url) {
         let basepath = document.body.getAttribute('data-basepath');
-        fetch(basepath + url, {
+        return await (fetch(basepath + url, {
             credentials: 'include'
         }).then(function(response) {
             return response.text();
-        }).then(function(text) {
-            Editor.load(text);
-        });
+        }));
     }
 
     /**
@@ -340,7 +354,7 @@ class FileList extends EventComponent {
         item.classList.add('open');
 
         // Is this a local directory?
-        if (item.hasAttribute('data-path')) {
+        if (!item.hasAttribute('data-url')) {
             // Read the contents, if we need to do so.
             let itemRoot = item.querySelector('ol');
             let path = atob(item.getAttribute('data-path'));
@@ -371,12 +385,15 @@ class FileList extends EventComponent {
         return item.classList.contains("open");
     }
 
-    /**
-     * Loads the item provided by the given element.
-     *
-     * @param {HTMLElement} item The list item to use.
-     */
-    async loadItem(item) {
+    unselect() {
+        if (this._activeItem) {
+            this._activeItem.classList.remove('active');
+        }
+
+        this._activeItem = null;
+    }
+
+    async select(item) {
         if (this._activeItem) {
             this._activeItem.classList.remove('active');
         }
@@ -393,8 +410,32 @@ class FileList extends EventComponent {
         this._activeItem = item;
         item.classList.add('active');
 
+        this.trigger('change', item);
+    }
+
+    clear() {
+        // Get the root
+        let root = this._element.querySelector("li.directory.root");
+
+        // Close it
+        this.close(root);
+
+        // And delete the listing
+        let rootList = root.querySelector(":scope > ol");
+        rootList.innerHTML = "";
+    }
+
+    /**
+     * Loads the item provided by the given element.
+     *
+     * @param {HTMLElement} item The list item to use.
+     */
+    async loadItem(item) {
+        // Select the item
+        await this.select(item);
+
         // Load the file
-        if (item.hasAttribute('data-path')) {
+        if (!item.hasAttribute('data-url')) {
             let path = atob(item.getAttribute('data-path'));
             let token = item.getAttribute('data-token');
             let text = await this._storage.load(path, token);
@@ -406,7 +447,7 @@ class FileList extends EventComponent {
         }
         else {
             var url = atob(item.getAttribute('data-url'));
-            this.load(url);
+            Editor.load(await this.load(url));
 
             this.startupFile = url;
         }
@@ -418,7 +459,15 @@ class FileList extends EventComponent {
      * @param {Object} item The item information.
      */
     newItem(item, path) {
-        let template = document.querySelector("template." + item.type);
+        // Get the template for adding this particular type of item
+        let template = this._element.querySelector("template." + item.type);
+
+        // Do not add it if there is no template
+        if (!template) {
+            return;
+        }
+
+        // Clone it
         let element = template;
         if ('content' in template) {
             element = document.importNode(template.content, true);
@@ -437,11 +486,21 @@ class FileList extends EventComponent {
 
         let dropdownID = "dropdown-" + path.replace("/", "-");
 
-        actionButton.setAttribute("aria-controls", dropdownID);
-        actionDropdown.setAttribute("id", dropdownID);
+        if (actionButton) {
+            actionButton.setAttribute("aria-controls", dropdownID);
+            actionDropdown.setAttribute("id", dropdownID);
+        }
+
+        // Retains the type
+        element.setAttribute('data-type', item.type);
 
         // Updates path itself.
-        element.setAttribute('data-path', btoa(path + '/' + item.name));
+        let newPath = path;
+        if (newPath[newPath.length - 1] != "/") {
+            newPath = newPath + "/";
+        }
+        newPath = newPath + item.name;
+        element.setAttribute('data-path', btoa(newPath));
 
         // Add the token
         element.setAttribute('data-token', item.token);
@@ -449,16 +508,86 @@ class FileList extends EventComponent {
         // Bind events
         this.bind(element);
 
-        let dataPath = atob(element.getAttribute('data-path'));
-        let token = element.getAttribute('data-token');
+        // Return new item
+        return element;
+    }
+
+    infoFor(element) {
+        let info = {
+            type: element.getAttribute('data-type'),
+            name: element.querySelector('span.name').textContent,
+        };
+
+        if (element.hasAttribute('data-token')) {
+            info.token = element.getAttribute('data-token');
+        }
+
+        if (element.hasAttribute('data-path')) {
+            info.path = atob(element.getAttribute('data-path'));
+        }
+
+        if (element.hasAttribute('data-url')) {
+            info.url = atob(element.getAttribute('data-url'));
+        }
+
+        return info;
+    }
+
+    bindDropdownActions(element) {
+        let item = this.infoFor(element);
+        let dataPath = item.path;
 
         // Attaches event handlers to each dropdown button
         if (element.dropdown) {
             element.dropdown.on("click", async (action) => {
+                if (element.hasAttribute('disabled')) {
+                    return;
+                }
+
                 switch(action) {
                     // "Copy to My Files" functionality
                     // Clones a preset directory or file element to user directory.
                     case "clone":
+                        let item = this.infoFor(element);
+                        let copyDialog = new CopyDialog(item);
+                        copyDialog.on('copy', async (destination) => {
+                            // Reveal the destination and open it
+                            await this.revealPath(destination.path);
+                            const parentDirectory = this.itemFor(destination.path);
+                            await this.open(parentDirectory);
+
+                            let newPath = destination.path;
+                            if (newPath[newPath.length - 1] != "/") {
+                                newPath = newPath + "/";
+                            }
+                            newPath = newPath + item.name;
+
+                            let newToken = null;
+                            if (item.url) {
+                                // A built-in file
+                                let data = await this.load(item.url);
+                                newToken = await this._storage.save(newPath, data);
+                            }
+                            else if (item.path[0] != "/") {
+                                // A built-in directory... traverse and save every file
+                                await this.copyBuiltIn(item, destination.path);
+
+                                // Get the token for the destination directory
+                                newToken = await this._storage.locate(newPath);
+                            }
+                            else {
+                                newToken = await this._storage.copy(item.path, destination.path);
+                            }
+
+                            // Append the new item
+                            // Creates the file/directory item.
+                            const newItem = {name: item.name, type: item.type, token: newToken};
+                            const itemElement = this.newItem(newItem, destination.path);
+
+                            // Adds file element to the DOM.
+                            const parentListing = parentDirectory.querySelector(":scope > ol");
+                            parentListing.appendChild(itemElement);
+                        });
                         break;
 
                     // "Delete" functionality
@@ -467,7 +596,7 @@ class FileList extends EventComponent {
                         // TODO: Disable the file listing during a delete action
 
                         // Deleting an individual file
-                        await this.revealPath(path);
+                        await this.revealPath(dataPath);
 
                         // Deletes the individual file.
                         let directoryElement = element.parentNode.parentNode;
@@ -485,10 +614,10 @@ class FileList extends EventComponent {
                     // "Download" functionality
                     // Downloads a file element to the client.
                     case "download":
-                        await this.revealPath(path);
+                        await this.revealPath(dataPath);
 
                         // Loads the text of the file.
-                        const data = await this._storage.load(dataPath, token);
+                        const data = await this._storage.load(dataPath, item.token);
 
                         // Creates and downloads the text blob to the client.
                         const dataBlob = new Blob([data], {type: "text/plain;charset=utf-8"});
@@ -501,7 +630,7 @@ class FileList extends EventComponent {
                     case "downloadzip":
                         let zip = new JSZip();
 
-                        await this.revealPath(path);
+                        await this.revealPath(dataPath);
 
                         // Collects every directory and file element.
                         const listing = await this._storage.list(dataPath);
@@ -572,19 +701,47 @@ class FileList extends EventComponent {
                 }
             })
         }
+    }
 
-        // Return new item
-        return element;
+    /**
+     * Copies a built-in directory to the given path.
+     */
+    async copyBuiltIn(item, newPath) {
+        // Get the element
+        let element = this.itemFor(item.path);
+
+        if (newPath[newPath.length - 1] != "/") {
+            newPath = newPath + "/";
+        }
+
+        // Get the directory listing
+        let items = element.querySelectorAll(":scope > ol > li");
+        for (const subElement of items) {
+            let subItem = this.infoFor(subElement);
+
+            if (subItem.type == 'directory') {
+                // Recursively copy built-in directories
+                await this.copyBuiltIn(subItem, newPath + item.name);
+            }
+            else {
+                // Save the file
+                let data = await this.load(subItem.url);
+                await this._storage.save(newPath + item.name + "/" + subItem.name, data);
+            }
+        }
     }
 
     /**
      * Retrieves the item element for the given path.
      */
     itemFor(path) {
-        if (path[0] == '/') {
-            return this._element.querySelector("li[data-path=\"" + btoa(path) + "\"]");
+        let ret = this._element.querySelector("li[data-url=\"" + btoa(path) + "\"]");
+
+        if (!ret) {
+            ret = this._element.querySelector("li[data-path=\"" + btoa(path) + "\"]");
         }
-        return this._element.querySelector("li[data-url=\"" + btoa(path) + "\"]");
+
+        return ret;
     }
 
     /**

@@ -110,6 +110,52 @@ class FileSystem {
     }
 
     /**
+     * Copies a file or directory to a particular directory.
+     */
+    async copy(path, newPath) {
+        if (path[0] != '/') {
+            path = "/" + path;
+        }
+
+        if (newPath[0] != '/') {
+            newPath = "/" + newPath;
+        }
+
+        if (newPath[newPath.length - 1] == '/') {
+            newPath = newPath.substring(0, newPath.length - 1);
+        }
+
+        let parts = path.substring(1).split('/');
+        let directoryPath = parts.slice(0, parts.length - 1).join('/') || '/';
+        let fileName = parts[parts.length - 1];
+
+        // We load the file data and 'save' it to the new path
+        // If it is a directory, we recursively call copy
+        let data = await this.load(path);
+        let ret = null;
+        if (typeof data === 'string' || data instanceof String) {
+            // File data
+            ret = await this.save(newPath + "/" + fileName, data);
+        }
+        else if (data !== null) {
+            // Directory. Recurse for each entry
+            let innerPath = newPath + "/" + fileName;
+
+            let names = Object.keys(data);
+            for (let i = 0; i < names.length; i++) {
+                let name = names[i];
+                await this.copy(path + "/" + name, innerPath);
+            }
+
+            // Get the directory token for that new directory
+            ret = await this.locate(innerPath);
+        }
+
+        // Return the new token
+        return ret;
+    }
+
+    /**
      * Moves a file or directory from the given old to new path.
      */
     async move(path, newPath) {

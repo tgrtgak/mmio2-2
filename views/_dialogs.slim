@@ -206,3 +206,44 @@ dialog.dialog#dialog-float-explorer
         h2
           | Decimal Representation
         input.entered-value value="500"
+
+dialog.dialog#dialog-copy-file
+  h1.title
+    span.caption
+      | Copy Files
+    button.close
+      | Close
+  .client
+    h2
+      | Copy to
+    .file-list
+      ol
+        template.directory
+          li.directory data-selectable=true
+            span.info
+              img        src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
+              img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
+              img.hover  src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
+              span.name
+            ol
+            p.empty
+              | Empty
+        template.file
+          li.file disabled=true
+            span.info
+              img        src="#{@basepath}images/dynamic/hex/46b1e4/text.svg"
+              img.active src="#{@basepath}images/dynamic/hex/ffffff/text.svg"
+              img.hover  src="#{@basepath}images/dynamic/hex/46b1e4/text.svg"
+              span.name
+        li.directory.root data-selectable=true data-path=Base64.encode64("/") data-type=:directory
+          span.info
+            img        src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
+            img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
+            img.hover  src="#{@basepath}images/dynamic/hex/46b1e4/group.svg"
+            span.name
+              | My Projects
+          ol
+    button.button#button-complete-copy disabled=true
+      | Copy
+    button.button.red#button-cancel-copy
+      | Cancel

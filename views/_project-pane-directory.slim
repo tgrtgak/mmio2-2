@@ -1,28 +1,32 @@
 - if !defined?(filter)
   - filter = "*"
 
+- if !defined?(suppress)
+  - suppress = false
+
 - Dir["#{path}/#{filter}"].each do |f|
   - if File.directory?(f)
-    li.directory.built-in data-path=Base64.encode64(File.join(root, File.basename(f))[("files/".length)...]).strip
+    li.directory.built-in data-path=Base64.encode64(File.join(root, File.basename(f))[("files/".length)...]).strip data-type=:directory
       span.info
         img        src="#{@basepath}images/dynamic/hex/aaaaaa/group.svg"
         img.active src="#{@basepath}images/dynamic/hex/ffffff/group.svg"
         img.hover  src="#{@basepath}images/dynamic/hex/aaaaaa/group.svg"
         span.name
           = f[(path.length+1)..-1]
-        button.actions
-          img        src="#{@basepath}images/dynamic/hex/ffffff/actions.svg"
-          img.active src="#{@basepath}images/dynamic/hex/ffffff/actions.svg"
-          img.hover  src="#{@basepath}images/dynamic/hex/aaaaaa/actions.svg"
-        - id = File.join(root, File.basename(f)).gsub("/", "-")
-        ul.dropdown-menu role=:menu id=id aria-hidden="true" hidden=true
-          li.dropdown-menu-option
-            button.action data-action=:clone role=:menuitem
-              | Copy to My Files
+        - if !suppress
+          button.actions
+            img        src="#{@basepath}images/dynamic/hex/ffffff/actions.svg"
+            img.active src="#{@basepath}images/dynamic/hex/ffffff/actions.svg"
+            img.hover  src="#{@basepath}images/dynamic/hex/aaaaaa/actions.svg"
+          - id = File.join(root, File.basename(f)).gsub("/", "-")
+          ul.dropdown-menu role=:menu id=id aria-hidden="true" hidden=true
+            li.dropdown-menu-option
+              button.action data-action=:clone role=:menuitem
+                | Copy to My Files
       ol
         == partial(:"project-pane-directory", :locals => { :path => f, :root => File.join(root, File.basename(f)) })
   - else
-    li.file.built-in data-url=Base64.encode64(File.join(root, File.basename(f))).strip
+    li.file.built-in data-url=Base64.encode64(File.join(root, File.basename(f))).strip data-selectable=true data-type=:file data-path=Base64.encode64(File.join(root, File.basename(f))[("files/".length)...]).strip
       span.info
         img        src="#{@basepath}images/dynamic/hex/46b1e4/text.svg"
         img.active src="#{@basepath}images/dynamic/hex/ffffff/text.svg"

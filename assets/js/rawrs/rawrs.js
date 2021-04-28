@@ -83,6 +83,10 @@ class RAWRS {
             });
         });
 
+        RAWRS.fileList.on('change', (item) => {
+            let info = RAWRS.fileList.infoFor(item);
+        });
+
         RAWRS.codeListing = new CodeListing(document.body);
         RAWRS.registerListing = new RegisterListing(document.body);
         RAWRS.memoryListing = new MemoryListing(document.body);
@@ -118,9 +122,6 @@ class RAWRS {
         RAWRS.memoryListing.on("change", (info) => {
             if(RAWRS.simulator) {
                 let sim = RAWRS.simulator;
-                console.log("memoryListing.on('change')");
-                console.log(info.address);
-                console.log(info.data);
                 sim.writeMemory(info.address, info.data);
 
                 let numRows = RAWRS.memoryListing.numberOfRows;

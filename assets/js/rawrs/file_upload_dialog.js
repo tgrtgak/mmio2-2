@@ -160,6 +160,14 @@ class FileUploadDialog extends Dialog {
      * This is called internally when the dialog is created.
      */
     bindEvents() {
+        // Bail if this was called before
+        if (this.dialog.classList.contains("bound")) {
+            return;
+        }
+
+        // Do not allow the events to be bound twice
+        this.dialog.classList.add("bound");
+
         // Bind events to the file upload modal.
         this.dialog.addEventListener("drop", this.handleDrop.bind(this));
         this.dialog.addEventListener("dragover", this.handleDragover.bind(this));
