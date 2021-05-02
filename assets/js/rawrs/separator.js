@@ -118,6 +118,10 @@ class Separator extends EventComponent {
         this._boundDrag = this.handleMouseDrag.bind(this);
         this._draggable.addEventListener("mousemove", this._boundDrag);
 
+        // Ensure that the draggable also displays the correct cursor
+        let cursor = window.getComputedStyle(this._element).cursor;
+        this._draggable.style.cursor = cursor;
+
         // Show the draggable plane
         this._draggable.removeAttribute('hidden');
     }
