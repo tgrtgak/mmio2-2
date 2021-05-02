@@ -1,4 +1,4 @@
-.top
+.top data-separator=:"bottom-separator"
   div.container
     ol.tabs.side
       li.tab.active
@@ -31,7 +31,8 @@
             div#gdb_container
             div.disconnected
               img src="#{@basepath}images/disconnected.svg"
-  .register-file
+  .separator.vertical#register-separator
+  .register-file data-separator=:"register-separator,label-separator"
     ol.tabs
       li.tab.active
         button aria-controls=:"register-file"
@@ -110,6 +111,7 @@
                     = "0x0000000000000000"
                 td.edit hidden=true
                   input.input type=:text id="supervisor-register-#{register_name}"
+.separator.horizontal#bottom-separator
 .bottom
   .left
     ol.tabs
@@ -165,7 +167,8 @@
 
         img.waiting src="#{@basepath}images/dynamic/hex/dbccda/dinosaurs/tyrannosaurus.svg"
 
-  .right
+  .separator.vertical#label-separator
+  .right data-separator=:"register-separator,label-separator"
     ol.tabs
       li.tab.active
         button aria-controls=:"labels-panel"

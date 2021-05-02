@@ -1,7 +1,9 @@
 .editor-pane
-  .project-pane
+  .project-pane data-separator=:"editor-separator"
     == partial(:"project-pane")
+  .separator.vertical#editor-separator
   textarea#editor
     | add s1, s1, 1
-pre#output.initial
+.separator.horizontal#output-separator
+pre#output.initial data-separator=:"output-separator"
   = I18n.t(:"console.initial")

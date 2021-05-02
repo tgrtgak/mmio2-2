@@ -17,9 +17,17 @@ import CodeListing     from './code_listing';
 import MemoryListing   from './memory_listing';
 import LabelListing    from './label_listing';
 import RegisterListing from './register_listing';
+import Separator       from './separator';
 
 class RAWRS {
     static load() {
+        // Load all separators
+        let separators = Array.from(
+            document.querySelectorAll(".separator")
+        ).map( (el) => {
+            return new Separator(el);
+        });
+
         // Determine the rootpath for any relative ajax calls later on
         let path = window.location.pathname;
         path = path.split("/");

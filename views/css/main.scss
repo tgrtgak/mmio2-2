@@ -141,7 +141,7 @@ template, *[hidden] {
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
-    flex: 1 1 100%;
+    flex: 1 1 0.1%;
     overflow: auto;
     margin: 0;
     width: 100%;
@@ -152,11 +152,8 @@ template, *[hidden] {
         background: #262626;
         box-sizing: border-box;
         color: white;
-
         flex: 1 1 100%;
-
-        overflow: auto;
-
+        overflow: hidden;
         margin: 0;
     }
 }
@@ -164,16 +161,12 @@ template, *[hidden] {
 pre#output {
     background: #0e0e0e;
     color: #d4d4d4;
-
-    flex: 0 1 25%;
+    flex: 0 1 auto;
     box-sizing: border-box;
     overflow: auto;
     overflow-y: scroll;
-
-    max-height: 25%;
-
     margin: 0;
-    margin-top: 0.2rem;
+    height: 25%;
     padding: 0.2rem;
 
     h1 {
@@ -514,8 +507,9 @@ ol.tab-panels {
     user-select: none;
     cursor: default;
     flex: 1 0 auto;
-    margin-right: 0.2rem;
+    margin-right: 0;
     width: 15rem;
+    min-width: 12rem;
     overflow: auto;
 
     ol {
@@ -834,9 +828,8 @@ ol.tab-panels {
 #run-panel {
     .top {
         display: flex;
-        flex: 1 0 auto;
+        flex: 0 1 481px;
         flex-direction: row;
-        flex-basis: 481px;
         overflow: hidden;
         line-height: 1.2;
         height: 481px;
@@ -846,6 +839,7 @@ ol.tab-panels {
             flex: 1 0 auto;
             flex-direction: row;
             margin: 0;
+            min-width: 20rem;
             text-align: center;
             background: #211a21;
             background-image: url('../images/dynamic/hex/1d141d/tracks.svg');
@@ -934,12 +928,11 @@ ol.tab-panels {
         .register-file {
             flex: 0 1 17rem;
             width: 17rem;
-            margin-left: 0.2rem;
             background: #fff;
             position: relative;
-
             display: flex;
             flex-direction: column;
+            min-width: 17rem;
 
             .registers {
                 box-shadow: 0 0 0.25rem -0.0625rem black inset;
@@ -1088,14 +1081,14 @@ ol.tab-panels {
     .bottom {
         display: flex;
         flex-direction: row;
-        margin-top: 0.2rem;
-
-        flex: 1 1 100%;
+        flex: 1 1 0.1%;
 
         .left {
             display: flex;
-            flex: 75%;
+            flex: 1 1 0.1%;
             flex-direction: column;
+            overflow: auto;
+            min-width: 20rem;
         }
 
         .right {
@@ -1103,9 +1096,9 @@ ol.tab-panels {
             display: flex;
             flex: 0 1 17rem;
             flex-direction: column;
-            margin-left: 0.2rem;
             position: relative;
             width: 17rem;
+            min-width: 17rem;
         }
     }
 }
@@ -1650,4 +1643,37 @@ dialog.dialog {
             }
         }
     }
+}
+
+.separator {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    flex: 0 0 0.2rem;
+
+    &.vertical {
+        width: 0.2rem;
+        cursor: ew-resize;
+    }
+
+    &.horizontal {
+        height: 0.2rem;
+        cursor: ns-resize;
+    }
+
+    &:hover {
+        background-color: #f3caff;
+    }
+}
+
+.draggable-plane {
+    position: absolute;
+    z-index: 999999999999999;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
