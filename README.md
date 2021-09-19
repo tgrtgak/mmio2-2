@@ -41,6 +41,7 @@ You will need to install on your own system the following packages:
 * make
 * ruby
 * node.js
+* npm
 
 ### Gather All of the Things
 
