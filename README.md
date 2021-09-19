@@ -36,6 +36,7 @@ others.
 You will need to install on your own system the following packages:
 
 * gcc
+* texinfo
 * bison
 * flex
 * make
