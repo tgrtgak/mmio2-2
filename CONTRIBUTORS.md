@@ -10,8 +10,12 @@
 * Tyler Lendon
 * Joel Valentino
 * Adam Buchinsky
+<<<<<<< HEAD
 * Erik Joy
 * Zhiyi Zhan
+=======
+* Celest Hayden
+>>>>>>> add name to contributors
 
 ## Documentation
 
