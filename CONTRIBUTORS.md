@@ -10,6 +10,7 @@
 * Tyler Lendon
 * Joel Valentino
 * Adam Buchinsky
+* Celest Hayden
 
 ## Documentation
 
