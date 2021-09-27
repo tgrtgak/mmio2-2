@@ -11,6 +11,7 @@
 * Joel Valentino
 * Adam Buchinsky
 * Erik Joy
+* Zhiyi Zhan
 
 ## Documentation
 
