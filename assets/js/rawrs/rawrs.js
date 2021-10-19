@@ -470,7 +470,6 @@ class RAWRS {
 
         assembler.assemble("foo.s", text, this._terminal, (object) => {
             linker.link(linkerScript, object, this._terminal, (binary) => {
-                
                 RAWRS.toolbar.setStatus("assemble", "success");
                 RAWRS.toolbar.setStatus("run", "");
                 this._binary = binary;

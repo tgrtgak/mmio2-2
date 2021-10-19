@@ -58,6 +58,7 @@ class Linker extends EventComponent {
                             text: matches[2]
                         };
                         this._errors.push(error);
+                        terminal.writeln("Linking failed.");
                         this.trigger('error', error);
                     }
 
@@ -66,6 +67,7 @@ class Linker extends EventComponent {
                 case "exit":
                     break;
                 case "done":
+                    terminal.writeln("Linking successful.");
                     this.trigger('done');
                     if (msg.data.MEMFS[0] && this._errors.length == 0) {
                         callback(msg.data.MEMFS[0]);
