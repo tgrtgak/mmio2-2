@@ -115,6 +115,9 @@
 .bottom
   .left
     ol.tabs
+      li.tab
+        button aria-controls=:"run-console-panel"
+          = I18n.t(:"console.tab")
       li.tab.active
         button aria-controls=:"machine-code-panel"
           = I18n.t(:"run.machine-code.tab")
@@ -122,6 +125,7 @@
         button aria-controls=:"memory-panel"
           = I18n.t(:"run.memory.tab")
     ol.tab-panels
+      li.tab-panel#run-console-panel
       li.tab-panel.active#machine-code-panel
         table.instructions.empty
           thead

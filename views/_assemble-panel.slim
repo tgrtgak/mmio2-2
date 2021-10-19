@@ -1,9 +1,17 @@
-.editor-pane
+.top.editor-pane data-separator=:"output-separator"
   .project-pane data-separator=:"editor-separator"
     == partial(:"project-pane")
   .separator.vertical#editor-separator
   textarea#editor
     | add s1, s1, 1
 .separator.horizontal#output-separator
-pre#output.initial data-separator=:"output-separator"
-  = I18n.t(:"console.initial")
+.bottom
+  .left
+    ol.tabs
+      li.tab.active
+        button aria-controls=:"assemble-console-panel"
+          = I18n.t(:"console.tab")
+    ol.tab-panels
+      li.tab-panel.active#assemble-console-panel
+        pre#output.initial
+          = I18n.t(:"console.initial")

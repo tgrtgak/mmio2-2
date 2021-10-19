@@ -1,5 +1,6 @@
 "use strict";
 
+import Tabs           from './tabs';
 import EventComponent from './event_component';
 
 /**
@@ -17,6 +18,23 @@ class Terminal extends EventComponent {
         let element = root.querySelector("pre#output");
         this._element = element;
         this._element.classList.remove("initial");
+
+        this._tabs = Tabs.load(document.querySelector('#main-tabs'));
+        this._tabs.on('change', (button) => {
+            let panelId = button.getAttribute('aria-controls');
+            let assembleContainer = document.querySelector('#assemble-console-panel');
+            let runContainer = document.querySelector('#run-console-panel');
+            if (panelId === 'assemble-panel') {
+                if (runContainer.children[0]) {
+                    assembleContainer.appendChild(runContainer.children[0]);
+                }
+            }
+            else if (panelId === 'run-panel') {
+                if (assembleContainer.children[0]) {
+                    runContainer.appendChild(assembleContainer.children[0]);
+                }
+            }
+        });
     }
 
     /**
