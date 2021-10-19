@@ -27,6 +27,7 @@ describe('Register Listing', () => {
             let curr_row = document.createElement("tr");
             curr_row.classList.add("register");
             curr_row.classList.add(regName);
+            curr_row.setAttribute('data-hex-value', '0x0000000000000000');
 
             // Create name td
             let name_td = document.createElement("td");
@@ -82,6 +83,7 @@ describe('Register Listing', () => {
                 let str = (i + 1).toString(16); // Convert to a string represented as a hex value
                 str = "0000000000000000".slice(str.length) + str;
                 document.querySelector("tr." + regName + " td.value button").textContent = "0x" + str;
+                document.querySelector("tr." + regName).setAttribute('data-hex-value', "0x" + str);
             });
 
             // Run function
@@ -191,6 +193,7 @@ describe('Register Listing', () => {
                 let str = nums[i].toString(16); // Convert to a string represented as a hex value
                 str = "0000000000000000".slice(str.length) + str; // Pad the string with zeroes
                 document.querySelector("tr." + regName + " td.value button").textContent = "0x" + str;
+                document.querySelector("tr." + regName).setAttribute('data-hex-value', "0x" + str);
             });
 
             let result = reg_list.registers;

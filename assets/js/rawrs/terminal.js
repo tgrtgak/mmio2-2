@@ -20,30 +20,32 @@ class Terminal extends EventComponent {
         this._element.classList.remove("initial");
 
         this._tabs = Tabs.load(document.querySelector('#main-tabs'));
-        this._tabs.on('change', (button) => {
-            // Terminal the new tab
-            let panelId = button.getAttribute('aria-controls');
-            let assembleContainer = document.querySelector('#assemble-console-panel');
-            let runContainer = document.querySelector('#run-console-panel');
+        if (this._tabs) {
+            this._tabs.on('change', (button) => {
+                // Terminal the new tab
+                let panelId = button.getAttribute('aria-controls');
+                let assembleContainer = document.querySelector('#assemble-console-panel');
+                let runContainer = document.querySelector('#run-console-panel');
 
-            // Copy the console to the appropriate tab and maintain the scroll.
-            if (panelId === 'assemble-panel') {
-                if (runContainer.children[0]) {
-                    let pre = runContainer.children[0];
-                    let scroll = pre.scrollTop;
-                    assembleContainer.appendChild(pre);
-                    pre.scrollTop = scroll;
+                // Copy the console to the appropriate tab and maintain the scroll.
+                if (panelId === 'assemble-panel') {
+                    if (runContainer.children[0]) {
+                        let pre = runContainer.children[0];
+                        let scroll = pre.scrollTop;
+                        assembleContainer.appendChild(pre);
+                        pre.scrollTop = scroll;
+                    }
                 }
-            }
-            else if (panelId === 'run-panel') {
-                if (assembleContainer.children[0]) {
-                    let pre = assembleContainer.children[0];
-                    let scroll = pre.scrollTop;
-                    runContainer.appendChild(pre);
-                    pre.scrollTop = scroll;
+                else if (panelId === 'run-panel') {
+                    if (assembleContainer.children[0]) {
+                        let pre = assembleContainer.children[0];
+                        let scroll = pre.scrollTop;
+                        runContainer.appendChild(pre);
+                        pre.scrollTop = scroll;
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
