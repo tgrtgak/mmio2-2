@@ -46,7 +46,6 @@ class Assembler extends EventComponent {
                     // Check for error statements
                     var matches = Assembler.ERROR_REGEX.exec(msg.data);
                     if (matches) {
-                        terminal.writeln("Assembly failed.");
                         this.trigger('error', {
                             row: parseInt(matches[1]) - 1,
                             column: 0,
@@ -59,7 +58,12 @@ class Assembler extends EventComponent {
                 case "exit":
                     break;
                 case "done":
-                    terminal.writeln("Assembly successful.");
+                    if (msg.data.MEMFS[0]) {
+                        terminal.write("Assembly successful.");
+                    }
+                    else {
+                        terminal.write("Assembly failed.");
+                    }
 
                     this.trigger('done');
                     if (msg.data.MEMFS[0]) {
