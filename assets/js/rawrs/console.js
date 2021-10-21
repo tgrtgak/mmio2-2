@@ -10,6 +10,10 @@ class Console extends EventComponent {
         this._columns = cols;
 
         this._term = new window.XTerm({
+          theme: {
+            fontFamily: 'inconsolata'
+          },
+          fontFamily: 'inconsolata',
           cols: cols,
           rows: rows,
           cursorBlink:      true,     // Whether or not the cursor caret blinks

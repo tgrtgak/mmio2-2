@@ -103,3 +103,14 @@
                url(/fonts/oxygen/oxygen.woff2) format('woff2'),
                url(/fonts/oxygen/oxygen.woff) format('woff');
 }
+
+@font-face {
+  font-family: 'inconsolata';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('inconsolata'),
+    url(/fonts/inconsolata/inconsolata.woff2) format('woff2'),
+    url(/fonts/inconsolata/inconsolata.woff) format('woff');
+}

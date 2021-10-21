@@ -880,6 +880,7 @@ ol.tab-panels {
                                 width: 640px;
                                 height: 480px;
                                 background: #2e3436;
+                                font-family: 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
                             }
                         }
                     }
@@ -947,7 +948,7 @@ ol.tab-panels {
 
                 .register {
                     padding: 0.2rem;
-                    font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                    font: 0.8rem/1.2rem 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
                     font-weight: normal;
                     font-variant-ligatures: none;
 
@@ -978,7 +979,7 @@ ol.tab-panels {
                         width: 100%;
 
                         button {
-                            font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                            font: 1rem/normal 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
                             margin: 0;
                             padding: 0;
                             outline: none;
@@ -994,7 +995,7 @@ ol.tab-panels {
                         .input {
                             background: transparent;
                             border: none;
-                            font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                            font: 1rem/normal 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
                             margin: 0;
                             outline: none;
                             padding: 0;
@@ -1124,7 +1125,7 @@ table.labels {
 
         th ,
         td {
-            font-family: monospace,courier,fixed,swiss,sans-serif;
+            font-family: 'inconsolata', monospace, courier,fixed, swiss, sans-serif;
             font-size: 15px;
             font-weight: normal;
             font-variant-ligatures: none;
@@ -1255,7 +1256,7 @@ iframe {
 
   code {
     color: #9260c3;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    font-family: 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     margin: 0;
     padding: 0;
   }
@@ -1469,7 +1470,7 @@ dialog.dialog {
             tbody {
                 tr {
                     td {
-                        font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                        font: 1rem/normal 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
                         height: 1.25rem;
                         padding: 0.125rem;
 
@@ -1601,13 +1602,13 @@ dialog.dialog {
 
         input {
             box-sizing: border-box;
-            font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+            font: 0.8rem/1.2rem 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
             width: 100%;
         }
 
         p {
             display: block;
-            font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+            font: 0.8rem/1.2rem 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
             margin: 0;
             padding: 0;
             width: 100%;

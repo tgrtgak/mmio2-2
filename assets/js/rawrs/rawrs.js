@@ -50,9 +50,9 @@ class RAWRS {
             }
         }
 
-        this._console = new Console("#term_container", 28, 71, 15);
+        this._console = new Console("#term_container", 29, 71, 15);
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
-        this._debugConsole = new Console("#gdb_container", 28, 71, 15);
+        this._debugConsole = new Console("#gdb_container", 29, 71, 15);
 
         // TinyEMU looks for this:
         window.term = {
