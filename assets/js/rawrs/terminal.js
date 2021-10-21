@@ -25,6 +25,9 @@ class Terminal extends EventComponent {
                 this.updateActivePanel();
             });
         }
+
+        // Initially ensure the active panel has the console
+        this.updateActivePanel();
     }
 
     /**
@@ -49,6 +52,12 @@ class Terminal extends EventComponent {
     updateActivePanel() {
         // Terminal the new tab
         let button = this._tabs.element.querySelector(".active button");
+
+        // Bail if there is no active tab
+        if (!button) {
+            return;
+        }
+
         let panelId = button.getAttribute('aria-controls');
         let assembleContainer = document.querySelector('#assemble-console-panel');
         let runContainer = document.querySelector('#run-console-panel');

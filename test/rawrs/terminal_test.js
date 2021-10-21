@@ -13,6 +13,16 @@ describe('Terminal', () => {
         this.pre.setAttribute("id", "output");
         
         document.body.appendChild(this.pre);
+
+        // We need a stub for the main tabs
+        let element = document.createElement('ol');
+        element.classList.add('tabs');
+        element.setAttribute('id', 'main-tabs');
+
+        document.body.appendChild(element);
+
+        this.tabs = jasmine.createSpyObj('tabs', ['on'], {'element': element});
+        spyOn(Tabs, 'load').and.returnValue(this.tabs);
     });
 
     afterEach(function() {
@@ -21,12 +31,8 @@ describe('Terminal', () => {
 
     describe('#updateActivePanel', () => {
         beforeEach(function() {
-            // We need a stub for the main tabs
-            let element = document.createElement('ol');
-            element.classList.add('tabs');
-            element.setAttribute('id', 'main-tabs');
-
-            document.body.appendChild(element);
+            // Get the tab strip
+            let element = this.tabs.element;
 
             // We need the assemble and run panels
             ['assemble-console-panel', 'run-console-panel'].forEach( (id) => {
@@ -43,9 +49,6 @@ describe('Terminal', () => {
                 panel.setAttribute('id', id);
                 document.body.appendChild(panel);
             });
-
-            this._tabs = jasmine.createSpyObj('tabs', ['on'], {'element': element});
-            spyOn(Tabs, 'load').and.returnValue(this._tabs);
         });
 
         it("should duplicate to the run tab when switched to", function() {
