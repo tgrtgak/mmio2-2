@@ -888,6 +888,8 @@ ol.tab-panels {
                     width: 640px;
                     height: 480px;
                     background: black;
+                    image-rendering: crisp-edges;
+                    image-rendering: pixelated;
                 }
             }
 

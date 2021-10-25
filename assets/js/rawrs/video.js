@@ -15,6 +15,7 @@ export class Video extends EventComponent {
         this._height = height;
         this._active = false;
         this._visible = false;
+        this._scale = 1;
 
         // Get context
         this._context = this._canvas.getContext('2d');
@@ -49,6 +50,13 @@ export class Video extends EventComponent {
     }
 
     /**
+     * Returns the scale of the video.
+     */
+    get scale() {
+        return this._scale;
+    }
+
+    /**
      * Returns the current width of the display.
      */
     get width() {
@@ -76,7 +84,15 @@ export class Video extends EventComponent {
         return this._context;
     }
 
-    blit(imageData, destX, destY, srcX, srcY, width, height) {
+    blit(imageData, destX, destY, srcX, srcY, width, height, deviceWidth, deviceHeight) {
+        // Update the scale
+        if (deviceWidth != this.width || deviceHeight != this.height) {
+            this._width = deviceWidth;
+            this._height = deviceHeight;
+            this.canvas.setAttribute('width', this.width);
+            this.canvas.setAttribute('height', this.height);
+        }
+
         this._active = true;
         this.context.putImageData(imageData, destX, destY, srcX, srcY, width, height);
     }
