@@ -53,6 +53,7 @@ class RAWRS {
         this._console = new Console("#term_container", 29, 71, 15);
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
         this._debugConsole = new Console("#gdb_container", 29, 71, 15);
+        this._terminal = new Terminal(document.body);
 
         // TinyEMU looks for this:
         window.term = {
@@ -65,6 +66,7 @@ class RAWRS {
         };
 
         Tabs.load();
+        this._tabs = Tabs.load(document.querySelector('#main-tabs'));
         Editor.initialize();
         RAWRS.toolbar  = new Toolbar(document.body);
         RAWRS.fileList = new FileList(document.body);
@@ -207,6 +209,10 @@ class RAWRS {
             let sim = new Simulator(32, "basic-riscv64.cfg", basepath + "kernel/kernel.bin", this._binary, this._console, this._video, bp);
 
             sim.on("quit", () => {
+                // Update console
+                this._terminal.writeln("Simulation ended.");
+                this._terminal.writeln("");
+
                 // Update the toolbar buttons
                 RAWRS.toolbar.setStatus("run", "success");
                 RAWRS.toolbar.setStatus("step", "disabled");
@@ -233,6 +239,11 @@ class RAWRS {
             });
 
             sim.on("breakpoint", () => {
+                // Update console
+                if (sim.ready) {
+                    this._terminal.writeln("Simulation breakpoint reached.");
+                }
+
                 // Update the toolbar buttons
                 RAWRS.toolbar.setStatus("step", "active");
                 RAWRS.toolbar.setStatus("run", "");
@@ -263,6 +274,9 @@ class RAWRS {
             });
 
             sim.on("running", () => {
+                // Update console
+                this._terminal.writeln("Simulation started.");
+
                 // When the simulator is running, unhighlight
                 RAWRS.codeListing.unhighlight();
 
@@ -271,6 +285,9 @@ class RAWRS {
             });
 
             sim.on("paused", () => {
+                // Update console
+                this._terminal.writeln("Simulation paused.");
+
                 RAWRS.toolbar.setStatus("run", "paused");
                 RAWRS.toolbar.setStatus("step", "active");
 
@@ -295,6 +312,8 @@ class RAWRS {
             });
 
             sim.on("ready", () => {
+                this._terminal.writeln("Simulation ready to run.");
+
                 if (RAWRS.runRequested) {
                     RAWRS.toolbar.setStatus("step", "");
                     RAWRS.toolbar.setStatus("run", "active");
@@ -365,7 +384,6 @@ class RAWRS {
 
     static assemble() {
         var text = window.editor.getValue();
-        var terminal = new Terminal(document.body);
 
         RAWRS.codeListing.clear();
         RAWRS.codeListing.source = text;
@@ -461,49 +479,32 @@ class RAWRS {
 
         linker.on('done', () => {
             window.editor.getSession().setAnnotations(annotations);
+            this._terminal.writeHeader("Running");
         });
 
         // Reset the console and video
         this._console.clear();
         this._video.reset();
 
-        assembler.assemble("foo.s", text, terminal, (object) => {
-            linker.link(linkerScript, object, terminal, (binary) => {
-                
+        assembler.assemble("foo.s", text, this._terminal, (object) => {
+            linker.link(linkerScript, object, this._terminal, (binary) => {
                 RAWRS.toolbar.setStatus("assemble", "success");
                 RAWRS.toolbar.setStatus("run", "");
                 this._binary = binary;
 
                 // On success, go to the run tab
-                var runTab = document.body.querySelector("button[aria-controls=\"run-panel\"]");
-                if (runTab) {
-                    var strip = runTab.parentNode.parentNode;
-                    strip.querySelectorAll(":scope > li.tab").forEach( (tab) => tab.classList.remove('active') );
-                    runTab.parentNode.classList.add("active");
-
-                    var tabPanels = strip.nextElementSibling;
-                    if (tabPanels) {
-                        tabPanels.querySelectorAll(":scope > .tab-panel").forEach( (tabPanel) => {
-                            tabPanel.classList.remove("active");
-                        });
-                    }
-
-                    var tabPanel = document.querySelector(".tab-panel#run-panel");
-                    if (tabPanel) {
-                        tabPanel.classList.add("active");
-                    }
-                }
+                this._tabs.select('run-panel');
 
                 // Also, disassemble the binary
-                disassembler.disassemble(binary, terminal, () => {
+                disassembler.disassemble(binary, this._terminal, () => {
                 });
 
                 // And dump its memory (data segment)
-                data_dumper.dump(binary, "-x", ".data", terminal, () => {
+                data_dumper.dump(binary, "-x", ".data", this._terminal, () => {
                 });
                 
                 // Then retrieve the labels (.symtab)
-                label_dumper.dump(binary, "-s", "", terminal, () => {
+                label_dumper.dump(binary, "-s", "", this._terminal, () => {
                 });
 
                 // Run
