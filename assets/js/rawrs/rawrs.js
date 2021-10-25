@@ -209,6 +209,10 @@ class RAWRS {
             let sim = new Simulator(32, "basic-riscv64.cfg", basepath + "kernel/kernel.bin", this._binary, this._console, this._video, bp);
 
             sim.on("quit", () => {
+                // Update console
+                this._terminal.writeln("Simulation ended.");
+                this._terminal.writeln("");
+
                 // Update the toolbar buttons
                 RAWRS.toolbar.setStatus("run", "success");
                 RAWRS.toolbar.setStatus("step", "disabled");
@@ -235,6 +239,11 @@ class RAWRS {
             });
 
             sim.on("breakpoint", () => {
+                // Update console
+                if (sim.ready) {
+                    this._terminal.writeln("Simulation breakpoint reached.");
+                }
+
                 // Update the toolbar buttons
                 RAWRS.toolbar.setStatus("step", "active");
                 RAWRS.toolbar.setStatus("run", "");
@@ -265,6 +274,9 @@ class RAWRS {
             });
 
             sim.on("running", () => {
+                // Update console
+                this._terminal.writeln("Simulation started.");
+
                 // When the simulator is running, unhighlight
                 RAWRS.codeListing.unhighlight();
 
@@ -273,6 +285,9 @@ class RAWRS {
             });
 
             sim.on("paused", () => {
+                // Update console
+                this._terminal.writeln("Simulation paused.");
+
                 RAWRS.toolbar.setStatus("run", "paused");
                 RAWRS.toolbar.setStatus("step", "active");
 
@@ -297,6 +312,8 @@ class RAWRS {
             });
 
             sim.on("ready", () => {
+                this._terminal.writeln("Simulation ready to run.");
+
                 if (RAWRS.runRequested) {
                     RAWRS.toolbar.setStatus("step", "");
                     RAWRS.toolbar.setStatus("run", "active");
@@ -462,6 +479,7 @@ class RAWRS {
 
         linker.on('done', () => {
             window.editor.getSession().setAnnotations(annotations);
+            this._terminal.writeHeader("Running");
         });
 
         // Reset the console and video
