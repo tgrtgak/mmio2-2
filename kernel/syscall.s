@@ -599,9 +599,6 @@ syscall_read_string:
   move  s0, a0
   move  s1, a1
 
-  # Enable interrupts (allows keyboard events to trigger)
-  jal   trap_enable_interrupts
-
   # Read the line
   move  a0, s0
   move  a1, s1

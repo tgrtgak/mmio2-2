@@ -139,6 +139,9 @@ _kmain_virtio_init_loop:
   move  a1, s0
   jal   elf_load
 
+  # Enable interrupts (allows keyboard events to trigger)
+  jal   trap_enable_interrupts
+
   # Execute the application
 
   # a0: The virtual address of the first instruction of our program
