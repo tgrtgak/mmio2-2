@@ -22,6 +22,15 @@ export class Video extends EventComponent {
         // Get context
         this._context = this._canvas.getContext('2d');
 
+        // Bind events
+        this._canvas.addEventListener('keyup', (event) => {
+            this.trigger('keyup', event);
+        });
+
+        this._canvas.addEventListener('keydown', (event) => {
+            this.trigger('keydown', event);
+        });
+
         // Create an image to hold the frame
         this._image = this.context.createImageData(width, height);
 
