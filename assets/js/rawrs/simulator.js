@@ -301,8 +301,8 @@ class Simulator extends EventComponent {
                        this.memorySize,
                        "",   // cmdline
                        "",   // password
-                       640,  // width
-                       480,  // height
+                       1024,  // width
+                       768,  // height
                        0,    // net_state
                        "");  // drive_url
                       //*/

@@ -13,6 +13,8 @@ export class Video extends EventComponent {
         this._canvas = canvas;
         this._width = width;
         this._height = height;
+        this._originalWidth = width;
+        this._originalHeight = height;
         this._active = false;
         this._visible = false;
         this._scale = 1;
@@ -103,6 +105,10 @@ export class Video extends EventComponent {
     }
 
     reset() {
+        this._width = this._originalWidth;
+        this._height = this._originalHeight;
+        this.canvas.setAttribute('width', this.width);
+        this.canvas.setAttribute('height', this.height);
         this._active = false;
         this.clear();
         this.animate();
