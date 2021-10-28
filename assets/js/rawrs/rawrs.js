@@ -195,6 +195,12 @@ class RAWRS {
             RAWRS.simulator.resume();
         }
         else {
+            // Removes previously displyed warnings when running the simulator again
+            const terminal_content = document.querySelector("pre#output");
+            if (terminal_content.childNodes.length > 5) {
+                terminal_content.removeChild(terminal_content.lastChild);
+            }
+
             // Create and start the simulation (or restart, if it is running.)
 
             // Carry over last breakpoints
@@ -367,6 +373,56 @@ class RAWRS {
         var text = window.editor.getValue();
         var terminal = new Terminal(document.body);
 
+        window.terminal_warning = {
+            warn: (warning_code, reg_index) => {
+                let warning;
+
+                switch (warning_code) {
+                    case 1:
+                        warning = "Uninitialized Register";
+                        break;
+                }
+
+                // Gets the register name given an index
+                let reg;
+                if (reg_index == 0) {
+                    reg = "zero";
+                } else {
+                    reg = Simulator.REGISTER_NAMES[reg_index];
+                }
+
+                const pc = RAWRS.simulator.pc.toString(16);
+                const instructions_table = RAWRS.codeListing.element;
+                const instructions = instructions_table.querySelectorAll(".address");
+
+                let pc_index;
+                for (let [i, element] of instructions.entries()) {
+                    if (element.classList.contains("address-" + pc)) {
+                        pc_index = i;
+                        break;
+                    }
+                }
+
+                let line_num = instructions[pc_index].parentNode.querySelector(".row").textContent;
+                // Gets the correct line number for pseudo-instructions
+                if (line_num === "") {
+                    line_num = instructions[pc_index - 1].parentNode.querySelector(".row").textContent;// Does not get the line number of pseudo-instructions comprised of more than 2 instructions
+                }
+
+                const annotations = window.editor.getSession().getAnnotations();
+                const line_warning = {
+                    row: line_num - 1,
+                    column: 0,
+                    text: warning + " " + reg
+                }
+                line_warning.type = "warning";
+                annotations.push(line_warning);
+                window.editor.getSession().setAnnotations(annotations);
+
+                terminal.writeln(warning + " " + reg + " at line " + line_num);
+            }
+        };
+
         RAWRS.codeListing.clear();
         RAWRS.codeListing.source = text;
 
@@ -469,7 +525,9 @@ class RAWRS {
 
         assembler.assemble("foo.s", text, terminal, (object) => {
             linker.link(linkerScript, object, terminal, (binary) => {
-                
+                terminal.writeln("");
+                terminal.writeHeader("Warnings");
+
                 RAWRS.toolbar.setStatus("assemble", "success");
                 RAWRS.toolbar.setStatus("run", "");
                 this._binary = binary;
