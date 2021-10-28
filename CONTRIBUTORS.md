@@ -11,6 +11,8 @@
 * Joel Valentino
 * Adam Buchinsky
 * Erik Joy
+* Zhiyi Zhan
+* Celest Hayden
 
 ## Documentation
 

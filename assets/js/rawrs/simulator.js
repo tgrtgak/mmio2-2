@@ -232,6 +232,13 @@ class Simulator extends EventComponent {
     }
 
     /**
+     * Returns whether or not the simulation is ready to run.
+     */
+    get ready() {
+        return this._ready;
+    }
+
+    /**
      * Returns whether or not the simulator is loaded, and running.
      */
     get running() {

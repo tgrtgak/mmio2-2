@@ -82,7 +82,6 @@ class Dumper extends EventComponent {
                     }
                     break;
                 case "stderr":
-                    terminal.writeln(msg.data);
                     break;
                 case "exit":
                     break;

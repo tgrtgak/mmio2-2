@@ -7,7 +7,7 @@ html lang="en-US"
   body data-basepath=@basepath
     - if !defined?(tab)
       - tab = :edit
-    ol.tabs
+    ol.tabs#main-tabs
       li.tab class=(tab == :edit ? "active" : false)
         a href="#{@basepath}edit" hidden=true aria-hidden="true"
         button aria-controls=:"assemble-panel"
@@ -21,11 +21,11 @@ html lang="en-US"
         button aria-controls=:"guidance-panel"
           = I18n.t(:"guidance.tab")
     ol.tab-panels
-      li.tab-panel id=:"assemble-panel" class=(tab == :edit ? "active" : false)
+      li.tab-panel#assemble-panel class=(tab == :edit ? "active" : false)
         == partial(:"assemble-panel")
-      li.tab-panel id=:"run-panel" class=(tab == :run ? "active" : false)
+      li.tab-panel#run-panel class=(tab == :run ? "active" : false)
         == partial(:"run-panel")
-      li.tab-panel id=:"guidance-panel" class=(tab == :guidance ? "active" : false)
+      li.tab-panel#guidance-panel class=(tab == :guidance ? "active" : false)
         - if !defined?(guidance)
           - guidance = "about"
         == partial(:"guidance-panel", :locals => {:guidance => guidance})

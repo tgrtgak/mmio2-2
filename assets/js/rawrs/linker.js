@@ -66,6 +66,13 @@ class Linker extends EventComponent {
                 case "exit":
                     break;
                 case "done":
+                    if (msg.data.MEMFS[0] && this._errors.length == 0) {
+                        terminal.write("Linking successful.");
+                    }
+                    else {
+                        terminal.write("Linking failed.");
+                    }
+
                     this.trigger('done');
                     if (msg.data.MEMFS[0] && this._errors.length == 0) {
                         callback(msg.data.MEMFS[0]);

@@ -4,7 +4,6 @@ en:
   edit:
     tab:                "Edit"
 
-
   run:
     tab:                "Run"
 
@@ -67,6 +66,7 @@ en:
       tab:              "Instructions"
 
   console:
+    tab: "Console"
     initial: |
       Console output. When you assemble something and stub your toe slightly, those errors will appear here.
   

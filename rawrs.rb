@@ -127,8 +127,8 @@ class RAWRS < Sinatra::Base
         data.gsub!("{% binutils_authors %}", @@binutils_authors)
         ret = render(:markdown, data, :layout => layout)
         ret.gsub!(" href=\"http", " target=\"_blank\" href=\"http")
-        ret.gsub!("<p><img", "<p class=\"image\"><img")
       end
+      ret.gsub!("<p><img", "<p class=\"image\"><img")
       ret
     end
   end
@@ -163,7 +163,9 @@ class RAWRS < Sinatra::Base
     if params[:page].end_with?('_ajax')
       params[:page] = params[:page][0...-5]
       if params[:page] == "instructions"
-        render(:slim, :"guidance/_instructions", :layout => :"guidance/layout")
+        ret = render(:slim, :"guidance/_instructions", :layout => :"guidance/layout")
+        ret.gsub!("<p><img", "<p class=\"image\"><img")
+        ret
       else
         render_guidance(params[:page])
       end

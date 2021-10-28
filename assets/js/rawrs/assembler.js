@@ -58,6 +58,13 @@ class Assembler extends EventComponent {
                 case "exit":
                     break;
                 case "done":
+                    if (msg.data.MEMFS[0]) {
+                        terminal.write("Assembly successful.");
+                    }
+                    else {
+                        terminal.write("Assembly failed.");
+                    }
+
                     this.trigger('done');
                     if (msg.data.MEMFS[0]) {
                         callback(msg.data.MEMFS[0]);

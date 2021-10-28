@@ -147,15 +147,13 @@ template, *[hidden] {
     width: 100%;
 }
 
-.editor-pane {
-    textarea, pre {
-        background: #262626;
-        box-sizing: border-box;
-        color: white;
-        flex: 1 1 100%;
-        overflow: hidden;
-        margin: 0;
-    }
+textarea, pre {
+    background: #262626;
+    box-sizing: border-box;
+    color: white;
+    flex: 1 1 100%;
+    overflow: hidden;
+    margin: 0;
 }
 
 pre#output {
@@ -166,22 +164,23 @@ pre#output {
     overflow: auto;
     overflow-y: scroll;
     margin: 0;
-    height: 25%;
-    padding: 0.2rem;
+    height: 100%;
+    padding: 0;
 
     h1 {
-        margin: 0.3rem;
-        padding: 0.1rem;
-
-        font: 400 0.8rem Lato;
-
-        border: 0.0625rem solid #71526e;
-        border-radius: 0.5rem;
-
+        margin: 0;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem;
+        font: 400 1rem Lato;
+        border-top: 0.0625rem solid #71526e;
+        border-bottom: 0.0625rem solid #71526e;
         background: #382c37;
-
         text-align: center;
         color: white;
+
+        &:not(:first-child) {
+          margin-top: 0.5rem;
+        }
     }
 }
 
@@ -825,250 +824,248 @@ ol.tab-panels {
     }
 }
 
-#run-panel {
-    .top {
+.top {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: row;
+    overflow: hidden;
+    line-height: 1.2;
+
+    .container {
         display: flex;
-        flex: 0 1 481px;
+        flex: 1 0 auto;
         flex-direction: row;
-        overflow: hidden;
-        line-height: 1.2;
-        height: 481px;
+        margin: 0;
+        min-width: 20rem;
+        text-align: center;
+        background: #211a21;
+        background-image: url('../images/dynamic/hex/1d141d/tracks.svg');
+        background-size: 10rem;
 
-        .container {
-            display: flex;
-            flex: 1 0 auto;
-            flex-direction: row;
-            margin: 0;
-            min-width: 20rem;
-            text-align: center;
-            background: #211a21;
-            background-image: url('../images/dynamic/hex/1d141d/tracks.svg');
-            background-size: 10rem;
+        ol.tabs.side {
+            position: static;
+            flex: 1 1 0%;
+        }
 
-            ol.tabs.side {
-                position: static;
-                flex: 1 1 0%;
-            }
+        ol.tab-panels {
+            height: 100%;
 
-            ol.tab-panels {
-                height: 100%;
+            .tab-panel {
+                .output-container {
+                    display: flex;
+                    flex: 1 0 auto;
+                    flex-direction: row;
+                    margin: 0;
+                    text-align: center;
+                    background: #211a21;
+                    background-image: url('../images/dynamic/hex/1d141d/tracks.svg');
+                    background-size: 10rem;
 
-                .tab-panel {
-                    .output-container {
-                        display: flex;
-                        flex: 1 0 auto;
-                        flex-direction: row;
-                        margin: 0;
-                        text-align: center;
-                        background: #211a21;
-                        background-image: url('../images/dynamic/hex/1d141d/tracks.svg');
-                        background-size: 10rem;
-
-                        .output {
-                            position: relative;
-                            text-align: left;
-                            margin: 0 auto;
-                            display: inline-block;
-                            border-left: 0.3125rem solid #2d242d;
-                            border-right: 0.3125rem solid #2d242d;
-                            outline: 0.0625rem solid #1d141d;
-                            width: 640px;
-                            height: 480px;
-
-                            #term_container,
-                            #gdb_container {
-                                width: 640px;
-                                height: 480px;
-                                background: #2e3436;
-                            }
-                        }
-                    }
-                }
-
-                li.tab-panel#video {
-                    canvas {
+                    .output {
+                        position: relative;
+                        text-align: left;
+                        margin: 0 auto;
+                        display: inline-block;
+                        border-left: 0.3125rem solid #2d242d;
+                        border-right: 0.3125rem solid #2d242d;
+                        outline: 0.0625rem solid #1d141d;
                         width: 640px;
                         height: 480px;
-                        background: black;
+
+                        #term_container,
+                        #gdb_container {
+                            width: 640px;
+                            height: 480px;
+                            font-family: 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                            background: #2e3436;
+                        }
                     }
                 }
+            }
 
-                div.disconnected {
-                    position: absolute;
-                    left: 0;
-                    right: 0.0625rem;
-                    top: 0;
-                    bottom: 0;
-                    background: rgba(96, 41, 41, 0.5);
-                    z-index: 9;
-                    display: flex;
-                    align-items: center;
-                    align-content: center;
-                    text-align: center;
+            li.tab-panel#video {
+                canvas {
+                    width: 640px;
+                    height: 480px;
+                    background: black;
+                }
+            }
 
-                    img {
-                        flex: 1;
-                        width: 40%;
-                        height: 40%;
-                        animation: 1s infinite alternate disconnect-pulse;
+            div.disconnected {
+                position: absolute;
+                left: 0;
+                right: 0.0625rem;
+                top: 0;
+                bottom: 0;
+                background: rgba(96, 41, 41, 0.5);
+                z-index: 9;
+                display: flex;
+                align-items: center;
+                align-content: center;
+                text-align: center;
 
-                        @keyframes disconnect-pulse {
-                            0% {
-                              opacity: 0.5;
-                            }
-                            100% {
-                              opacity: 1.0;
-                            }
+                img {
+                    flex: 1;
+                    width: 40%;
+                    height: 40%;
+                    animation: 1s infinite alternate disconnect-pulse;
+
+                    @keyframes disconnect-pulse {
+                        0% {
+                          opacity: 0.5;
+                        }
+                        100% {
+                          opacity: 1.0;
                         }
                     }
                 }
             }
         }
+    }
 
-        .register-file {
-            flex: 0 1 17rem;
-            width: 17rem;
-            background: #fff;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            min-width: 17rem;
+    .register-file {
+        flex: 0 1 17rem;
+        width: 17rem;
+        background: #fff;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 17rem;
 
-            .registers {
-                box-shadow: 0 0 0.25rem -0.0625rem black inset;
-                padding: 0;
-                margin: 0;
-                margin-top: 0.2rem;
-                height: 100%;
-                width:  100%;
-                overflow: auto;
-                border-collapse: collapse;
-                display: block;
+        .registers {
+            box-shadow: 0 0 0.25rem -0.0625rem black inset;
+            padding: 0;
+            margin: 0;
+            margin-top: 0.2rem;
+            height: 100%;
+            width:  100%;
+            overflow: auto;
+            border-collapse: collapse;
+            display: block;
 
-                .register {
-                    padding: 0.2rem;
-                    font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
-                    font-weight: normal;
-                    font-variant-ligatures: none;
+            .register {
+                padding: 0.2rem;
+                font: 0.8rem/1.2rem 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                font-weight: normal;
+                font-variant-ligatures: none;
 
+                > * {
+                    border-bottom: 0.0625rem solid #ddd;
+                    padding: 0.2rem 0.4rem;
+
+                    &:not(:first-child) {
+                        border-left: 0.0625rem solid #ddd;
+                    }
+
+                    text-align: center;
+                }
+
+                &.updated {
+                    > .value > button,
                     > * {
-                        border-bottom: 0.0625rem solid #ddd;
-                        padding: 0.2rem 0.4rem;
-
-                        &:not(:first-child) {
-                            border-left: 0.0625rem solid #ddd;
-                        }
-
-                        text-align: center;
+                        color: #d243c6;
+                        font-weight: bold;
                     }
+                }
 
-                    &.updated {
-                        > .value > button,
-                        > * {
-                            color: #d243c6;
-                            font-weight: bold;
-                        }
-                    }
+                &:last-child {
+                    border: none;
+                }
 
-                    &:last-child {
-                        border: none;
-                    }
+                .value {
+                    width: 100%;
 
-                    .value {
-                        width: 100%;
-
-                        button {
-                            font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
-                            margin: 0;
-                            padding: 0;
-                            outline: none;
-                            border: none;
-                            background: transparent;
-                            text-align: center;
-                        }
-                    }
-
-                    .edit {
-                        width: 100%;
-
-                        .input {
-                            background: transparent;
-                            border: none;
-                            font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
-                            margin: 0;
-                            outline: none;
-                            padding: 0;
-                            text-align: center;
-                            width: 100%;
-                        }
-                    }
-
-                    .actions {
-                        line-height: 0;
+                    button {
+                        font: 1rem/normal 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
                         margin: 0;
                         padding: 0;
-                        position: relative;
+                        outline: none;
+                        border: none;
+                        background: transparent;
+                        text-align: center;
+                    }
+                }
 
-                        > button.actions {
-                            cursor: pointer;
-                            background: none;
-                            border: 0.0625rem solid #ffffff;
-                            border-radius: 50%;
-                            width: 1rem;
-                            height: 1rem;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
+                .edit {
+                    width: 100%;
 
-                            &:active {
-                                outline: none;
-                            }
+                    .input {
+                        background: transparent;
+                        border: none;
+                        font: 1rem/normal 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                        margin: 0;
+                        outline: none;
+                        padding: 0;
+                        text-align: center;
+                        width: 100%;
+                    }
+                }
 
-                            > img {
-                                width: 1rem;
-                                height: 1rem;
-                                line-height: 1rem;
-                                padding: 0;
-                                margin: 0;
-                                vertical-align: middle;
+                .actions {
+                    line-height: 0;
+                    margin: 0;
+                    padding: 0;
+                    position: relative;
 
-                                &.active ,
-                                &.hover {
-                                    display: none;
-                                }
-                            }
+                    > button.actions {
+                        cursor: pointer;
+                        background: none;
+                        border: 0.0625rem solid #ffffff;
+                        border-radius: 50%;
+                        width: 1rem;
+                        height: 1rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        &:active {
+                            outline: none;
                         }
 
-                        > ul.dropdown-menu {
-                            list-style: none;
-                            position: absolute;
-                            z-index: 999;
+                        > img {
+                            width: 1rem;
+                            height: 1rem;
+                            line-height: 1rem;
                             padding: 0;
                             margin: 0;
-                            right: 0;
-                            outline: 0;
-                            background: white;
-                            border: 0.0625rem solid #333;
+                            vertical-align: middle;
 
-                            > li {
-                                padding: 0;
+                            &.active ,
+                            &.hover {
+                                display: none;
+                            }
+                        }
+                    }
+
+                    > ul.dropdown-menu {
+                        list-style: none;
+                        position: absolute;
+                        z-index: 999;
+                        padding: 0;
+                        margin: 0;
+                        right: 0;
+                        outline: 0;
+                        background: white;
+                        border: 0.0625rem solid #333;
+
+                        > li {
+                            padding: 0;
+                            margin: 0;
+                            white-space: nowrap;
+
+                            > button {
+                                width: 100%;
+                                text-align: left;
+                                background: none;
+                                border: 0;
+                                padding: 0.2rem;
                                 margin: 0;
-                                white-space: nowrap;
+                                cursor: pointer;
 
-                                > button {
-                                    width: 100%;
-                                    text-align: left;
-                                    background: none;
-                                    border: 0;
-                                    padding: 0.2rem;
-                                    margin: 0;
-                                    cursor: pointer;
-
-                                    &:focus,
-                                    &:hover:not([disabled]) {
-                                        background: #46b1e4;
-                                        color: white;
-                                    }
+                                &:focus,
+                                &:hover:not([disabled]) {
+                                    background: #46b1e4;
+                                    color: white;
                                 }
                             }
                         }
@@ -1077,30 +1074,44 @@ ol.tab-panels {
             }
         }
     }
+}
 
-    .bottom {
+.bottom {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 0.1%;
+
+    .left {
         display: flex;
-        flex-direction: row;
         flex: 1 1 0.1%;
-
-        .left {
-            display: flex;
-            flex: 1 1 0.1%;
-            flex-direction: column;
-            overflow: auto;
-            min-width: 20rem;
-        }
-
-        .right {
-            background: #fff;
-            display: flex;
-            flex: 0 1 17rem;
-            flex-direction: column;
-            position: relative;
-            width: 17rem;
-            min-width: 17rem;
-        }
+        flex-direction: column;
+        overflow: auto;
+        min-width: 20rem;
     }
+
+    .right {
+        background: #fff;
+        display: flex;
+        flex: 0 1 17rem;
+        flex-direction: column;
+        position: relative;
+        width: 17rem;
+        min-width: 17rem;
+    }
+}
+
+#run-panel {
+  .top {
+    flex: 0 1 481px;
+    height: 481px;
+  }
+}
+
+#assemble-panel {
+  .bottom {
+    flex: 0 1 15rem;
+    height: 15rem;
+  }
 }
 
 table.memory ,
@@ -1124,7 +1135,7 @@ table.labels {
 
         th ,
         td {
-            font-family: monospace,courier,fixed,swiss,sans-serif;
+            font-family: 'inconsolata', monospace, courier,fixed, swiss, sans-serif;
             font-size: 15px;
             font-weight: normal;
             font-variant-ligatures: none;
@@ -1255,7 +1266,7 @@ iframe {
 
   code {
     color: #9260c3;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    font-family: 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     margin: 0;
     padding: 0;
   }
@@ -1469,7 +1480,7 @@ dialog.dialog {
             tbody {
                 tr {
                     td {
-                        font: 1rem/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                        font: 1rem/normal 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
                         height: 1.25rem;
                         padding: 0.125rem;
 
@@ -1601,13 +1612,13 @@ dialog.dialog {
 
         input {
             box-sizing: border-box;
-            font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+            font: 0.8rem/1.2rem 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
             width: 100%;
         }
 
         p {
             display: block;
-            font: 0.8rem/1.2rem 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+            font: 0.8rem/1.2rem 'inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
             margin: 0;
             padding: 0;
             width: 100%;

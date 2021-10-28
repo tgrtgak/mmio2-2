@@ -93,6 +93,10 @@ class Tabs extends EventComponent {
         }
     }
 
+    get element() {
+        return this._tabStrip;
+    }
+
     static load(tabStrip) {
         if (tabStrip) {
             if (!Tabs._loaded.has(tabStrip)) {
