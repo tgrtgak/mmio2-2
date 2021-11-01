@@ -400,11 +400,13 @@ class RAWRS {
         RAWRS._simulator = null;
         RAWRS._clearBreakpoint = false;
 
+        let fileinfo = RAWRS.fileList.infoFor(RAWRS.fileList.active);
+
         // Pass the files to a new debugger (when it is ready)
         this._gdb = new Debugger(this._debugConsole);
         this._gdb.on("ready", () => {
             this._gdb.mount([{
-                name: "/input/foo.s",
+                name: "/input/" + fileinfo.name,
                 data: text
             }]);
 
@@ -486,7 +488,7 @@ class RAWRS {
         this._console.clear();
         this._video.reset();
 
-        assembler.assemble("foo.s", text, this._terminal, (object) => {
+        assembler.assemble(fileinfo.name, text, this._terminal, (object) => {
             linker.link(linkerScript, object, this._terminal, (binary) => {
                 RAWRS.toolbar.setStatus("assemble", "success");
                 RAWRS.toolbar.setStatus("run", "");

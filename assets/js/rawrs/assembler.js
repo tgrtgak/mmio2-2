@@ -21,6 +21,8 @@ class Assembler extends EventComponent {
           data: fileData
         }];
 
+        let basename = filename.match(/([^/]+)[.].+$/)[1]
+
         worker.onmessage = (e) => {
             var msg = e.data;
 
@@ -36,7 +38,7 @@ class Assembler extends EventComponent {
                             },
                             "mountpoint": "/input"
                         }],
-                        arguments: ["/input/" + filename, "-o", "foo.o", "-g"]
+                        arguments: ["/input/" + filename, "-o", basename + ".o", "-g"]
                     });
                     break;
                 case "stdout":

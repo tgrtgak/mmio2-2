@@ -298,15 +298,19 @@ class FileList extends EventComponent {
         }
     }
 
+    get active() {
+        return this._activeItem;
+    }
+
     /**
      * Saves the current file, if possible, with the provided data.
      */
     async save(data) {
-        if (!this._activeItem) {
+        if (!this.active) {
             return;
         }
 
-        let item = this._activeItem;
+        let item = this.active;
         let path = item.getAttribute("data-path");
 
         if (!path) {
@@ -386,16 +390,16 @@ class FileList extends EventComponent {
     }
 
     unselect() {
-        if (this._activeItem) {
-            this._activeItem.classList.remove('active');
+        if (this.active) {
+            this.active.classList.remove('active');
         }
 
         this._activeItem = null;
     }
 
     async select(item) {
-        if (this._activeItem) {
-            this._activeItem.classList.remove('active');
+        if (this.active) {
+            this.active.classList.remove('active');
         }
 
         // Ensure all directories to this file are open
