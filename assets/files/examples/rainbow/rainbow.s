@@ -1,11 +1,19 @@
   li    s0, 0x00 # hue
   li    s1, 0xff # saturation
   li    s2, 0x80 # light value
-  li    s3, 0x90000000 # framebuffer address
+  li    s3, 0x90001000 # framebuffer address
   li    s4, 640 # width
   li    s5, 480 # height
   li    s6, 0 # x
   li    s7, 0 # y
+  
+  # Set the width
+  li      t0, 0x90000000
+  sw      s4, 0(t0)
+    
+  # Set the height
+  li      t0, 0x90000004
+  sw      s5, 0(t0)
 
 _foo_x:
   # calculate pixel color
