@@ -155,7 +155,7 @@ Writing to this memory has the "side effect" that it gets painted to the video d
 With this, you can draw sprites, backgrounds, landscapes... whatever you can imagine (and then create in code!)
 
 Using this is relatively straightforward.
-The framebuffer memory starts at address `0x90000000` and proceeds continuously to create an array of pixels.
+The framebuffer memory starts at address `0x90001000` and proceeds continuously to create an array of pixels.
 Each word (4 bytes) represents a single pixel in the form `a8b8g8r8` where the `a` stands for alpha (transparency) which is ignored by our display. The `r` stands for **red**, `g` stands for **green**, and `b` stands for **blue**.
 The resulting color is determined by mixing each of these together.
 
@@ -168,8 +168,8 @@ Red and blue, in this scheme, also make purple.
 However, red and green (opposites in subtractive color) make yellow, here.
 This takes some getting used to, but there are many resources online to retrieve the red-green-blue (RGB) values from any color you like.
 
-The first word in memory (at `0x90000000`) represents the top-left-most pixel.
-The next word in memory (at `0x90000004`) represents the pixel to the immediate right of that one.
+The first word in memory (at `0x90001000`) represents the top-left-most pixel.
+The next word in memory (at `0x90001004`) represents the pixel to the immediate right of that one.
 The words continue along that row until it hits the last pixel within that row at its right-most edge.
 In that case, the next word in memory represents the first pixel of the next row, at its left-most edge.
 All in all, the words (and pixels) of the screen go from top-left and proceed strictly to the right, whip back to the left with every row, and end on the last pixel at the bottom-right.
@@ -191,7 +191,7 @@ But this is still a good place to start.
 Here is some code to paint the display red:
 
 ```riscv
-  li    t0, 0x90000000    # pixel_address = The framebuffer address
+  li    t0, 0x90001000    # pixel_address = The framebuffer address
   li    t3, 640           # width = 640
   li    t4, 480           # height = 480
 
@@ -217,3 +217,9 @@ Try it yourself!
 
 With some effort, you can start drawing characters and animations.
 
+As we said before, the display size is 640 pixels wide by 480 pixels high by *default*.
+The first 4096 bytes (the first "page" of memory, which you may learn a bit about later on) is for the device control.
+The first word in memory here (at address `0x90000000`) is the display width and the next word (at address `0x90000004`) is the display height.
+The display itself will be scaled to fit the video container in the RAWRS application.
+
+Making the display very large might make your application a little slower since it has to do a lot more work to paint the screen.
