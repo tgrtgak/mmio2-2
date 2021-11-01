@@ -32,7 +32,6 @@ class Simulator extends EventComponent {
             device.on('keydown', (event) => {
                 if (!event.repeat && this.running) {
                     if (this._display_key_event) {
-                        console.log("keydown display key event", event.keyCode);
                         this._display_key_event(1, event.keyCode);
                     }
                 }
@@ -41,7 +40,6 @@ class Simulator extends EventComponent {
             device.on('keyup', (event) => {
                 if (this.running) {
                     if (this._display_key_event) {
-                        console.log("keyup display key event", event.keyCode);
                         this._display_key_event(0, event.keyCode);
                     }
                 }
