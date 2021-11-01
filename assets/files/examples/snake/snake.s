@@ -2,6 +2,9 @@
 #
 # Collect apples and do not collide with the edges, walls, or the snake itself!
 #
+# Remember to click on the game screen in order for it to pick up your keyboard
+# presses!
+#
 # 'W' - up
 # 'A' - left
 # 'S' - down
