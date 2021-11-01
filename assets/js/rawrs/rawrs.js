@@ -96,18 +96,19 @@ class RAWRS {
                 }
 
                 let line_num = instructions[pc_index].parentNode.querySelector(".row").textContent;
-                // Gets the correct line number for pseudo-instructions
-                if (line_num === "") {
-                    line_num = instructions[pc_index - 1].parentNode.querySelector(".row").textContent;// Does not get the line number of pseudo-instructions comprised of more than 2 instructions
+                // Gets the correct line number for pseudo-instructions of arbitrary length
+                let pseudo_count = 0;
+                while (line_num === "") {
+                    line_num = instructions[pc_index - ++pseudo_count].parentNode.querySelector(".row").textContent;
                 }
 
                 const annotations = window.editor.getSession().getAnnotations();
                 const line_warning = {
                     row: line_num - 1,
                     column: 0,
+                    type: "warning",
                     text: warning + " " + reg
                 }
-                line_warning.type = "warning";
                 annotations.push(line_warning);
                 window.editor.getSession().setAnnotations(annotations);
 
@@ -252,6 +253,9 @@ class RAWRS {
             if (terminal_content.childNodes.length > 5) {
                 terminal_content.removeChild(terminal_content.lastChild);
             }
+
+            // Clears the annotations from the editor when running the simulator again
+            window.editor.getSession().clearAnnotations();
 
             // Create and start the simulation (or restart, if it is running.)
 
@@ -553,6 +557,8 @@ class RAWRS {
 
                 // Also, disassemble the binary
                 disassembler.disassemble(binary, this._terminal, () => {
+                    // Run the simulator after disassembling
+                    this.run();
                 });
 
                 // And dump its memory (data segment)
@@ -562,9 +568,6 @@ class RAWRS {
                 // Then retrieve the labels (.symtab)
                 label_dumper.dump(binary, "-s", "", this._terminal, () => {
                 });
-
-                // Run
-                this.run();
             });
         });
     }
