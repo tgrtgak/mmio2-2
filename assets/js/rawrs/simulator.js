@@ -172,6 +172,25 @@ class Simulator extends EventComponent {
         Module.onRuntimeInitialized = () => {
             this._runtimeInitialized();
         };
+
+        Module.onVMWarn = (warning_code, reg_index) => {
+            let warning;
+            switch (warning_code) {
+                case 1:
+                    warning = "Uninitialized Register";
+                    break;
+            }
+
+            // Gets the register name given an index
+            let reg;
+            if (reg_index == 0) {
+                reg = "zero";
+            } else {
+                reg = Simulator.REGISTER_NAMES[reg_index];
+            }
+
+            this.trigger("warning", {"warning": warning, "reg": reg});
+        };
     }
 
     /*

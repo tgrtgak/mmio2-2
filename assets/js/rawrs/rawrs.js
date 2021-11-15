@@ -65,57 +65,6 @@ class RAWRS {
             }
         };
 
-        window.terminal_warning = {
-            warn: (warning_code, reg_index) => {
-                let warning;
-
-                switch (warning_code) {
-                    case 1:
-                        warning = "Uninitialized Register";
-                        break;
-                }
-
-                // Gets the register name given an index
-                let reg;
-                if (reg_index == 0) {
-                    reg = "zero";
-                } else {
-                    reg = Simulator.REGISTER_NAMES[reg_index];
-                }
-
-                const pc = RAWRS.simulator.pc.toString(16);
-                const instructions_table = RAWRS.codeListing.element;
-                const instructions = instructions_table.querySelectorAll(".address");
-
-                let pc_index;
-                for (let [i, element] of instructions.entries()) {
-                    if (element.classList.contains("address-" + pc)) {
-                        pc_index = i;
-                        break;
-                    }
-                }
-
-                let line_num = instructions[pc_index].parentNode.querySelector(".row").textContent;
-                // Gets the correct line number for pseudo-instructions of arbitrary length
-                let pseudo_count = 0;
-                while (line_num === "") {
-                    line_num = instructions[pc_index - ++pseudo_count].parentNode.querySelector(".row").textContent;
-                }
-
-                const annotations = window.editor.getSession().getAnnotations();
-                const line_warning = {
-                    row: line_num - 1,
-                    column: 0,
-                    type: "warning",
-                    text: warning + " " + reg
-                }
-                annotations.push(line_warning);
-                window.editor.getSession().setAnnotations(annotations);
-
-                this._terminal.writeln("Warning: " + warning + " " + reg + " at line " + line_num);
-            }
-        };
-
         Tabs.load();
         this._tabs = Tabs.load(document.querySelector('#main-tabs'));
         Editor.initialize();
@@ -408,6 +357,42 @@ class RAWRS {
 
                 }
                 framebufferRefresh++;
+            });
+
+            sim.on("warning", (data) => {
+                const warning = data["warning"];
+                const reg = data["reg"];
+                const pc = RAWRS.simulator.pc.toString(16);
+                const instructions_table = RAWRS.codeListing.element;
+                const instructions = instructions_table.querySelectorAll(".address");
+    
+                let pc_index;
+                for (let [i, element] of instructions.entries()) {
+                    if (element.classList.contains("address-" + pc)) {
+                        pc_index = i;
+                        break;
+                    }
+                }
+    
+                // Gets the correct line number for pseudo-instructions of arbitrary length
+                let count = 0;
+                let line_num;
+                do {
+                    line_num = instructions[pc_index - count++].parentNode.querySelector(".row").textContent;
+                } while (line_num === "");
+    
+                // Adds the warning icon to the editor next to the corresponding line number
+                const annotations = window.editor.getSession().getAnnotations();
+                const line_warning = {
+                    row: line_num - 1,
+                    column: 0,
+                    type: "warning",
+                    text: warning + " " + reg
+                }
+                annotations.push(line_warning);
+                window.editor.getSession().setAnnotations(annotations);
+    
+                this._terminal.writeln("Warning: " + warning + " " + reg + " at line " + line_num);
             });
 
             RAWRS._simulator = sim;
