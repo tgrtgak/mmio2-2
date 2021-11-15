@@ -197,12 +197,6 @@ class RAWRS {
             RAWRS.simulator.resume();
         }
         else {
-            // Removes previously displyed warnings when running the simulator again
-            const terminal_content = document.querySelector("pre#output");
-            if (terminal_content.childNodes.length > 5) {
-                terminal_content.removeChild(terminal_content.lastChild);
-            }
-
             // Clears the annotations from the editor when running the simulator again
             window.editor.getSession().clearAnnotations();
 
