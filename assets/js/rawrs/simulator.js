@@ -172,6 +172,33 @@ class Simulator extends EventComponent {
         Module.onRuntimeInitialized = () => {
             this._runtimeInitialized();
         };
+
+        Module.onVMWarn = (warning_code, reg_index) => {
+            let warning;
+            switch (warning_code) {
+                case 1:
+                    warning = "Uninitialized Register";
+                    break;
+            }
+
+            // Gets the register name given an index
+            let reg;
+            if (reg_index == 0) {
+                reg = "zero";
+            } else {
+                reg = Simulator.REGISTER_NAMES[reg_index];
+            }
+
+            this.trigger("warning", {"warning": warning, "reg": reg});
+        };
+
+        Module.onVMDeviceRead = (address, size) => {
+            console.log("Read function on JS side");
+        };
+
+        Module.onVMDeviceWrite = (address,size) => {
+            console.log("Write function on JS side");
+        };
     }
 
     /*
@@ -232,6 +259,13 @@ class Simulator extends EventComponent {
     }
 
     /**
+     * Returns whether or not the simulation is ready to run.
+     */
+    get ready() {
+        return this._ready;
+    }
+
+    /**
      * Returns whether or not the simulator is loaded, and running.
      */
     get running() {
@@ -276,6 +310,7 @@ class Simulator extends EventComponent {
         this._vm_pause             = Module.cwrap('vm_pause', null, []);
         this._vm_resume            = Module.cwrap('vm_resume', null, []);
         this._vm_step              = Module.cwrap('vm_step', null, []);
+        this._vm_register_device   = Module.cwrap('vm_register_device', null, ["number", "number"]);
         this._cpu_get_regs         = Module.cwrap('cpu_get_regs', null, ["number"]);
         this._cpu_set_regs         = Module.cwrap('cpu_set_regs', null, ["number"]);
         this._force_refresh        = Module.cwrap('force_refresh', null, []);
