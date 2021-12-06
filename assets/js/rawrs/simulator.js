@@ -179,15 +179,16 @@ class Simulator extends EventComponent {
                 case 1:
                     warning = "Uninitialized Register";
                     break;
+                case 2:
+                    warning = "Unmaintained S-Register After Jump";
+                    break;
+                case 3:
+                    warning = "Storing Uninitialized Register";
+                    break;
             }
 
             // Gets the register name given an index
-            let reg;
-            if (reg_index == 0) {
-                reg = "zero";
-            } else {
-                reg = Simulator.REGISTER_NAMES[reg_index];
-            }
+            let reg = (reg_index == 0) ? "zero" : Simulator.REGISTER_NAMES[reg_index];
 
             this.trigger("warning", {"warning": warning, "reg": reg});
         };
