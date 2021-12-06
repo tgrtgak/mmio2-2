@@ -183,7 +183,7 @@ class Simulator extends EventComponent {
                     warning = "Unmaintained S-Register After Jump";
                     break;
                 case 3:
-                    warning = "Storing Uninitialized Register";
+                    warning = "Stored Uninitialized Register";
                     break;
             }
 
