@@ -21,6 +21,9 @@
 .global fdt_get_framebuffer_base_addr
 .global fdt_get_framebuffer_width
 .global fdt_get_framebuffer_height
+.global fdt_get_mmio_base_addr
+.global fdt_get_mmio_length
+.global fdt_get_mmio_count
 
 # The magic number to look for
 .set FDT_MAGIC,                 0xd00dfeed
@@ -173,7 +176,7 @@ fdt_get_cpu_timebase_frequency:
   ld    a0, 0(a0)
   jr    ra
 
-# fdt_get_virtio_base_addr(): Returns the address of the virtio MMIO region. 
+# fdt_get_virtio_base_addr(): Returns the address of the virtio MMIO region.
 #
 # Does not clobber any registers except a0.
 #
@@ -209,7 +212,7 @@ fdt_get_virtio_irq:
   pop   s0
   jr    ra
 
-# fdt_get_virtio_count(): Returns the number of virtio devices. 
+# fdt_get_virtio_count(): Returns the number of virtio devices.
 #
 # Does not clobber any registers except a0.
 #
@@ -220,7 +223,54 @@ fdt_get_virtio_count:
   ld    a0, 0(a0)
   jr    ra
 
-# fdt_get_clint_base_addr(): Returns the address of the clint MMIO region. 
+# fdt_get_mmio_base_addr(): Returns the address of the MMIO region.
+#
+# Does not clobber any registers except a0.
+#
+# Arguments
+#   a0: The index of the mmio device.
+#
+# Returns
+#   a0: The address of the MMIO region.
+fdt_get_mmio_base_addr:
+  push  s0
+  sll   a0, a0, 3
+  la    s0, fdt_mmio_base_addrs
+  add   a0, a0, s0
+  ld    a0, 0(a0)
+  pop   s0
+  jr    ra
+
+# fdt_get_mmio_length(): Returns the length of the MMIO region.
+#
+# Does not clobber any registers except a0.
+#
+# Arguments
+#   a0: The index of the mmio device.
+#
+# Returns
+#   a0: The address of the MMIO region.
+fdt_get_mmio_length:
+  push  s0
+  sll   a0, a0, 3
+  la    s0, fdt_mmio_lengths
+  add   a0, a0, s0
+  ld    a0, 0(a0)
+  pop   s0
+  jr    ra
+
+# fdt_get_mmio_count(): Returns the number of MMIO devices.
+#
+# Does not clobber any registers except a0.
+#
+# Returns
+#   a0: The number of MMIO devices.
+fdt_get_mmio_count:
+  la    a0, fdt_mmio_count
+  ld    a0, 0(a0)
+  jr    ra
+
+# fdt_get_clint_base_addr(): Returns the address of the clint MMIO region.
 #
 # Does not clobber any registers except a0.
 #
@@ -231,7 +281,7 @@ fdt_get_clint_base_addr:
   ld    a0, 0(a0)
   jr    ra
 
-# fdt_get_plic_base_addr(): Returns the address of the plic MMIO region. 
+# fdt_get_plic_base_addr(): Returns the address of the plic MMIO region.
 #
 # Does not clobber any registers except a0.
 #
@@ -679,6 +729,13 @@ fdt_parse_property:
   jal   strncmp
   beqz  a0, _fdt_parse_property_framebuffer
 
+  # Check for "mmio" nodes
+  move  a0, s0
+  la    a1, str_fdt_check_node_mmio
+  li    a2, 12
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_mmio
+
   j     _fdt_parse_property_exit
 
 _fdt_parse_property_root:
@@ -847,7 +904,7 @@ _fdt_parse_property_clint:
   la    t0, fdt_clint_base_addr
   ld    t0, 0(t0)
   bnez  t0, _fdt_parse_property_exit
-  
+
   # Get the address by parsing the string
   move  a0, s0
   add   a0, a0, 6
@@ -895,7 +952,7 @@ _fdt_parse_property_plic:
   # We ignore the size, for now
 
 _fdt_parse_property_plic_addr_commit:
-  
+
   # Write the base address
   la    t0, fdt_plic_base_addr
   sd    a0, 0(t0)
@@ -968,13 +1025,94 @@ _fdt_parse_property_memory_addr:
   la    t0, fdt_memory_base_addr
   ld    t0, 0(t0)
   bnez  t0, _fdt_parse_property_exit
-  
+
   # Get the address by parsing the string
   move  a0, s0
   add   a0, a0, 7
   li    a1, 16
   jal   parse_int
   la    t0, fdt_memory_base_addr
+  sd    a0, 0(t0)
+
+  j _fdt_parse_property_exit
+
+_fdt_parse_property_mmio:
+  # Check for the "reg" property
+  move  a0, s1
+  la    a1, str_fdt_check_prop_reg
+  li    a2, 4
+  jal   strncmp
+  beqz  a0, _fdt_parse_property_mmio_addr
+
+_fdt_parse_property_mmio_addr:
+
+  # Pull the 'reg' value which is a <base, length> pair
+  # The <base> part has a number of bytes given by "#address-cells" x 2
+  # And the <length> part has "#size-cells" x 2 number of bytes
+
+  # Get the number of address cells
+  la    t1, fdt_address_cells
+  ld    t1, 0(t1)
+
+  # Read address
+  lwu   a0, 0(s2)
+  jal   toBE32
+  li    t2, 1
+  addi  s2, s2, 4
+  beq   t1, t2, _fdt_parse_property_mmio_addr_commit
+
+  # 64-bit address
+  move  t2, a0
+  lwu   a0, 0(s2)
+  jal   toBE32
+  sll   t2, t2, 32
+  add   a0, a0, t2
+  addi  s2, s2, 4
+
+_fdt_parse_property_mmio_addr_commit:
+
+  # Write the base address to the mmio device array
+  # And increment the mmio device count
+  # TODO: do not store if the fdt_mmio_count hits the maximum
+  la    t0, fdt_mmio_base_addrs
+  la    t1, fdt_mmio_count
+  ld    t2, 0(t1)
+  sll   t2, t2, 3
+  add   t0, t0, t2
+  srl   t2, t2, 3
+  sd    a0, 0(t0)
+
+  # Get the number of size cells
+  la    t1, fdt_size_cells
+  ld    t1, 0(t1)
+
+  # Read size
+  lwu   a0, 0(s2)
+  jal   toBE32
+  li    t2, 1
+  addi  s2, s2, 4
+  beq   t1, t2, _fdt_parse_property_mmio_length_commit
+
+  # 64-bit size
+  move  t2, a0
+  lwu   a0, 0(s2)
+  jal   toBE32
+  sll   t2, t2, 32
+  add   a0, a0, t2
+  addi  s2, s2, 4
+
+_fdt_parse_property_mmio_length_commit:
+  # Write the length to the mmio device array
+  # And increment the mmio device count
+  # TODO: do not store if the fdt_mmio_count hits the maximum
+  la    t0, fdt_mmio_lengths
+  la    t1, fdt_mmio_count
+  ld    t2, 0(t1)
+  sll   t2, t2, 3
+  add   t0, t0, t2
+  srl   t2, t2, 3
+  addi  t2, t2, 1
+  sd    t2, 0(t1)
   sd    a0, 0(t0)
 
   j _fdt_parse_property_exit
@@ -1008,7 +1146,7 @@ _fdt_parse_property_framebuffer_width:
   # Pull the 'width' value which is a simple 32-bit word.
   lwu   a0, 0(s2)
   jal   toBE32
-  
+
   # Write the value
   la    t0, fdt_framebuffer_width
   sd    a0, 0(t0)
@@ -1020,7 +1158,7 @@ _fdt_parse_property_framebuffer_height:
   # Pull the 'height' value which is a simple 32-bit word.
   lwu   a0, 0(s2)
   jal   toBE32
-  
+
   # Write the value
   la    t0, fdt_framebuffer_height
   sd    a0, 0(t0)
@@ -1051,7 +1189,6 @@ _fdt_parse_property_framebuffer_addr:
   add   a0, a0, t2
 
 _fdt_parse_property_framebuffer_addr_commit:
-  
   # Write the base address
   la    t0, fdt_framebuffer_base_addr
   sd    a0, 0(t0)
@@ -1085,8 +1222,8 @@ fdt_size_cells:                   .dword  1
 fdt_cpu_timebase_frequency:       .dword  0
 
 # FDT regions of interest:
-fdt_virtio_base_addrs:            .dword  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-fdt_virtio_irqs:                  .dword  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+fdt_virtio_base_addrs:            .dword  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+fdt_virtio_irqs:                  .dword  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 fdt_virtio_irq_count:             .dword  0
 fdt_virtio_count:                 .dword  0
 fdt_clint_base_addr:              .dword  0
@@ -1096,6 +1233,9 @@ fdt_memory_base_addr:             .dword  0
 fdt_memory_length:                .dword  0
 fdt_application_start:            .dword  0
 fdt_application_end:              .dword  0
+fdt_mmio_base_addrs:              .dword  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+fdt_mmio_lengths:                 .dword  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+fdt_mmio_count:                   .dword  0
 
 # FDT properties of interest:
 fdt_framebuffer_width:            .dword  0
@@ -1105,6 +1245,7 @@ fdt_framebuffer_height:           .dword  0
 str_fdt_check_node_root:          .string ""
 str_fdt_check_node_memory:        .string "memory@"
 str_fdt_check_node_framebuffer:   .string "framebuffer@"
+str_fdt_check_node_mmio:          .string "mmio@"
 str_fdt_check_node_cpus:          .string "cpus"
 str_fdt_check_node_virtio:        .string "virtio@"
 str_fdt_check_node_clint:         .string "clint@"
