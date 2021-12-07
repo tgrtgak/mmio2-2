@@ -124,6 +124,33 @@ _kmain_virtio_init_loop:
   move  a0, s0
   jal   framebuffer_map
 
+  # Map in MMIO devices
+  jal   fdt_get_mmio_count
+  move  s1, a0
+
+  # Loop through the MMIO devices (s1 starts at the device count)
+_kmain_mmio_map_loop:
+  beqz  s1, _kmain_map_user_stack
+  add   s1, s1, -1
+
+  move  a0, s1
+  jal   fdt_get_mmio_base_addr
+  li    t0, MEM_BASE
+  add   s2, a0, t0
+
+  move  a0, s1
+  jal   fdt_get_mmio_length
+  move  s3, a0
+
+  # Call mmio_map(root page table, base address, length)
+  move  a0, s0
+  move  a1, s2
+  move  a2, s3
+  jal   mmio_map
+
+  j     _kmain_mmio_map_loop
+
+_kmain_map_user_stack:
   # Map in user stack
   move  a0, s0
   jal   stack_map
