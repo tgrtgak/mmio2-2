@@ -55,7 +55,7 @@ echo "TinyEMU"
 echo "======="
 
 if [ ! -d "tinyemu" ]; then
-  git clone https://gitlab.com/wilkie/tinyemu
+  git clone -b demo https://gitlab.com/erikjoy/tinyemu
 else
   echo "tinyemu already exists. delete the tinyemu directory to reinstall"
 fi

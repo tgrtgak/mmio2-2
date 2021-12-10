@@ -387,7 +387,7 @@ class RAWRS {
                 annotations.push(line_warning);
                 window.editor.getSession().setAnnotations(annotations);
     
-                this._terminal.writeln("Warning: " + warning + " " + reg + " at line " + line_num);
+                this._terminal.writeln("Warning: " + warning + " for register " + reg + " at line " + line_num);
             });
 
             RAWRS._simulator = sim;
