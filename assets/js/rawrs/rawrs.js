@@ -316,6 +316,7 @@ class RAWRS {
 
             sim.on("ready", () => {
                 this._terminal.writeln("Simulation ready to run.");
+                sim._vm_register_device(0x80000000, 16);
 
                 if (RAWRS.runRequested) {
                     RAWRS.toolbar.setStatus("step", "");

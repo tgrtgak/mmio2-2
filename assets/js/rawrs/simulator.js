@@ -192,12 +192,12 @@ class Simulator extends EventComponent {
             this.trigger("warning", {"warning": warning, "reg": reg});
         };
 
-        Module.onVMDeviceRead = (temp) => {
-            console.log(temp);
+        Module.onVMDeviceRead = (offset, size_log2) => {
+            
         };
 
-        Module.onVMDeviceWrite = (temp) => {
-            console.log(temp);
+        Module.onVMDeviceWrite = (offset, size_log2, val) => {
+            console.log(offset + " " + size_log2 + " " + val);
         };
     }
 
@@ -311,8 +311,6 @@ class Simulator extends EventComponent {
         this._vm_resume            = Module.cwrap('vm_resume', null, []);
         this._vm_step              = Module.cwrap('vm_step', null, []);
         this._vm_register_device   = Module.cwrap('vm_register_device', null, ["number", "number"]);
-        this._vm_read_device       = Module.cwrap('vm_read_device', null, ["number", "number"]);
-        this._vm_write_device      = Module.cwrap('vm_write_device', null, ["number", "number"]);
         this._cpu_get_regs         = Module.cwrap('cpu_get_regs', null, ["number"]);
         this._cpu_set_regs         = Module.cwrap('cpu_set_regs', null, ["number"]);
         this._force_refresh        = Module.cwrap('force_refresh', null, []);
