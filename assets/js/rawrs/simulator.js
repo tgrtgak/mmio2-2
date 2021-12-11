@@ -196,8 +196,8 @@ class Simulator extends EventComponent {
 
         };
 
-        Module.onVMDeviceWrite = (offset, size_log2, val) => {
-            console.log(offset + " " + size_log2 + " " + val);
+        Module.onVMDeviceWrite = (address, offset, val, size) => {
+            console.log(address + " " + offset + " " + val + " " + size);
         };
     }
 
@@ -310,7 +310,7 @@ class Simulator extends EventComponent {
         this._vm_pause             = Module.cwrap('vm_pause', null, []);
         this._vm_resume            = Module.cwrap('vm_resume', null, []);
         this._vm_step              = Module.cwrap('vm_step', null, []);
-        this._vm_register_device   = Module.cwrap('vm_register_device', null, ["number", "number"]);
+        this._vm_register_devices   = Module.cwrap('vm_register_devices', null, ["number", "number", "number"]);
         this._cpu_get_regs         = Module.cwrap('cpu_get_regs', null, ["number"]);
         this._cpu_set_regs         = Module.cwrap('cpu_set_regs', null, ["number"]);
         this._force_refresh        = Module.cwrap('force_refresh', null, []);
@@ -323,6 +323,22 @@ class Simulator extends EventComponent {
         if (this._started) {
             return;
         }
+
+        // Temporary
+        const addresses = [0xa0000000];
+        const sizes = [4];
+        
+        const addresses_buf = this._module._malloc(1 * 4);
+        const sizes_buf = this._module._malloc(1 * 4);
+
+        for (let i = 0; i < 1; i++) {
+            const index = i * 4;
+            this._module.setValue(addresses_buf + index, addresses[i], 'i32');
+            this._module.setValue(sizes_buf + index, sizes[i], 'i32');
+        }
+        this._vm_register_devices(addresses_buf, sizes_buf, 1);
+        this._module._free(addresses_buf);
+        this._module._free(sizes_buf);
 
         this._started = true;
         this._vm_start(this.configurationURL,
