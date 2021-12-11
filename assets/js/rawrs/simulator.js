@@ -28,20 +28,22 @@ class Simulator extends EventComponent {
         this._breakpoints = [];
         this._initialBreakpoints = breakpoints;
 
-        this._console.on('keydown', (event) => {
-            if (!event.repeat && this.running) {
-                if (this._display_key_event) {
-                    this._display_key_event(1, event.keyCode);
+        [this._video, this._console].forEach( (device) => {
+            device.on('keydown', (event) => {
+                if (!event.repeat && this.running) {
+                    if (this._display_key_event) {
+                        this._display_key_event(1, event.keyCode);
+                    }
                 }
-            }
-        });
+            });
 
-        this._console.on('keyup', (event) => {
-            if (this.running) {
-                if (this._display_key_event) {
-                    this._display_key_event(0, event.keyCode);
+            device.on('keyup', (event) => {
+                if (this.running) {
+                    if (this._display_key_event) {
+                        this._display_key_event(0, event.keyCode);
+                    }
                 }
-            }
+            });
         });
 
         window.update_downloading = () => {
@@ -332,8 +334,8 @@ class Simulator extends EventComponent {
                        this.memorySize,
                        "",   // cmdline
                        "",   // password
-                       640,  // width
-                       480,  // height
+                       1024,  // width
+                       768,  // height
                        0,    // net_state
                        "");  // drive_url
                       //*/

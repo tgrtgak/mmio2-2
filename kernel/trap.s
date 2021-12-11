@@ -162,9 +162,6 @@ trap:
   sd    a0, 0x80(sp)
   sd    a1, 0x78(sp)
 
-  # Disable interrupts
-  jal   trap_disable_interrupts
-
   # Pull target PC
   pop   s0
 
@@ -179,7 +176,6 @@ trap:
 
   # Exits the trap using the syscall stack
   j     _trap_exit
-
 
 _trap_check_interrupt:
   # Determine if the trap was an interrupt
