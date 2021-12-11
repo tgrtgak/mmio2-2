@@ -26,10 +26,12 @@ class Console extends EventComponent {
         this._term.open(document.querySelector(selector));
         this._term.resize(cols, rows);
 
-        this._term.onKey( (event) => {
-            // TODO: Convert printable key to appropriate scancode
-            //       (will better support international keyboards)
-            this.trigger('keydown', event.domEvent);
+        this._term.element.addEventListener('keyup', (event) => {
+            this.trigger('keyup', event);
+        });
+
+        this._term.element.addEventListener('keydown', (event) => {
+            this.trigger('keydown', event);
         });
 
         this._term.onData( (bytes) => {

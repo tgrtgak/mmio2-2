@@ -27,6 +27,8 @@ class Linker extends EventComponent {
 
         var files = [object];
 
+        let basename = object.name.match(/([^/]+)[.].+$/)[1]
+
         worker.onmessage = (e) => {
             var msg = e.data;
 
@@ -42,7 +44,7 @@ class Linker extends EventComponent {
                             },
                             "mountpoint": "/input"
                         }],
-                        arguments: [object.name, "-T", "/input/linker.ld", "-o", "foo.elf", "-g"]
+                        arguments: [object.name, "-T", "/input/linker.ld", "-o", basename + ".elf", "-g"]
                     });
                     break;
                 case "stdout":
