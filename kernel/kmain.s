@@ -135,8 +135,7 @@ _kmain_mmio_map_loop:
 
   move  a0, s1
   jal   fdt_get_mmio_base_addr
-  li    t0, MEM_BASE
-  add   s2, a0, t0
+  move  s2, a0
 
   move  a0, s1
   jal   fdt_get_mmio_length
