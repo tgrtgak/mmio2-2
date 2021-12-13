@@ -326,39 +326,18 @@ class Simulator extends EventComponent {
             return;
         }
 
-        // Temporary
-        // const addresses = [0xa0000000];
-        // const sizes = [4];
-
         const hexString = Number(0xa0000000).toString(16);
         const sizeString = Number(4).toString(16)
 
-        const address = hexString.padStart(16, "0");// dynamically pad
+        const address = hexString.padStart(16, "0");
         const addressHigh = parseInt(address.slice(0, 8), 16);
         const addressLow  = parseInt(address.slice(8), 16);
 
-        const size = sizeString.padStart(16, "0");// dynamically pad
+        const size = sizeString.padStart(16, "0");
         const sizeHigh = parseInt(size.slice(0, 8), 16);
         const sizeLow  = parseInt(size.slice(8), 16);
 
-        // update cwrap args
         this._vm_register_devices(addressHigh, addressLow, sizeHigh, sizeLow, 1);// Make the addresses lists later
-
-        
-        // const addresses_buf = this._module._malloc(1 * 8);
-        // const sizes_buf = this._module._malloc(1 * 8);
-
-        // for (let i = 0; i < 1; i++) {
-        //     const index = i * 8;
-        //     this._module.setValue(addresses_buf + index, addresses[i], 'i32');
-        //     this._module.setValue(addresses_buf + index, addresses[i], 'i32');
-
-        //     this._module.setValue(sizes_buf + index, sizes[i], 'i32');
-        //     this._module.setValue(sizes_buf + index, sizes[i], 'i32');
-        // }
-        // this._vm_register_devices(addresses_buf, sizes_buf, 1);
-        // this._module._free(sizes_buf);
-        // this._module._free(addresses_buf);
 
         this._started = true;
         this._vm_start(this.configurationURL,
