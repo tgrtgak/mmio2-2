@@ -732,7 +732,7 @@ fdt_parse_property:
   # Check for "mmio" nodes
   move  a0, s0
   la    a1, str_fdt_check_node_mmio
-  li    a2, 12
+  li    a2, 5
   jal   strncmp
   beqz  a0, _fdt_parse_property_mmio
 
@@ -1043,6 +1043,8 @@ _fdt_parse_property_mmio:
   li    a2, 4
   jal   strncmp
   beqz  a0, _fdt_parse_property_mmio_addr
+
+  j _fdt_parse_property_exit
 
 _fdt_parse_property_mmio_addr:
 
