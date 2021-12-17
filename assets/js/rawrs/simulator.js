@@ -2,6 +2,8 @@
 
 import EventComponent from './event_component';
 import Util from './util.js';
+import PluginManager from './plugin_manager';
+import Plugin from './plugin';
 
 class Simulator extends EventComponent {
     /**
@@ -76,6 +78,8 @@ class Simulator extends EventComponent {
             name: "test.elf",
             data: appBinaryOrURL.data
         };
+
+        //initialize the plugin manager here?
 
         this._initialize();
     }
