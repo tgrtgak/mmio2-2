@@ -18,6 +18,7 @@ import MemoryListing   from './memory_listing';
 import LabelListing    from './label_listing';
 import RegisterListing from './register_listing';
 import Separator       from './separator';
+import PluginManager   from './plugin_manager';
 
 class RAWRS {
     static load() {
@@ -54,6 +55,7 @@ class RAWRS {
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
         this._debugConsole = new Console("#gdb_container", 29, 71, 15);
         this._terminal = new Terminal(document.body);
+        this._pluginManager = new PluginManager();
 
         // TinyEMU looks for this:
         window.term = {
@@ -387,6 +389,27 @@ class RAWRS {
                 window.editor.getSession().setAnnotations(annotations);
     
                 this._terminal.writeln("Warning: " + warning + " for register " + reg + " at line " + line_num);
+            });
+
+            sim.on("register-plugin", (pluginObject) => {
+                this._pluginManager.registerPlugin(pluginObject);
+            });
+
+            sim.on("plugin-read", (data) => {
+                const address = data["address"];
+                const offset = data["offset"];
+                const size = data["size"];
+
+                return this._pluginManager.readFuncManager(address, offset, size);
+            });
+
+            sim.on("plugin-write", (data) => {
+                const address = data["address"];
+                const offset = data["offset"];
+                const val = data["val"];
+                const size = data["size"];
+
+                this._pluginManager.writeFuncManager(address, offset, val, size);
             });
 
             RAWRS._simulator = sim;

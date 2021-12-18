@@ -2,7 +2,7 @@
 
 import EventComponent from './event_component';
 import Util from './util.js';
-import plugin_manager from './plugin_manager';
+import * as plugins from '../../plugins/index';
 
 class Simulator extends EventComponent {
     /**
@@ -77,8 +77,6 @@ class Simulator extends EventComponent {
             name: "test.elf",
             data: appBinaryOrURL.data
         };
-
-        //initialize the plugin manager here?
 
         this._initialize();
     }
@@ -198,20 +196,12 @@ class Simulator extends EventComponent {
             this.trigger("warning", {"warning": warning, "reg": reg});
         };
 
-        Module.onVMDeviceRegister = (offset, size_log2, read_func, write_func) => {
-            // try to register the new plugin on js side (..?)
-            // where do I get the read and write function though
-            plugin_manager.register_new_plugin(offset, size_log2, read_func, write_func);
-        }
-
-        Module.onVMDeviceRead = (offset, size_log2) => {
-            // call the corresponding read function
-            plugin_manager.get_readfunc_manager(offset);
+        Module.onVMDeviceRead = (address, offset, size) => {
+            return this.trigger("plugin-read", {"address": address, "offset": offset, "size": size});
         };
 
-        Module.onVMDeviceWrite = (offset,size_log2, val) => {
-           // call the corresponding write function
-            plugin_manager.get_writefunc_manager(offset);
+        Module.onVMDeviceWrite = (address, offset, val, size) => {
+            this.trigger("plugin-write", {"address": address, "offset": offset, "val": val, "size": size});
         };
     }
 
@@ -338,19 +328,23 @@ class Simulator extends EventComponent {
             return;
         }
 
-        // Loop here
-        const hexString = Number(0xa0000000).toString(16);
-        const sizeString = Number(16).toString(16)
+        for (const plugin of Object.values(plugins['default'])) {
+            const pluginObject = new plugin();
 
-        const address = hexString.padStart(16, "0");
-        const addressHigh = parseInt(address.slice(0, 8), 16);
-        const addressLow  = parseInt(address.slice(8), 16);
+            const hexString = Number(pluginObject.address).toString(16);
+            const sizeString = Number(pluginObject.size).toString(16)
 
-        const size = sizeString.padStart(16, "0");
-        const sizeHigh = parseInt(size.slice(0, 8), 16);
-        const sizeLow  = parseInt(size.slice(8), 16);
+            const address = hexString.padStart(16, "0");
+            const addressHigh = parseInt(address.slice(0, 8), 16);
+            const addressLow  = parseInt(address.slice(8), 16);
 
-        this._vm_register_device(addressHigh, addressLow, sizeHigh, sizeLow);
+            const size = sizeString.padStart(16, "0");
+            const sizeHigh = parseInt(size.slice(0, 8), 16);
+            const sizeLow  = parseInt(size.slice(8), 16);
+            
+            this.trigger("register-plugin", pluginObject);
+            this._vm_register_device(addressHigh, addressLow, sizeHigh, sizeLow);
+        }
 
         this._started = true;
         this._vm_start(this.configurationURL,

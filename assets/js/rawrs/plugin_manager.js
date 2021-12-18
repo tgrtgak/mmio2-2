@@ -1,65 +1,56 @@
 "use strict";
 
-import EventComponent from './event_component';
-
-// plugin class (does it have to be an inner class in this case)
-class plugin extends EventComponent{
-    // passing in the pointer
-    constructor(address,size, read_func, write_func) {
-        this.address = address;
-        this.size = size;
-        this.read_func = read_func(address, size);
-        this.write_func = write_func(address, size, data);
-    }
-
-    get get_readfunc() {
-        return this.read_func;
-    }
-
-    get get_writefunc() {
-        return this.write_func;
-    }
-}
-
-class plugin_manager extends EventComponent{
-    plugin_table
-    address_set
+class PluginManager {
     constructor() {
-        this.name = 'plugin manager';
-        this.plugin_table = new Map();
-        this.address_set = new Set();
+        this.pluginTable = new Map();
     }
 
-    check_overlap(address, size) {
-       for(let i = address; i<address+size ; i++) {
-            if(this.address_set.has(i)) {
-                return true;
-            }
-       }
-       return false;
+    // This function needs fixed--exponentiation with BigInts isn't working
+    checkOverlap(new_address, new_size) {
+        // for every plugin in the map, check for address overlap
+        // for (let [address, pluginObject] of this.pluginTable) {
+        //     // accomodate for very large size
+        //     let address_end = BigInt(pluginObject.address) + BigInt(2) ** BigInt(pluginObject.size);
+        //     let new_address_end = BigInt(new_address) + BigInt(2) ** BigInt(new_size);
+
+        //     // check if either end of both addresses lands within the address range of another plugin
+        //     if (address <= new_address && new_address < address_end) {
+        //         return true;
+        //     }
+        //     if (address < new_address_end && new_address_end <= address_end) {
+        //         return true;
+        //     }
+        //     if (new_address <= address && address < new_address_end) {
+        //         return true;
+        //     }
+        //     if (new_address < address_end && address_end <= new_address_end) {
+        //         return true;
+        //     }
+        // }
+        // default return false when there is no overlap
+        return false;
     }
 
-    register_new_plugin() {
-        const new_plugin = new plugin(address, size, read_func, write_func);
-        if(check_overlap(new_plugin.address, size) == true) {
-            console.log(new_plugin.address);
+    // Adds all plugins within a certain directory to a Plugin Map so when the _runtimeInitialized()
+    // is called in simulator.js, the PluginManager's Map will be accessed and each plugin will be added
+    // to the simulator accordingly. 
+    // This all has to happen before the simulator itself starts, so this whole process must happen
+    // before vm_start() is called within simulator.js
+    registerPlugin(pluginObject) {
+        if (this.checkOverlap(pluginObject.address, pluginObject.size)) {
+            console.log("Error when adding plugin at address " + pluginObject.address + ", address space already occupied.");
+        } else {
+            console.log("No overlap!");
+            this.pluginTable.set(pluginObject.address, pluginObject);
         }
-        else {
-            this.plugin_table.set(new_plugin.address, new_plugin);
-            for(let i = new_plugin.address; i<new_plugin.address+size; i++) {
-                this.address_set.add(i);
-            }
-        }
     }
 
-    // get read function
-    get get_readfunc_manager(address) {
-        return this.plugin_table.get(address).get_readfunc();
+    readFuncManager(address, offset, size) {
+        return this.pluginTable.get(address).read(offset, size);
     }
 
-    // get write function
-    get get_writefunc_manager(address) {
-        return this.plugin_table.get(address).get_writefunc();
+    writeFuncManager(address, offset, val, size) {
+        this.pluginTable.get(address).write(offset, val, size);
     }
 }
 export default plugin_manager;
