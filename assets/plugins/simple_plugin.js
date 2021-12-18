@@ -1,10 +1,9 @@
 "use strict";
 
-import Plugin from '../rawrs/plugin';
-
-class SimplePlugin extends Plugin {
+class SimplePlugin {
     constructor() {
-        super(SimplePlugin.MMIO_ADDRESS, SimplePlugin.MMIO_SIZE, read, write);
+        this.address = 0xb0000000;
+        this.size = 16;
     }
 
     read(offset, size) {
@@ -12,10 +11,9 @@ class SimplePlugin extends Plugin {
         return 29;
     }
 
-    write(offset, size, value) {
-        console.log("simple plugin write " + value + " at " + offset.toString(16) + " for " + size + " bytes");
+    write(offset, val, size) {
+        console.log("simple plugin write " + val + " at " + offset.toString(16) + " for " + size + " bytes");
     }
 }
 
-SimplePlugin.MMIO_ADDRESS = 0xb0000000;
-SimplePlugin.MMIO_SIZE = 16;
+export default SimplePlugin;
