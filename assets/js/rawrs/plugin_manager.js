@@ -40,7 +40,6 @@ class PluginManager {
         if (this.checkOverlap(pluginObject.address, pluginObject.size)) {
             console.log("Error when adding plugin at address " + pluginObject.address + ", address space already occupied.");
         } else {
-            console.log("No overlap!");
             this.pluginTable.set(pluginObject.address, pluginObject);
         }
     }
