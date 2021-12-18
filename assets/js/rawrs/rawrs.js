@@ -199,9 +199,6 @@ class RAWRS {
             RAWRS.simulator.resume();
         }
         else {
-            // Clears the annotations from the editor when running the simulator again
-            window.editor.getSession().clearAnnotations();
-
             // Create and start the simulation (or restart, if it is running.)
 
             // Carry over last breakpoints
@@ -525,8 +522,6 @@ class RAWRS {
 
                 // Also, disassemble the binary
                 disassembler.disassemble(binary, this._terminal, () => {
-                    // Run the simulator after disassembling
-                    this.run();
                 });
 
                 // And dump its memory (data segment)
@@ -536,6 +531,9 @@ class RAWRS {
                 // Then retrieve the labels (.symtab)
                 label_dumper.dump(binary, "-s", "", this._terminal, () => {
                 });
+
+                // Run
+                this.run();
             });
         });
     }
