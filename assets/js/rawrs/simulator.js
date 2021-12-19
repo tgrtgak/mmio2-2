@@ -294,7 +294,7 @@ class Simulator extends EventComponent {
         this._vm_pause             = Module.cwrap('vm_pause', null, []);
         this._vm_resume            = Module.cwrap('vm_resume', null, []);
         this._vm_step              = Module.cwrap('vm_step', null, []);
-        this._vm_register_device   = Module.cwrap('vm_register_device', null, ["number", "number", "number", "number"]);
+        this._vm_register_device   = Module.cwrap('vm_register_device', "number", ["number", "number", "number", "number"]);
         this._cpu_get_regs         = Module.cwrap('cpu_get_regs', null, ["number"]);
         this._cpu_set_regs         = Module.cwrap('cpu_set_regs', null, ["number"]);
         this._force_refresh        = Module.cwrap('force_refresh', null, []);
@@ -324,8 +324,13 @@ class Simulator extends EventComponent {
             const sizeHigh = parseInt(size.slice(0, 8), 16);
             const sizeLow  = parseInt(size.slice(8), 16);
             
-            this.trigger("register-plugin", pluginObject);
-            this._vm_register_device(addressHigh, addressLow, sizeHigh, sizeLow);
+            const registerCode = this._vm_register_device(addressHigh, addressLow, sizeHigh, sizeLow);
+
+            if (registerCode == 0) {
+                this.trigger("register-plugin", pluginObject);
+            } else {
+                console.log("Error code " + registerCode + " when registering device");
+            }
         }
 
         this._started = true;
