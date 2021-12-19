@@ -5,13 +5,11 @@ class PluginManager {
         this.pluginTable = new Map();
     }
 
-    // This function needs fixed--exponentiation with BigInts isn't working
     checkOverlap(new_address, new_size) {
         // for every plugin in the map, check for address overlap
         // for (let [address, pluginObject] of this.pluginTable) {
-        //     // accomodate for very large size
-        //     let address_end = BigInt(pluginObject.address) + BigInt(2) ** BigInt(pluginObject.size);
-        //     let new_address_end = BigInt(new_address) + BigInt(2) ** BigInt(new_size);
+        //     let address_end = pluginObject.address + 2 ** pluginObject.size;
+        //     let new_address_end = new_address + 2 ** new_size;
 
         //     // check if either end of both addresses lands within the address range of another plugin
         //     if (address <= new_address && new_address < address_end) {
@@ -50,6 +48,10 @@ class PluginManager {
 
     writeFuncManager(address, offset, val, size) {
         this.pluginTable.get(address).write(offset, val, size);
+    }
+
+    resetTable() {
+        this.pluginTable.clear();
     }
 }
 

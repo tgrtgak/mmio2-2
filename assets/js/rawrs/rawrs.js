@@ -373,6 +373,10 @@ class RAWRS {
                 this._pluginManager.writeFuncManager(address, offset, val, size);
             });
 
+            sim.on("clear-plugins", () => {
+                this._pluginManager.resetTable();
+            });
+
             RAWRS._simulator = sim;
             RAWRS._gdb.simulator = sim;
             RAWRS.simulator.run();

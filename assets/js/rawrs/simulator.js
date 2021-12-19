@@ -308,6 +308,8 @@ class Simulator extends EventComponent {
             return;
         }
 
+        this.trigger("clear-plugins");
+
         for (const plugin of Object.values(plugins['default'])) {
             const pluginObject = new plugin();
 
