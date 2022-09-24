@@ -55,7 +55,7 @@ class RAWRS {
         this._video = new Video(640, 480, document.querySelector("#video canvas"));
         this._debugConsole = new Console("#gdb_container", 29, 71, 15);
         this._terminal = new Terminal(document.body);
-        this._pluginManager = new PluginManager();
+        this._pluginManager = new PluginManager("#plugin_container");
 
         // TinyEMU looks for this:
         window.term = {

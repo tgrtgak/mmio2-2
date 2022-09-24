@@ -1,8 +1,9 @@
 "use strict";
 
 class PluginManager {
-    constructor() {
+    constructor(selector) {
         this.pluginTable = new Map();
+	this.pluginPath = selector;
     }
 
     checkOverlap(new_address, new_size) {
@@ -31,7 +32,7 @@ class PluginManager {
 
     // Adds all plugins within a certain directory to a Plugin Map so when the _runtimeInitialized()
     // is called in simulator.js, the PluginManager's Map will be accessed and each plugin will be added
-    // to the simulator accordingly. 
+    // to the simulator accordingly.
     // This all has to happen before the simulator itself starts, so this whole process must happen
     // before vm_start() is called within simulator.js
     registerPlugin(pluginObject) {
@@ -39,6 +40,7 @@ class PluginManager {
             console.log("Error when adding plugin at address " + pluginObject.address + ", address space already occupied.");
         } else {
             this.pluginTable.set(pluginObject.address, pluginObject);
+	    pluginObject.loadPanel(this.pluginPath);
         }
     }
 
@@ -52,6 +54,7 @@ class PluginManager {
 
     resetTable() {
         this.pluginTable.clear();
+	document.getElementById("plugin_container").innerHTML="";
     }
 }
 export default plugin_manager;
