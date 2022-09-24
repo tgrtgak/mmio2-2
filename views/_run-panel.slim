@@ -16,6 +16,11 @@
           img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/debug.svg"
           span.caption
             = I18n.t(:"run.devices.debugger")
+      li.tab
+        button aria-controls=:"plugin"
+          img src="#{@basepath}images/dynamic/hex/1e151e/toolbar/video.svg"
+          span.caption
+            = "Plugins"
     ol.tab-panels.side
       li.tab-panel.active#console
         div.output-container
@@ -31,6 +36,10 @@
             div#gdb_container
             div.disconnected
               img src="#{@basepath}images/disconnected.svg"
+      li.tab-panel#plugin
+        div.output-container
+          div.output
+            div#plugin_container
   .separator.vertical#register-separator
   .register-file data-separator=:"register-separator,label-separator"
     ol.tabs
