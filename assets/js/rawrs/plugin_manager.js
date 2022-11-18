@@ -57,6 +57,6 @@ class PluginManager {
 	document.getElementById("plugin_container").innerHTML="";
     }
 }
-export default plugin_manager;
+export default PluginManager;
 
 

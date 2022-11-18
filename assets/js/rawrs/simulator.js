@@ -176,6 +176,26 @@ class Simulator extends EventComponent {
             this._runtimeInitialized();
         };
 
+        Module.onVMWarn = (warning_code, reg_index) => {
+            let warning;
+            switch (warning_code) {
+                case 1:
+                    warning = "Uninitialized Register";
+                    break;
+                case 2:
+                    warning = "Unmaintained S-Register After Jump";
+                    break;
+                case 3:
+                    warning = "Stored Uninitialized Register";
+                    break;
+            }
+	    
+	    // Gets the register name given an index
+            let reg = (reg_index == 0) ? "zero" : Simulator.REGISTER_NAMES[reg_index];
+            this.trigger("warning", {"warning": warning, "reg": reg});
+	};
+	
+
         Module.onVMDeviceRead = (address, offset, size) => {
             return this.trigger("plugin-read", {"address": address, "offset": offset, "size": size});
         };
