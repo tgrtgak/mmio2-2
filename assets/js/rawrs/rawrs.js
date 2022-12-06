@@ -351,6 +351,42 @@ class RAWRS {
                 }
                 framebufferRefresh++;
             });
+			
+	    sim.on("warning", (data) => {
+                const warning = data["warning"];
+                const reg = data["reg"];
+                const pc = RAWRS.simulator.pc.toString(16);
+                const instructions_table = RAWRS.codeListing.element;
+                const instructions = instructions_table.querySelectorAll(".address");
+    
+                let pc_index;
+                for (let [i, element] of instructions.entries()) {
+                    if (element.classList.contains("address-" + pc)) {
+                        pc_index = i;
+                        break;
+                    }
+                }
+    
+                // Gets the correct line number for pseudo-instructions of arbitrary length
+                let count = 0;
+                let line_num;
+                do {
+                    line_num = instructions[pc_index - count++].parentNode.querySelector(".row").textContent;
+                } while (line_num === "");
+    
+                // Adds the warning icon to the editor next to the corresponding line number
+                const annotations = window.editor.getSession().getAnnotations();
+                const line_warning = {
+                    row: line_num - 1,
+                    column: 0,
+                    type: "warning",
+                    text: warning + " " + reg
+                }
+                annotations.push(line_warning);
+                window.editor.getSession().setAnnotations(annotations);
+    
+                this._terminal.writeln("Warning: " + warning + " for register " + reg + " at line " + line_num);
+            });
 
             sim.on("register-plugin", (pluginObject) => {
                 this._pluginManager.registerPlugin(pluginObject);
