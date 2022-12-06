@@ -2,13 +2,13 @@
 
 class KsimPlugin {
     constructor() {
-        this.address = 0xffff0000;
-        this.size = 16;
+    this.address = 0xffff0000;
+    this.size = 16;
 
-	this.r1 = 1;
-	this.r2 = 2;
-	this.r3 = 3;
-	this.r4 = 4;
+	this.r1 = 0;
+	this.r2 = 0;
+	this.r3 = 0;
+	this.r4 = 0;
     }
 
     loadPanel(selector) {
@@ -32,9 +32,8 @@ class KsimPlugin {
 
 
         k.addEventListener('keydown', (event) => {
-               	this.r1 = 1;
-		this.r2 = ((event.key).charCodeAt(0));
-                });
+		this.write(4, (event.key).charCodeAt(0));
+        });
 
         x.appendChild(j);
         y.appendChild(k);
@@ -74,6 +73,8 @@ class KsimPlugin {
 	case 0:
 		break;
 	case 4:
+		this.r1 = 1;
+		this.r2 = val;
 		break;
 	case 8:
 		this.r3 = val;
